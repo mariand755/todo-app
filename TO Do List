@@ -1,0 +1,25 @@
+
+Project Outline
+- Features
+    - Add Folder(s)
+    - Remove Folder(s)
+    - Add new items to folder
+    - Remove items within folder
+    - List items within folder
+    - Edit items within folder
+    - Search for item in folder
+
+- Properties 
+    - Folder
+        - ID
+        - Title
+        - Items[]
+    - Item(s)
+        - ID
+        - Title
+
+- FrontEnd
+    - Blank screen
+    - Edit Mode
+    - Add button (auto saves)
+    - Delete button
