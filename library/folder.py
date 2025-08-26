@@ -11,7 +11,11 @@ class Folder:
 
     def add_new_items_to_folder(self, new_items:List[TodoItem]):
         for item in new_items:
-            self.items.append(item)
+            id_exist = self.__find_index(item.id) != -1
+            if id_exist:
+                print(f"Skipping {item} because id={item.id} already exist")
+            else:
+                self.items.append(item)
 
     def list_items_within_folder(self):
         for item in self.items:
@@ -25,11 +29,7 @@ class Folder:
 
 
     def remove_item_within_folder(self, id_to_remove:int):
-        index_to_remove = -1
-        for index, item in enumerate(self.items):
-            if item.id == id_to_remove:
-                index_to_remove = index
-
+        index_to_remove = self.__find_index(id_to_remove)
         if index_to_remove != -1:
             del self.items[index_to_remove]
 
@@ -43,10 +43,21 @@ class Folder:
             self.edit_item_within_folder(id, updated_title)
         
     def edit_item_within_folder(self, id_to_edit:int, updated_title:str):
-        index_to_edit = -1
-        for index, item in enumerate(self.items):
-            if item.id == id_to_edit:
-                index_to_edit = index
-    
+        index_to_edit = self.__find_index(id_to_edit)
         if index_to_edit != -1:
             self.items[index_to_edit].title = updated_title
+
+
+    def search_for_item_in_folder(self, id_to_find:int):
+        index_to_find = self.__find_index(id_to_find)
+        if index_to_find != -1:
+            return self.items[index_to_find]
+        return None
+
+    def __find_index(self, id_to_find:int):
+        index_to_find = -1
+        for index, item in enumerate(self.items):
+            if item.id == id_to_find:
+                index_to_find = index
+        return index_to_find
+    
