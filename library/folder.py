@@ -1,4 +1,4 @@
-from lib.todo_item import TodoItem
+from library.todo_item import TodoItem
 from typing import List, Dict
 
 

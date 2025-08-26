@@ -1,5 +1,5 @@
-from lib.folder import Folder
-from lib.todo_item import TodoItem
+from library.folder import Folder
+from library.todo_item import TodoItem
 
 #adding
 new_folder = Folder(id=1, title="Conference")
