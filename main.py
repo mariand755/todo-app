@@ -1,69 +1,58 @@
 from library.folder import Folder
 from library.todo_item import TodoItem
 
-#adding
-new_folder = Folder(id=1, title="Prayer Conference")
-new_item = TodoItem(id=1, title="Praise Conference")
-second_item = TodoItem(id=2,title="Praise Conference")
-third_item = TodoItem(id=3, title="Worship Conference ")
-fourth_item = TodoItem(id=4, title="Prayer Conference")
-fifth_item = TodoItem(title="Breakfest Execs", id=5)
-sixth_item = TodoItem(id=4, title="Prayer Copy")
-new_folder.add_new_items_to_folder([new_item, second_item, third_item, fourth_item, fifth_item, sixth_item])
-new_folder.list_items_within_folder()
-print("\n")
-
-#deleting
-new_folder.remove_items_within_folder([2,3])
-new_folder.list_items_within_folder()
-print("\n")
-
-#editing
-find_id_of_items = {
-    1: "Praise Break", 
-    2: "Book Signing Session", 
-    3: "Worship Session",
-    4: "Prayer Session",
-    5: "Time for Testimonies"
-}
-new_folder.edit_items_within_folder(find_id_of_items)
-new_folder.list_items_within_folder()
-print("\n")
-
-#add in after edit
-new_folder.add_new_items_to_folder([second_item, third_item])
-new_folder.list_items_within_folder()
-print("\n")
-
 
 def todo_list():
     todos = []
+    new_folder = Folder(id=1, title="Prayer Conference")
+    insert_id = 1
     print("Welcome to the Todo List App!")  # Initialize an empty todo list
     print("You can add todos, view them, or exit the app.") 
+    commands = ["add", "view", "exit", "edit", "delete", "search"]
+    command_str = "/".join(commands)
     while True:
-        command = input("Enter command (add/view/exit): ").strip().lower()
+        command = input(f"Enter command ({command_str}): ").strip().lower()
 
         if command == "add":
-            todo = input("Enter a new todo item: ").strip()
-            if todo:
-                todos.append(todo)
-                print(f"Added todo: {todo}")
-            else:
-                print("Todo cannot be empty.")
+            while True:
+                new_title = input("Enter a new todo item (unless done adding): ").strip()
+                if not new_title:
+                    break
+                new_item = TodoItem(id=insert_id, title=new_title)
+                new_folder.add_new_items_to_folder([new_item])
+                insert_id += 1
 
         elif command == "view":
-            if todos:
-                print("Todo List:")
-                for i, todo in enumerate(todos, start=1):
-                    print(f"{i}. {todo}")
-            else:
-                print("No todos available.")
+            new_folder.list_items_within_folder()
+
+        elif command == "edit":
+            new_folder.list_items_within_folder()
+            edit_id = handle_input_int("Which title do you want to edit? ID: ")
+            updated_title = input("Enter updated title name: ")
+            updated_item = {}
+            updated_item[edit_id] = updated_title
+            new_folder.edit_items_within_folder(updated_item)
+
+        elif command == "delete":   
+            new_folder.list_items_within_folder()
+            delete_id = handle_input_int("Which title do you want to delete? ID: ")
+            new_folder.remove_items_within_folder([delete_id])
+
+       # elif command == "search":
+
 
         elif command == "exit":
             print("Exiting the todo list.")
             break
 
+
         else:
             print("Unknown command. Please use 'add', 'view', or 'exit'.")
 
-#todo_list()
+def handle_input_int(user_prompt:str)->int:
+    try:
+        return int(input(user_prompt))
+    except:
+        return -1
+    
+todo_list()

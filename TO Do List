@@ -8,6 +8,7 @@ Project Outline
     - List items within folder
     - Edit items within folder
     - Search for item in folder
+    - Search for item using Title
 
 - Properties 
     - Folder
@@ -23,3 +24,11 @@ Project Outline
     - Edit Mode
     - Add button (auto saves)
     - Delete button
+
+Issues
+- main.py
+    - support for adding multiple todo items
+    - handle user input for valid ints
+    - support for Deleting multiple todo items
+    - support for Editing multiple todo items
+    
