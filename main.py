@@ -27,12 +27,15 @@ def todo_list():
             new_folder.list_items_within_folder()
 
         elif command == "edit":
-            new_folder.list_items_within_folder()
-            edit_id = handle_input_int("Which title do you want to edit? ID: ")
-            updated_title = input("Enter updated title name: ")
-            updated_item = {}
-            updated_item[edit_id] = updated_title
-            new_folder.edit_items_within_folder(updated_item)
+            while True:
+                new_folder.list_items_within_folder()
+                edit_id = handle_input_int("Which title do you want to edit, unless done editing. ID: ")
+                if edit_id == None:
+                    break
+                updated_title = input("Enter updated title name: ")
+                updated_item = {}
+                updated_item[edit_id] = updated_title
+                new_folder.edit_items_within_folder(updated_item)
 
         elif command == "delete":  
             while True:
