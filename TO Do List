@@ -31,12 +31,12 @@ Issues
     - handle user input for valid ints (fix)
     - support for Deleting multiple todo items (fix)
     - support for Editing multiple todo items (fix)
-    - folder tile change to dynamic - user imput
     - fix the invaild display text while in the 
-    delete mode when invalid string enter
+    delete mode when invalid string enter (fix)
     - fix the auto view after delete id is entered to 
     display updated List (fix)
     - fix the invaild display text while in the 
-    Editing mode when invalid string enter
+    Editing mode when invalid string enter (fix)
     - fix the prompt after invalid string
     is entered in Edit mode
+    - folder tile change to dynamic - user imput

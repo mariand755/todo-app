@@ -64,7 +64,7 @@ def handle_input_int(user_prompt:str)-> Union[int, None]:
             return None
         return int(user_input)
     except ValueError as e:
-        print(f"Invalid ID {user_input} was entered.")
+        print(f"Invalid ID '{user_input}' was entered.")
         return -1
     
 todo_list()
