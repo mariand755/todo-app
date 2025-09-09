@@ -1,5 +1,6 @@
 from library.folder import Folder
 from library.todo_item import TodoItem
+from typing import Union
 
 
 def todo_list():
@@ -16,7 +17,7 @@ def todo_list():
         if command == "add":
             while True:
                 new_title = input("Enter a new todo item (unless done adding): ").strip()
-                if not new_title:
+                if new_title == "":
                     break
                 new_item = TodoItem(id=insert_id, title=new_title)
                 new_folder.add_new_items_to_folder([new_item])
@@ -33,10 +34,13 @@ def todo_list():
             updated_item[edit_id] = updated_title
             new_folder.edit_items_within_folder(updated_item)
 
-        elif command == "delete":   
-            new_folder.list_items_within_folder()
-            delete_id = handle_input_int("Which title do you want to delete? ID: ")
-            new_folder.remove_items_within_folder([delete_id])
+        elif command == "delete":  
+            while True:
+                delete_id = handle_input_int("Which title do you want to delete, unless done deleting. ID: ")
+                if delete_id == None:
+                    break
+                new_folder.list_items_within_folder()
+                new_folder.remove_items_within_folder([delete_id])
 
        # elif command == "search":
 
@@ -49,10 +53,14 @@ def todo_list():
         else:
             print("Unknown command. Please use 'add', 'view', or 'exit'.")
 
-def handle_input_int(user_prompt:str)->int:
+def handle_input_int(user_prompt:str)-> Union[int, None]:
     try:
-        return int(input(user_prompt))
-    except:
+        user_input = input(user_prompt).strip()
+        if user_input == "":
+            return None
+        return int(user_input)
+    except ValueError as e:
+        print(f"Invalid ID {user_input} was entered.")
         return -1
     
 todo_list()
