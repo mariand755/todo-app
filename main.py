@@ -39,11 +39,12 @@ def todo_list():
 
         elif command == "delete":  
             while True:
+                new_folder.list_items_within_folder()
                 delete_id = handle_input_int("Which title do you want to delete, unless done deleting. ID: ")
                 if delete_id == None:
                     break
-                new_folder.list_items_within_folder()
                 new_folder.remove_items_within_folder([delete_id])
+
 
        # elif command == "search":
 
