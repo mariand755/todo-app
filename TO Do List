@@ -38,5 +38,6 @@ Issues
     - fix the invaild display text while in the 
     Editing mode when invalid string enter (fix)
     - fix the prompt after invalid string
-    is entered in Edit mode
+    is entered in Edit mode (partial fix)
+    - handle edge case of edit_id = -1
     - folder tile change to dynamic - user imput
