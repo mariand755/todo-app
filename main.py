@@ -32,7 +32,7 @@ def todo_list():
                 edit_id = handle_input_int("Which title do you want to edit, unless done editing. ID: ")
                 if edit_id == None:
                     break
-                elif edit_id == -1:
+                elif edit_id <= 0:
                     continue
                 updated_title = input("Enter updated title name: ")
                 updated_item = {}
