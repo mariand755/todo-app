@@ -18,8 +18,9 @@ class Folder:
                 self.items.append(item)
 
     def list_items_within_folder(self):
+        print(self.title)
         for item in self.items:
-            print(item)
+            print(f"{item}")
 
     def remove_items_within_folder(self, ids_to_remove:List[int]):
         if len(self.items) == 0:
