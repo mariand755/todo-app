@@ -39,5 +39,6 @@ Issues
     Editing mode when invalid string enter (fix)
     - fix the prompt after invalid string
     is entered in Edit mode (partial fix)
-    - handle edge case of edit_id = -1
+    - handle edge case of edit_id = -1 (fix)
+    - handle only existing ids for edit & delete (fix)
     - folder tile change to dynamic - user imput

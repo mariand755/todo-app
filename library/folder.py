@@ -61,4 +61,7 @@ class Folder:
                 index_to_find = index
         return index_to_find
     
+    def does_item_exist(self, existing_id_to_find:int)-> bool:
+        existing_index_to_find = self.__find_index(existing_id_to_find)
+        return existing_index_to_find != -1
     

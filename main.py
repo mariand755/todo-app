@@ -32,7 +32,7 @@ def todo_list():
                 edit_id = handle_input_int("Which title do you want to edit, unless done editing. ID: ")
                 if edit_id == None:
                     break
-                elif edit_id <= 0:
+                elif not new_folder.does_item_exist(edit_id):
                     continue
                 updated_title = input("Enter updated title name: ")
                 updated_item = {}
@@ -45,6 +45,8 @@ def todo_list():
                 delete_id = handle_input_int("Which title do you want to delete, unless done deleting. ID: ")
                 if delete_id == None:
                     break
+                elif not new_folder.does_item_exist(delete_id):
+                    continue
                 new_folder.remove_items_within_folder([delete_id])
 
 
