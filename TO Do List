@@ -50,7 +50,8 @@ Issues
 
 
 Nice to have
-    - remove text (Welcome to our first ToDo_App) before item list 
+    - remove text (Welcome to our first 
+    ToDo_App) before item list (fix)
+    - Add text "ID" to returned title (fix)
     - Return maultiple same title
-    - Add text "ID" to returned title
     - add "command" aliases

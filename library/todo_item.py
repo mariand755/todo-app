@@ -6,5 +6,5 @@ class TodoItem:
         self.title = title
 
     def __str__(self):
-        return f"Welcome to our first ToDo_App: {self.id} {self.title}"    
+        return f"ID {self.id}: {self.title}"    
     

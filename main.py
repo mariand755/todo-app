@@ -59,7 +59,7 @@ def todo_list():
                 if result_item == None:
                     print(f"Did not find {input_title}")
                     continue
-                print(f"Found: {result_item}")
+                print(f"Found {result_item}")
              
 
         elif command == "exit":
