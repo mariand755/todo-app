@@ -17,10 +17,12 @@ class Folder:
             else:
                 self.items.append(item)
 
+
     def list_items_within_folder(self):
         print(self.title)
         for item in self.items:
             print(f"{item}")
+
 
     def remove_items_within_folder(self, ids_to_remove:List[int]):
         if len(self.items) == 0:
@@ -43,6 +45,7 @@ class Folder:
             updated_title = find_id_of_items[id]
             self.edit_item_within_folder(id, updated_title)
         
+
     def edit_item_within_folder(self, id_to_edit:int, updated_title:str):
         index_to_edit = self.__find_index(id_to_edit)
         if index_to_edit != -1:
@@ -54,6 +57,16 @@ class Folder:
         if index_to_find != -1:
             return self.items[index_to_find]
         return None
+    
+
+    def search_for_item_using_title(self, title_to_find:str)->TodoItem:
+        lowercase_title = title_to_find.lower().strip()
+        for item in self.items:
+            #searching usng prefix search
+            if item.title.lower().startswith(lowercase_title):
+                return item
+        return None
+
 
     def __find_index(self, id_to_find:int):
         index_to_find = -1
@@ -62,6 +75,7 @@ class Folder:
                 index_to_find = index
         return index_to_find
     
+
     def does_item_exist(self, existing_id_to_find:int)-> bool:
         existing_index_to_find = self.__find_index(existing_id_to_find)
         return existing_index_to_find != -1
