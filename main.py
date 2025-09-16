@@ -50,8 +50,17 @@ def todo_list():
                 new_folder.remove_items_within_folder([delete_id])
 
 
-       # elif command == "search":
-
+        elif command == "search":
+            while True:
+                input_title = input("Which title do you want to search, unless done searching. Title: ").strip()
+                if input_title == "":
+                    break
+                result_item = new_folder.search_for_item_using_title(input_title)
+                if result_item == None:
+                    print(f"Did not find {input_title}")
+                    continue
+                print(f"Found: {result_item}")
+             
 
         elif command == "exit":
             print("Exiting the todo list.")

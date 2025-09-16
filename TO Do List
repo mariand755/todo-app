@@ -5,16 +5,17 @@ Project Outline
         - folder tile change to dynamic - user imput
     - Edit Folders (s)
     - Remove Folder(s)
+    - Identify which folder the items are being 
+    being add/edit/etc to.(fix)
     - Add new items to folder (fix)
     - Remove items within folder (fix)
     - List items within folder (fix)
     - Edit items within folder (fix)
     - Search for item in folder (fix)
-    - Search for item using Title
-    - Identify which folder the items are being 
-    being add/edit/etc to.(fix)
-
-
+    - Search for item using Title (fix)
+    
+    
+   
 - Properties 
     - Folder
         - ID
@@ -46,3 +47,10 @@ Issues
     is entered in Edit mode (partial fix)
     - handle edge case of edit_id = -1 (fix)
     - handle only existing ids for edit & delete (fix)
+
+
+Nice to have
+    - remove text (Welcome to our first ToDo_App) before item list 
+    - Return maultiple same title
+    - Add text "ID" to returned title
+    - add "command" aliases
