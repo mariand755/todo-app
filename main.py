@@ -14,7 +14,7 @@ def todo_list():
     while True:
         command = input(f"Enter command ({command_str}): ").strip().lower()
 
-        if command == "add":
+        if command == "add" or command == "a":
             while True:
                 new_title = input("Enter a new todo item (unless done adding): ").strip()
                 if new_title == "":
@@ -23,10 +23,10 @@ def todo_list():
                 new_folder.add_new_items_to_folder([new_item])
                 insert_id += 1
 
-        elif command == "view":
+        elif command == "view" or command == "v" :
             new_folder.list_items_within_folder()
 
-        elif command == "edit":
+        elif command == "edit" or command == "ed":
             while True:
                 new_folder.list_items_within_folder()
                 edit_id = handle_input_int("Which title do you want to edit, unless done editing. ID: ")
@@ -39,7 +39,7 @@ def todo_list():
                 updated_item[edit_id] = updated_title
                 new_folder.edit_items_within_folder(updated_item)
 
-        elif command == "delete":  
+        elif command == "delete" or command == "d":  
             while True:
                 new_folder.list_items_within_folder()
                 delete_id = handle_input_int("Which title do you want to delete, unless done deleting. ID: ")
@@ -50,7 +50,7 @@ def todo_list():
                 new_folder.remove_items_within_folder([delete_id])
 
 
-        elif command == "search":
+        elif command == "search" or command == "s":
             while True:
                 input_title = input("Which title do you want to search, unless done searching. Title: ").strip()
                 if input_title == "":
@@ -62,7 +62,7 @@ def todo_list():
                 print(f"Found {result_item}")
              
 
-        elif command == "exit":
+        elif command == "exit" or command == "ex":
             print("Exiting the todo list.")
             break
 
