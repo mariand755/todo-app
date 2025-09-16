@@ -55,11 +55,12 @@ def todo_list():
                 input_title = input("Which title do you want to search, unless done searching. Title: ").strip()
                 if input_title == "":
                     break
-                result_item = new_folder.search_for_item_using_title(input_title)
-                if result_item == None:
+                result_item = new_folder.search_for_items_using_title(input_title)
+                if len(result_item) == 0:
                     print(f"Did not find {input_title}")
                     continue
-                print(f"Found {result_item}")
+                for item in result_item:
+                    print(f"Found {item}")
              
 
         elif command == "exit" or command == "ex":
