@@ -5,8 +5,7 @@ Project Outline
         - folder tile change to dynamic - user imput
     - Edit Folders (s)
     - Remove Folder(s)
-    - Identify which folder the items are being 
-    being add/edit/etc to.(fix)
+    - Identify which folder the items are being add/edit/etc to.(fix)
     - Add new items to folder (fix)
     - Remove items within folder (fix)
     - List items within folder (fix)
@@ -17,6 +16,8 @@ Project Outline
     
    
 - Properties 
+    - Folder Manager
+        - Folders[]
     - Folder
         - ID
         - Title
@@ -55,3 +56,8 @@ Nice to have
     - Add text "ID" to returned title (fix)
     - Return maultiple same title (fix)
     - add "command" aliases (fix)
+
+    - change/exit folder
+    - exit the program
+    
+
