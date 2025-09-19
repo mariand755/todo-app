@@ -8,6 +8,8 @@ class Folder:
         self.title = title
         self.items:List[TodoItem] = []
 
+    def __str__(self): #when we write 'print' it will call this
+        return f"ID {self.id}: {self.title}"   
 
     def add_new_items_to_folder(self, new_items:List[TodoItem]):
         for item in new_items:
