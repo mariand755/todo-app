@@ -1,18 +1,17 @@
 
 Project Outline
 - Features
-    - Add Folder(s)
-        - folder tile change to dynamic - user imput
-    - Edit Folders (s)
-    - Remove Folder(s)
-    - Identify which folder the items are being add/edit/etc to.(fix)
-    - Add new items to folder (fix)
-    - Remove items within folder (fix)
-    - List items within folder (fix)
-    - Edit items within folder (fix)
-    - Search for item in folder (fix)
-    - Search for item using Title (fix)
-    
+    - Add Folder(s) 
+        - folder tile change to dynamic - user imput (done)
+    - Edit Folders (s) (done)
+    - Remove Folder(s) - (done)
+    - Identify which folder the items are being add/edit/etc to.(done)
+    - Add new items to folder (done)
+    - Remove items within folder (done)
+    - List items within folder (done)
+    - Edit items within folder (done)
+    - Search for item in folder (done)
+    - Search for item using Title (done)
     
    
 - Properties 
@@ -31,6 +30,13 @@ Project Outline
     - Edit Mode
     - Add button (auto saves)
     - Delete button
+
+- Backend
+    - Api server (look up api servers)
+        - FastAPI / Django
+    - Database
+        - Postgress
+    - Docker
 
 Issues
 - main.py
@@ -52,12 +58,16 @@ Issues
 
 Nice to have
     - remove text (Welcome to our first 
-    ToDo_App) before item list (fix)
-    - Add text "ID" to returned title (fix)
-    - Return maultiple same title (fix)
-    - add "command" aliases (fix)
-
-    - change/exit folder
-    - exit the program
+    ToDo_App) before item list (done)
+    - Add text "ID" to returned title (done)
+    - Return maultiple same title (done)
+    - add "command" aliases (done)
+    - change/exit folder (done)
+    - exit the program (done)
+    - call handle_item_operations for selected folder (done)
+    - comments in code to learn what the functions and methods are doing
     - color code in run time (eg Invalid Entries, Mode of Operations)
+    
+
+
 

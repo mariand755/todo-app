@@ -1,5 +1,5 @@
 from library.folder import Folder
-from typing import List, Dict
+from typing import List, Dict, Union
 
 
 class FolderManager:
@@ -39,6 +39,9 @@ class FolderManager:
                 index_to_find = index
         return index_to_find
 
+    def does_any_folder_exist_in_foldermanager(self)-> bool:
+        return len(self.folders) > 0
+    
     def does_folder_exist(self, existing_id_to_find:int)-> bool:
         existing_index_to_find = self.__find_index(existing_id_to_find)
         return existing_index_to_find != -1
@@ -62,3 +65,10 @@ class FolderManager:
             if folder.title.lower().startswith(lowercase_title):
                 results.append(folder)
         return results
+    
+    def get_folder(self, id:int)-> Union[Folder, None]:
+        index_to_find = self.__find_index(id)
+        if index_to_find != -1:
+            return self.folders[index_to_find]
+        else:
+            return None

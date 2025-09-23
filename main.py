@@ -17,9 +17,18 @@ def todo_list():
             handle_folder_operations(folder_manager = folder_manager)
             
         elif command == "items" or command == "i":
-            #add code to select a folder
-            #call handle_item_operations for selected folder
-            pass
+            if not folder_manager.does_any_folder_exist_in_foldermanager():
+                print("Need to create a folder first")
+                continue
+            while True:
+                folder_manager.list_folders_within_app()
+                folder_id = handle_input_int("Which folder do you want to add items to, unless done adding. ID: ")
+                if folder_id == None:
+                    break
+                folder = folder_manager.get_folder(folder_id)
+                if folder == None:
+                    continue
+                handle_item_operations(folder)
         elif command == "exit" or command == "ex":
             print("Exiting the App.")
             break
