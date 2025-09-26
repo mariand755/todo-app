@@ -1,5 +1,6 @@
 from library.todo_item import TodoItem
 from typing import List, Dict
+from colorist import effect_bold, Color
 
 
 class Folder:
@@ -7,21 +8,23 @@ class Folder:
         self.id = id
         self.title = title
         self.items:List[TodoItem] = []
+        self.__new_id = 1 
+
 
     def __str__(self): #when we write 'print' it will call this
         return f"ID {self.id}: {self.title}"   
 
-    def add_new_items_to_folder(self, new_items:List[TodoItem]):
+    def add_new_items_to_folder(self, new_items:List[str]):
         for item in new_items:
-            id_exist = self.__find_index(item.id) != -1
-            if id_exist:
-                print(f"Skipping {item} because id={item.id} already exist")
-            else:
-                self.items.append(item)
-
+            new_item = TodoItem(
+                id = self.__new_id,
+                title = item
+                )
+            self.items.append(new_item)
+            self.__new_id += 1
 
     def list_items_within_folder(self):
-        print(self.title)
+        effect_bold(f"{Color.BLUE}{self.title}{Color.OFF}")
         for item in self.items:
             print(f"{item}")
 
@@ -79,6 +82,7 @@ class Folder:
             if item.title.lower().startswith(lowercase_title):
                 results.append(item)
         return results
+
 
     def __find_index(self, id_to_find:int):
         index_to_find = -1
