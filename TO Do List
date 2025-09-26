@@ -66,7 +66,9 @@ Nice to have
     - exit the program (done)
     - call handle_item_operations for selected folder (done)
     - comments in code to learn what the functions and methods are doing
-    - color code in run time (eg Invalid Entries, Mode of Operations)
+    - color code in run time (eg Invalid Entries, Mode of Operations) https://jakob-bagterp.github.io/colorist-for-python/
+    https://dslackw.gitlab.io/colored/
+
     
 
 
