@@ -36,7 +36,7 @@ Project Outline
         - FastAPI / Django
     - Database
         - Postgress
-    - Docker
+    - Docker (done)
 
 Issues
 - main.py

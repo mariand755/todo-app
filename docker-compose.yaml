@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    # ports:
+    #   - "5000:5000"
+    volumes:
+      - .:/app
+    container_name: api
+    # environment:
+    #   - FLASK_ENV=development
