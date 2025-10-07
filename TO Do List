@@ -33,10 +33,27 @@ Project Outline
 
 - Backend
     - Api server (look up api servers)
-        - FastAPI / Django
+        - FastAPI / Django (done)
+        - Api endpoints (RESTful - RESTAPI)
+            - /folders
+                - GET (list all folders)
+                - POST (add new folder)
+            - /folders/{folder_id}
+                - GET (get specific folder details)
+                - PUT (update folder details)
+                - DELETE (remove folder)
+            - /folders/{folder_id}/items
+                - GET (list all items in a folder)
+                - POST (add new item to a folder)
+            - /folders/{folder_id}/items/{item_id}
+                - GET (get specific item details)
+                - PUT (update item details)
+                - DELETE (remove item from folder)
     - Database
         - Postgress
     - Docker (done)
+    - https://docs.astral.sh/uv/#python-versions (done)
+    - https://docs.astral.sh/uv/guides/scripts/#running-a-script-without-dependencies (done)
 
 Issues
 - main.py
