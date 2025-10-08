@@ -7,13 +7,14 @@ class FolderManager:
         self.folders: List[Folder] = []
         self.__new_folder_id = 1 
 
-    def add_folder(self, folder_title:str):
+    def add_folder(self, folder_title:str)-> Folder:
         new_folder = Folder(
             id = self.__new_folder_id, 
             title = folder_title 
         )
         self.folders.append(new_folder)
         self.__new_folder_id +=1 
+        return new_folder
     
     def list_folders_within_app(self): #class functions take a "self" parameter
         for folder in self.folders:
@@ -72,3 +73,6 @@ class FolderManager:
             return self.folders[index_to_find]
         else:
             return None
+        
+    def get_folders(self)->List[Folder]:
+        return self.folders

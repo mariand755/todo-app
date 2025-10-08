@@ -35,9 +35,9 @@ Project Outline
     - Api server (look up api servers)
         - FastAPI / Django (done)
         - Api endpoints (RESTful - RESTAPI)
-            - /folders
+            - /folders (done)
                 - GET (list all folders)
-                - POST (add new folder)
+                - POST (add new folder) 
             - /folders/{folder_id}
                 - GET (get specific folder details)
                 - PUT (update folder details)
@@ -49,6 +49,7 @@ Project Outline
                 - GET (get specific item details)
                 - PUT (update item details)
                 - DELETE (remove item from folder)
+    - Handle hard & soft deletes 
     - Database
         - Postgress
     - Docker (done)

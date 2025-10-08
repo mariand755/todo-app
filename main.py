@@ -2,7 +2,6 @@ from library.folder_manager import FolderManager
 from library.folder import Folder
 from typing import Union
 from colorist import Color, effect_bold, BrightColor
-#from fastapi import FastAPI
 
 def todo_list():
     folder_manager = FolderManager()
