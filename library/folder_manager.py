@@ -32,6 +32,8 @@ class FolderManager:
         index_to_edit = self.__find_index(id_to_edit)
         if index_to_edit != -1:
             self.folders[index_to_edit].title = updated_title
+            return self.folders[index_to_edit]
+        return None
   
     def __find_index(self, id_to_find:int):
         index_to_find = -1
