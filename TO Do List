@@ -38,7 +38,7 @@ Project Outline
             - /folders (done)
                 - GET (list all folders)
                 - POST (add new folder) 
-            - /folders/{folder_id}
+            - /folders/{folder_id} (done)
                 - GET (get specific folder detail
                 - PUT (update folder details)
                 - DELETE (remove folder)

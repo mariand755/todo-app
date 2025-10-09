@@ -3,14 +3,9 @@ from library.folder_manager import FolderManager
 from library.folder import Folder
 from pydantic import BaseModel
 
-
-
 app = FastAPI()
 folder_manager = FolderManager()
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
 
 @app.get("/folders")
 async def get_folders():
