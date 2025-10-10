@@ -45,3 +45,20 @@ async def delete_folder(folder_id:int):
     folder_manager.remove_folder_within_app(folder_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+@app.get("/folders/{folder_id}/items")
+async def get_folder_items(folder_id:int):
+    folder = folder_manager.get_folder(folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    return folder.get_items()
+
+class CreateItem(BaseModel):
+    title: str
+
+@app.post("/folders/{folder_id}/items")
+async def create_new_item(folder_id:int, new_item_request:CreateItem):
+    folder = folder_manager.get_folder(folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    return  folder.add_new_item_to_folder(new_item_title=new_item_request.title)
+

@@ -16,12 +16,17 @@ class Folder:
 
     def add_new_items_to_folder(self, new_items:List[str]):
         for item in new_items:
-            new_item = TodoItem(
+          self.add_new_item_to_folder(item)
+    
+    def add_new_item_to_folder(self, new_item_title:str):
+        new_item = TodoItem(
                 id = self.__new_id,
-                title = item
+                title = new_item_title
                 )
-            self.items.append(new_item)
-            self.__new_id += 1
+        self.items.append(new_item)
+        self.__new_id += 1
+        return new_item
+
 
     def list_items_within_folder(self):
         effect_bold(f"{Color.BLUE}{self.title}{Color.OFF}")
@@ -96,3 +101,5 @@ class Folder:
         existing_index_to_find = self.__find_index(existing_id_to_find)
         return existing_index_to_find != -1
     
+    def get_items(self)->List[TodoItem]:
+        return self.items

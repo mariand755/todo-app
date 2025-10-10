@@ -42,7 +42,7 @@ Project Outline
                 - GET (get specific folder detail
                 - PUT (update folder details)
                 - DELETE (remove folder)
-            - /folders/{folder_id}/items
+            - /folders/{folder_id}/items (done)
                 - GET (list all items in a folder)
                 - POST (add new item to a folder)
             - /folders/{folder_id}/items/{item_id}
