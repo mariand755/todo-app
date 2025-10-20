@@ -1,5 +1,5 @@
 from library.todo_item import TodoItem
-from typing import List, Dict
+from typing import List, Dict, Union
 from colorist import effect_bold, Color
 
 
@@ -60,7 +60,9 @@ class Folder:
         index_to_edit = self.__find_index(id_to_edit)
         if index_to_edit != -1:
             self.items[index_to_edit].title = updated_title
-
+            return self.items[index_to_edit]
+        return None
+    
 
     def search_for_item_in_folder(self, id_to_find:int):
         index_to_find = self.__find_index(id_to_find)
@@ -103,3 +105,11 @@ class Folder:
     
     def get_items(self)->List[TodoItem]:
         return self.items
+    
+    def get_item(self, id:int)-> Union[TodoItem, None]:
+        item_index_to_find = self.__find_index(id)
+        if item_index_to_find != -1:
+            return self.items[item_index_to_find]
+        else:
+            return None
+    

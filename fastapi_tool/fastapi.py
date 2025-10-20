@@ -62,3 +62,33 @@ async def create_new_item(folder_id:int, new_item_request:CreateItem):
         raise HTTPException(status_code=404, detail="Folder not found")
     return  folder.add_new_item_to_folder(new_item_title=new_item_request.title)
 
+@app.get("/folders/{folder_id}/items/{item_id}")
+async def get_folder_item(folder_id:int, item_id:int):
+    folder = folder_manager.get_folder(folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    item = folder.get_item(item_id)
+    if item == None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+class UpdateItem(BaseModel):
+    title: str
+
+@app.put("/folders/{folder_id}/items/{item_id}")
+async def update_item(folder_id:int, item_id:int, update_item_request:UpdateItem):
+    folder = folder_manager.get_folder(folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    item = folder.edit_item_within_folder(item_id, updated_title = update_item_request.title)    
+    if item == None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+@app.delete("/folders/{folder_id}/items/{item_id}")
+async def delete_item(folder_id:int, item_id:int):
+    folder = folder_manager.get_folder(folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    folder.remove_item_within_folder(item_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
