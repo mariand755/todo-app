@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Response, status
 from library.folder_manager import FolderManager
-from library.folder import Folder
 from pydantic import BaseModel
+
 
 app = FastAPI()
 folder_manager = FolderManager()
@@ -92,3 +92,4 @@ async def delete_item(folder_id:int, item_id:int):
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.remove_item_within_folder(item_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+

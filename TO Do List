@@ -52,6 +52,7 @@ Project Outline
     - Handle hard & soft deletes 
     - Database
         - Postgress
+        - sqlalchemy
     - Docker (done)
     - https://docs.astral.sh/uv/#python-versions (done)
     - https://docs.astral.sh/uv/guides/scripts/#running-a-script-without-dependencies (done)

@@ -6,5 +6,29 @@ services:
     container_name: api
     ports:
       - "8000:8000"
-    # environment:
+    depends_on:
+      - db
+  db:
+    image: postgres:18
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    expose:
+      - 5432
+    
+    ports:
+      - 5432:5432
+
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres", "-d", "postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+volumes:
+  db-data:
     #   - FLASK_ENV=development
