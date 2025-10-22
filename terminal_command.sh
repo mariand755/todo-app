@@ -1,7 +1,7 @@
  
  
 # starting the server
- docker-compose up 
+ docker-compose up -d 
 
 # create a folder 
 curl -X POST http://localhost:8000/folders -H "Content-Type: application/json" -d '{ "title": "first_folder" }' | jq

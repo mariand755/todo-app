@@ -51,7 +51,7 @@ Project Outline
                 - DELETE (remove item from folder)
     - Handle hard & soft deletes 
     - Database
-        - Postgress
+        - Postgress 
         - sqlalchemy
     - Docker (done)
     - https://docs.astral.sh/uv/#python-versions (done)

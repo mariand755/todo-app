@@ -22,6 +22,13 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 Base.metadata.bind = engine
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+    
 class Folder(Base):
     __tablename__ = "folder"
     
@@ -34,3 +41,4 @@ class TodoItem(Base):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String, nullable=False)
     folder_id = sa.Column(sa.Integer, sa.ForeignKey('folder.id'), nullable=False)
+
