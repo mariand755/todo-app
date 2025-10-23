@@ -53,6 +53,7 @@ Project Outline
     - Database
         - Postgress 
         - sqlalchemy
+        - Undo functionality to recover deleted items/folders (nice to have)
     - Docker (done)
     - https://docs.astral.sh/uv/#python-versions (done)
     - https://docs.astral.sh/uv/guides/scripts/#running-a-script-without-dependencies (done)

@@ -34,6 +34,7 @@ class Folder(Base):
     
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String, nullable=False)
+    is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
 
 class TodoItem(Base):
     __tablename__ = "todo_item"
@@ -41,4 +42,6 @@ class TodoItem(Base):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String, nullable=False)
     folder_id = sa.Column(sa.Integer, sa.ForeignKey('folder.id'), nullable=False)
+    is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
+
 
