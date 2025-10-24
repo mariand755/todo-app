@@ -33,5 +33,11 @@ curl -X POST http://localhost:8000/folders/1/items -H "Content-Type: application
 # delete an item in a folder
 curl -X DELETE http://localhost:8000/folders/1/items/1 | jq
 
+# undo deleted folder action
+curl -X POST http://localhost:8000/folders/1/undo | jq
+
+# undo deleted item action
+curl -X POST http://localhost:8000/folders/1/items/1/undo | jq
+
 # stopping the server
  docker-compose down

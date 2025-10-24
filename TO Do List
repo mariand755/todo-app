@@ -49,11 +49,11 @@ Project Outline
                 - GET (get specific item details)
                 - PUT (update item details)
                 - DELETE (remove item from folder)
-    - Handle hard & soft deletes 
-    - Database
-        - Postgress 
-        - sqlalchemy
-        - Undo functionality to recover deleted items/folders (nice to have)
+    - Handle hard & soft deletes (done)
+    - Database (done)
+        - Postgress (done)
+        - sqlalchemy (done)
+        - Undo functionality to recover deleted items/folders (nice to have) (done)
     - Docker (done)
     - https://docs.astral.sh/uv/#python-versions (done)
     - https://docs.astral.sh/uv/guides/scripts/#running-a-script-without-dependencies (done)

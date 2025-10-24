@@ -107,14 +107,20 @@ async def get_folder_item(folder_id:int, item_id:int, db_session:Session = Depen
 class UpdateItem(BaseModel):
     title: str
 
-@app.put("/folders/{folder_id}/items/{item_id}")
+@app.put("/folders/{folder_id}/items/{item_id}", response_model=ItemResponse)
 async def update_item(folder_id:int, item_id:int, update_item_request:UpdateItem, db_session:Session = Depends(get_db)):
-    folder = folder_manager.get_folder(folder_id)
+    folder = db_session.get(FolderModel, folder_id)
     if folder == None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
-    item = folder.edit_item_within_folder(item_id, updated_title = update_item_request.title)    
-    if item == None:
+    item = db_session.query(TodoItemModel).filter(
+        TodoItemModel.folder_id == folder_id, 
+        TodoItemModel.id == item_id, 
+    ).first()    
+    if item == None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
+    item.title = update_item_request.title
+    db_session.add(item)
+    db_session.commit()
     return item
 
 @app.delete("/folders/{folder_id}/items/{item_id}")
@@ -133,3 +139,29 @@ async def delete_item(folder_id:int, item_id:int, db_session:Session = Depends(g
     db_session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+@app.put("/folders/{folder_id}/undo", response_model=FolderResponse)
+async def undo_folder(folder_id:int, db_session:Session = Depends(get_db)):
+    folder = db_session.get(FolderModel, folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    folder.is_deleted = False
+    db_session.add(folder)
+    db_session.commit()
+    return folder
+
+
+@app.put("/folders/{folder_id}/items/{item_id}/undo", response_model=ItemResponse)
+async def undo_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
+    folder = db_session.get(FolderModel, folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    item = db_session.query(TodoItemModel).filter(
+        TodoItemModel.folder_id == folder_id, 
+        TodoItemModel.id == item_id, 
+    ).first()    
+    if item == None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    item.is_deleted = False
+    db_session.add(item)
+    db_session.commit()
+    return item
