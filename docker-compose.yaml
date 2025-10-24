@@ -1,13 +1,25 @@
 services:
   api:
-    build: .
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./backend:/app
     container_name: api
     ports:
       - "8000:8000"
     depends_on:
       - db
+  frontend:
+    build:
+      image: nginx:latest
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
   db:
     image: postgres:18
     restart: always
