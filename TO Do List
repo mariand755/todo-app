@@ -26,10 +26,21 @@ Project Outline
         - Title
 
 - FrontEnd
-    - Blank screen
-    - Edit Mode
-    - Add button (auto saves)
-    - Delete button
+- Load data from backend/api server
+    - Main Menu 
+        - List Folders 
+        - Add Folder
+        - Edit Folder
+        - Delete Folder
+        - Select Folder (to manage items)
+        - Search Folder by Title *
+    - Todo Item Menu (for selected folder)
+        - List Items
+        - Add Item
+        - Edit Item
+        - Delete Item
+        - Search Item by Title
+   
 
 - Backend
     - Api server (look up api servers)
