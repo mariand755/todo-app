@@ -30,4 +30,7 @@ async function makeAPICall(http_method, api_path, payload=null){
 (async () => {
 	const apiResult = await makeAPICall("GET","/folders");
 	console.log(apiResult);
- })();
+    const responseBody = await apiResult.json();
+    console.log(responseBody);     
+    }
+)();

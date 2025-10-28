@@ -2,12 +2,23 @@ from library.models import get_db
 from library.models import SessionLocal, Folder as FolderModel, TodoItem as TodoItemModel
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Response, status, Depends
+from fastapi.middleware.cors import CORSMiddleware 
 from library.folder_manager import FolderManager
 from pydantic import BaseModel
 
 
 app = FastAPI()
 folder_manager = FolderManager()
+origins = ["http://localhost:3000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 @app.get("/folders")
@@ -165,3 +176,4 @@ async def undo_item(folder_id:int, item_id:int, db_session:Session = Depends(get
     db_session.add(item)
     db_session.commit()
     return item
+
