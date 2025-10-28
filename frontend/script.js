@@ -27,6 +27,17 @@ async function makeAPICall(http_method, api_path, payload=null){
     }
 }
 
+const folder_list_id = "#folder-list"
+const folder_list = document.querySelector(folder_list_id);
+const create_folder_item = (json) => {
+    const new_folder_item = document.createElement("li")
+    new_folder_item.id = `folder_id_${json.id}`
+    new_folder_item.textContent = json.title
+    new_folder_item.classList.add("folder-item")
+}
+    
+
+
 (async () => {
 	const apiResult = await makeAPICall("GET","/folders");
 	console.log(apiResult);
@@ -34,3 +45,4 @@ async function makeAPICall(http_method, api_path, payload=null){
     console.log(responseBody);     
     }
 )();
+

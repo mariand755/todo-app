@@ -99,7 +99,13 @@ Nice to have
     - color code in run time (eg Invalid Entries, Mode of Operations) https://jakob-bagterp.github.io/colorist-for-python/
    (done)
   - comments in code to learn what the functions and methods are doing
-    
+   - list # of items in folder when listing folders
+    - implement a better search algorithm (eg partial match, case insensitive)
+    - improve the ui/ux flow
+    - implement logging for better debugging and tracking
+    - implement user authentication for multi-user support
+    - implement due dates and reminders for todo items
+    - implement priority levels for todo items
 
 
 
