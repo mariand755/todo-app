@@ -32,17 +32,23 @@ const folder_list = document.querySelector(folder_list_id);
 const create_folder_item = (json) => {
     const new_folder_item = document.createElement("li")
     new_folder_item.id = `folder_id_${json.id}`
-    new_folder_item.textContent = json.title
     new_folder_item.classList.add("folder-item")
+    const folder_item_contents = document.createElement("span")
+    folder_item_contents.classList.add("folder-name")
+    folder_item_contents.textContent = json.title
+    new_folder_item.appendChild(folder_item_contents)
+    folder_list.appendChild(new_folder_item)
 }
     
-
 
 (async () => {
 	const apiResult = await makeAPICall("GET","/folders");
 	console.log(apiResult);
     const responseBody = await apiResult.json();
-    console.log(responseBody);     
+    console.log(responseBody);   
+    for(const item of responseBody){
+        create_folder_item(item)
+    }  
     }
 )();
 
