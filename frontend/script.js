@@ -26,7 +26,7 @@ async function makeAPICall(http_method, api_path, payload=null){
         return null
     }
 }
-
+const add_folder = '.add-folder'
 const folder_list_id = "#folder-list"
 const folder_list = document.querySelector(folder_list_id);
 const create_folder_item = (json) => {
@@ -37,7 +37,8 @@ const create_folder_item = (json) => {
     folder_item_contents.classList.add("folder-name")
     folder_item_contents.textContent = json.title
     new_folder_item.appendChild(folder_item_contents)
-    folder_list.appendChild(new_folder_item)
+    const add_folder_elem = document.querySelector(add_folder)
+    folder_list.insertBefore(new_folder_item, add_folder_elem)
 }
     
 
