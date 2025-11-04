@@ -19,8 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
 @app.get("/folders")
 async def get_folders(db_session:Session = Depends(get_db)):
     folders = db_session.query(FolderModel).filter(FolderModel.is_deleted == False).all()
