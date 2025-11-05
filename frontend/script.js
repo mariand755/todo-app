@@ -43,10 +43,18 @@ const create_folder_item = (json) => {
     new_folder_item.appendChild(folder_item_contents)
 
     const show_folder_items = async () => {
+        // getting folder items
         const apiItemResult = await makeAPICall("GET",`/folders/${json.id}/items/`);
         const list_of_items = await apiItemResult.json();
         const folder_item_str = create_folder_item_list(list_of_items);
         item_list.innerHTML = folder_item_str
+
+        // set active folder
+        const folder_list_items = document.querySelectorAll(".folder-item")
+        for (const item of folder_list_items){
+            item.classList.remove("active")
+        }
+        new_folder_item.classList.add("active")
     }
     new_folder_item.addEventListener("click", show_folder_items )
     const add_folder_elem = document.querySelector(add_folder)
