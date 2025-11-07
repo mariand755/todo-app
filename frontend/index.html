@@ -28,20 +28,17 @@
                 </li>
             -->
                 <li class="folder-item add-folder">
-                <!--
-                <span class="folder-name">+ Add New Folder</span>
-            -->
-                <sl-input placeholder="Add New Folder" clearable></sl-input>
-                <sl-icon-button name="plus-circle" label="Add" style="font-size: 2rem;"></sl-icon-button>
+                    <sl-input id="new-folder-input" placeholder="Add New Folder" clearable></sl-input>
+                    <sl-icon-button id="add-folder-btn" name="plus-circle" style="font-size: 2rem; color: rgb(80, 227, 194);"></sl-icon-button>
                 </li>
             </ul>
         </aside>
-
+ 
         <main id="todo-main-content">
             <header>
                 <h1 id="current-folder-title"></h1>
                 <div class="actions">
-                    <input type="text" id="new-todo-input" placeholder="What needs to be done?">
+                    <input type="text" id="new-todo-input" placeholder="What needs to be added?">
                     <button id="add-todo-btn">Add Items</button>
                 </div>
             </header>

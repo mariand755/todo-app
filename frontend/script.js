@@ -15,9 +15,9 @@ async function makeAPICall(http_method, api_path, payload=null){
     try { 
         const result = await fetch(url, {
             method: method, 
-            body: payload,
+            body: JSON.stringify(payload),
             headers: {
-                'Content-Type': 'text/javascript'
+                'Content-Type': 'application/json'
             }
         })
         return result
@@ -66,6 +66,16 @@ const create_folder_item = (json) => {
     const add_folder_elem = document.querySelector(add_folder)
     folder_list.insertBefore(new_folder_item, add_folder_elem)
 }
+const input_new_folder_title = async () => {
+const new_folder_input = document.querySelector("#new-folder-input")
+const title = new_folder_input.value
+const apiResult = await makeAPICall("POST","/folders", {
+    title
+});
+const apiResultJson = await apiResult.json()
+create_folder_item(apiResultJson)
+new_folder_input.value = ""
+}
 
 const create_folder_item_list = (jsonArray) => {
     let htmlstr = ""
@@ -90,14 +100,16 @@ const create_folder_item_list = (jsonArray) => {
     for(const item of list_of_folders){
         create_folder_item(item)
     }
-    const folder = list_of_folders[0]  
-    const apiItemResult = await makeAPICall("GET",`/folders/${folder.id}/items/`);
-    console.log(apiItemResult);
-    const list_of_items = await apiItemResult.json();
-    console.log(list_of_items);
-    const folder_item_str = create_folder_item_list(list_of_items);
-    item_list.innerHTML = folder_item_str
-    current_folder_title.innerHTML = folder.title
+    //const folder = list_of_folders[0]  
+    //const apiItemResult = await makeAPICall("GET",`/folders/${folder.id}/items/`);
+    //console.log(apiItemResult);
+    //const list_of_items = await apiItemResult.json();
+    //console.log(list_of_items);
+    //const folder_item_str = create_folder_item_list(list_of_items);
+    //item_list.innerHTML = folder_item_str
+    //current_folder_title.innerHTML = folder.title
+    const add_folder_btn = document.querySelector("#add-folder-btn")
+    add_folder_btn.addEventListener("click", input_new_folder_title)
     }
 )();
 

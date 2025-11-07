@@ -24,7 +24,7 @@ async def get_folders(db_session:Session = Depends(get_db)):
     folders = db_session.query(FolderModel).filter(FolderModel.is_deleted == False).all()
     return folders
 
-class CreateFollder(BaseModel):
+class CreateFolder(BaseModel):
     title: str 
 
 class FolderResponse(BaseModel):
@@ -35,7 +35,7 @@ class FolderResponse(BaseModel):
         from_attributes = True
 
 @app.post("/folders", response_model=FolderResponse)
-async def create_folder(new_folder_request:CreateFollder, db_session:Session = Depends(get_db)):
+async def create_folder(new_folder_request:CreateFolder, db_session:Session = Depends(get_db)):
     new_folder = FolderModel(title = new_folder_request.title)
     db_session.add(new_folder)
     db_session.commit()
