@@ -28,14 +28,14 @@ Project Outline
 - FrontEnd
 - Load data from backend/api server
     - Main Menu 
-        - List Folders 
+        - List Folders (done)
         - Add Folder
         - Edit Folder
         - Delete Folder
         - Select Folder (to manage items)
         - Search Folder by Title *
     - Todo Item Menu (for selected folder)
-        - List Items
+        - List Items (in folder) (done)
         - Add Item
         - Edit Item
         - Delete Item

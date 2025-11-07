@@ -30,6 +30,9 @@ const add_folder = '.add-folder'
 const folder_list_id = "#folder-list"
 const folder_list = document.querySelector(folder_list_id);
 
+const current_folder_title_id = "#current-folder-title"
+const current_folder_title = document.querySelector(current_folder_title_id);
+
 const item_list_id  = "#todo-list"   
 const item_list = document.querySelector(item_list_id);
 
@@ -55,6 +58,9 @@ const create_folder_item = (json) => {
             item.classList.remove("active")
         }
         new_folder_item.classList.add("active")
+        
+        // update folder title
+        current_folder_title.innerHTML = json.title
     }
     new_folder_item.addEventListener("click", show_folder_items )
     const add_folder_elem = document.querySelector(add_folder)
@@ -91,6 +97,7 @@ const create_folder_item_list = (jsonArray) => {
     console.log(list_of_items);
     const folder_item_str = create_folder_item_list(list_of_items);
     item_list.innerHTML = folder_item_str
+    current_folder_title.innerHTML = folder.title
     }
 )();
 
