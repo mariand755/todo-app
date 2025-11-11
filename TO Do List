@@ -29,7 +29,7 @@ Project Outline
 - Load data from backend/api server
     - Main Menu 
         - List Folders (done)
-        - Add Folder
+        - Add Folder (done)
         - Edit Folder
         - Delete Folder
         - Select Folder (to manage items)

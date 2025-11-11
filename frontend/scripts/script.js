@@ -1,31 +1,5 @@
-const apiURL= 'http://localhost:8000';
+import { makeAPICall } from "./api.js";
 
-async function makeAPICall(http_method, api_path, payload=null){
-    const url = `${apiURL}${api_path}`
-    const method = http_method.toUpperCase()
-    if (method == 'GET'){
-        try { 
-            const result = await fetch(url)
-            return result
-        } catch(ex){
-            console.log(ex)
-            return null
-        }
-    }
-    try { 
-        const result = await fetch(url, {
-            method: method, 
-            body: JSON.stringify(payload),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        return result
-    } catch(ex){
-        console.log(ex)
-        return null
-    }
-}
 const add_folder = '.add-folder'
 const folder_list_id = "#folder-list"
 const folder_list = document.querySelector(folder_list_id);
@@ -67,14 +41,20 @@ const create_folder_item = (json) => {
     folder_list.insertBefore(new_folder_item, add_folder_elem)
 }
 const input_new_folder_title = async () => {
-const new_folder_input = document.querySelector("#new-folder-input")
-const title = new_folder_input.value
-const apiResult = await makeAPICall("POST","/folders", {
-    title
-});
-const apiResultJson = await apiResult.json()
-create_folder_item(apiResultJson)
-new_folder_input.value = ""
+    const new_folder_input = document.querySelector("#new-folder-input")
+    const title = new_folder_input.value
+    const apiResult = await makeAPICall("POST","/folders", {
+        title
+    });
+    const apiResultJson = await apiResult.json()
+    create_folder_item(apiResultJson)
+    new_folder_input.value = ""
+}
+const enter_new_folder_tiltle_option = (event) => {
+    // Check if the key pressed is the Enter key
+    if (event.key === 'Enter') {
+        input_new_folder_title()
+    }
 }
 
 const create_folder_item_list = (jsonArray) => {
@@ -110,6 +90,8 @@ const create_folder_item_list = (jsonArray) => {
     //current_folder_title.innerHTML = folder.title
     const add_folder_btn = document.querySelector("#add-folder-btn")
     add_folder_btn.addEventListener("click", input_new_folder_title)
+    const new_folder_input = document.querySelector("#new-folder-input")
+    new_folder_input.addEventListener("keyup",enter_new_folder_tiltle_option)
     }
 )();
 
