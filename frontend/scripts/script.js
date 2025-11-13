@@ -11,12 +11,15 @@ const item_list_id  = "#todo-list"
 const item_list = document.querySelector(item_list_id);
 
 const create_folder_item = (json) => {
+    // create new folder list 
     const new_folder_item = document.createElement("li")
     new_folder_item.id = `folder_id_${json.id}`
     new_folder_item.classList.add("folder-item")
+    // create span for folder title
     const folder_item_contents = document.createElement("span")
     folder_item_contents.classList.add("folder-name")
     folder_item_contents.textContent = json.title
+    // append span to folder list
     new_folder_item.appendChild(folder_item_contents)
 
     const show_folder_items = async () => {
@@ -32,11 +35,36 @@ const create_folder_item = (json) => {
             item.classList.remove("active")
         }
         new_folder_item.classList.add("active")
+
+        // add event for edit folder title
+        new_folder_item.addEventListener("click", () => {
+            if (new_folder_item.classList.contains("active")) {
+                // create edit folder list item
+                const edit_folder_elem = document.createElement("li")
+                edit_folder_elem.dataset.folderId = json.id
+                edit_folder_elem.classList.add("folder-item", "add-folder")
+                // create edit folder input element
+                const edit_folder_input = document.createElement("sl-input") 
+                edit_folder_input.id = "edit-folder-input"
+                edit_folder_input.value = json.title
+                edit_folder_input.clearable = true
+                // create edit folder btn
+                const edit_folder_btn = document.createElement("sl-icon-button")
+                edit_folder_btn.id = "edit-folder-btn"
+                edit_folder_btn.name = "pencil-square"
+                edit_folder_btn.classList.add("edit-folder-btn")
+                // append input and btn to folder
+                edit_folder_elem.appendChild(edit_folder_input)
+                edit_folder_elem.appendChild(edit_folder_btn)
+                
+                new_folder_item.replaceWith(edit_folder_elem) 
+            }
+        }) 
         
         // update folder title
         current_folder_title.innerHTML = json.title
     }
-    new_folder_item.addEventListener("click", show_folder_items )
+    new_folder_item.addEventListener("click", show_folder_items)
     const add_folder_elem = document.querySelector(add_folder)
     folder_list.insertBefore(new_folder_item, add_folder_elem)
 }
@@ -56,7 +84,13 @@ const enter_new_folder_tiltle_option = (event) => {
         input_new_folder_title()
     }
 }
-
+/*
+    const active_edit_folder = `
+        <li class="folder-item active" data-folder_id='${item.id}'>
+            <span class="folder-name">${item.title}</span>
+        </li>
+        `
+ */   
 const create_folder_item_list = (jsonArray) => {
     let htmlstr = ""
     for(const item of jsonArray){

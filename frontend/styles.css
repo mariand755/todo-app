@@ -47,14 +47,15 @@ body {
 }
 
 .folder-item {
-    flex-wrap: wrap;
     display: flex;
-    justify-content: flex-end;
     align-items: center;
+    justify-content: space-between; /* keep name on the left, counts/buttons on the right */
+    gap: 10px;
     padding: 12px 20px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
     border-left: 5px solid transparent;
+    box-sizing: border-box;
 }
 
 .folder-item:hover {
@@ -66,9 +67,15 @@ body {
     color: #fff;
     border-left: 5px solid #fff;
 }
-
+/* make folder name able to shrink so siblings (like the input) don't force overflow */
 .folder-name {
     font-weight: 500;
+     flex: 1 1 auto;
+    min-width: 0; /* allows text to truncate instead of forcing the container wider */
+}
+.edit-folder-btn {
+    font-size: 2rem;
+    color: rgb(80, 227, 194);
 }
 
 .item-count {
@@ -85,11 +92,29 @@ body {
     background-color: #fff;
     color: #1abc9c;
 }
-
+/* add-folder row specific layout so the input/button behave */
 .add-folder {
     margin-top: 10px;
-    font-style: italic;
     color: #bdc3c7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+}
+/* make shoelace input behave inside the flex row:
+   - allow it to take remaining space but not grow past the container
+   - min-width: 0 is required so flex child can shrink properly */
+.add-folder sl-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* keep the icon button a fixed size so it doesn't get pushed */
+.add-folder sl-icon-button {
+    flex: 0 0 auto;
+    margin-left: 4px;
 }
 
 /* -------------------- */
