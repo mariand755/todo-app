@@ -15,11 +15,12 @@ function App() {
         const fetchFolders = async () => {
             const data = await makeAPICall("GET", "/folders");
             if (data) {
-                setFolders(data);
+                const folders = await data.json();
+                setFolders(folders);
                 // The original script.js had commented-out logic to load the first folder's items, 
                 // but let's just initialize state here.
-                if (data.length > 0) {
-                    // setActiveFolderId(data[0].id);
+                if (folders.length > 0) {
+                    // setActiveFolderId(folders[0].id);
                     // loadFolderItems(data[0].id);
                 }
             }
@@ -31,7 +32,8 @@ function App() {
     const loadFolderItems = async (folderId) => {
         const data = await makeAPICall("GET", `/folders/${folderId}/items/`);
         if (data) {
-            setItems(data);
+            const folders = await data.json();
+            setItems(folders);
             setActiveFolderId(folderId);
         }
     };

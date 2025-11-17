@@ -1,10 +1,10 @@
 {
-  "name": "new-frontend",
+  "name": "frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host --port 3000",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

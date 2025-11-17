@@ -12,15 +12,16 @@ services:
       - db
   frontend:
     build:
-      context: ./nginx
+      context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - ./frontend:/usr/share/nginx/html:ro
-    container_name: frontend
+      - ./frontend:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    environment:
+      NODE_ENV: development
     ports:
       - "3000:3000"
-    depends_on:
-      - api
+    command: npx vite --host --port 3000
   db:
     image: postgres:18
     restart: always
@@ -44,4 +45,5 @@ services:
       start_period: 5s
 volumes:
   db-data:
+  node_modules:
     #   - FLASK_ENV=development
