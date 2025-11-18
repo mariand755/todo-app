@@ -2,7 +2,7 @@ import React from 'react';
 import FolderItem from './FolderItem';
 import NewFolderForm from './NewFolderForm'; // Defined below
 
-const Sidebar = ({ folders, activeFolderId, onFolderClick, onNewFolder }) => {
+const Sidebar = ({ folders, activeFolderId, onFolderClick, onNewFolder, onEditFolder }) => {
     
     // Combine fetched folders with the static 'Add New Folder' input from index.html
     const listItems = [
@@ -24,6 +24,7 @@ const Sidebar = ({ folders, activeFolderId, onFolderClick, onNewFolder }) => {
                         folder={folder}
                         isActive={folder.id === activeFolderId}
                         onClick={onFolderClick}
+                        onEdit={onEditFolder}
                     />
                 ))}
             </ul>

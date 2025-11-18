@@ -40,8 +40,9 @@ function App() {
 
     // Logic for adding a new folder, replacing input_new_folder_title()
     const handleNewFolder = async (title) => {
-        const newFolder = await makeAPICall("POST", "/folders", { title });
-        if (newFolder) {
+        const rawApiResponse = await makeAPICall("POST", "/folders", { title });
+        if (rawApiResponse) {
+            const newFolder = await rawApiResponse.json();
             // Update state immutably: new folder added to the list
             setFolders(prevFolders => {
                 // Find the index of the 'Add New Folder' input item (the last one)

@@ -1,7 +1,8 @@
 // Replaces create_folder_item (part of it) and the click handler
-import React from 'react';
+import React, {useState} from 'react';
 
-const FolderItem = ({ folder, isActive, onClick }) => {
+const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
+    const [isEditing, setIsEditing] = useState(false);
     // Check for the special 'add-folder' item from the original HTML
     if (folder.isInput) {
         return <li className="folder-item add-folder">{folder.content}</li>;
@@ -9,6 +10,13 @@ const FolderItem = ({ folder, isActive, onClick }) => {
 
     const handleClick = () => {
         onClick(folder.id);
+        setIsEditing(previous => {
+            console.log(previous)
+            return !previous
+        })
+    }
+    const handleEdit = () => {
+        onEdit(folder.id);
     };
 
     // The logic to add the 'active' class is now handled by a prop check
@@ -16,7 +24,9 @@ const FolderItem = ({ folder, isActive, onClick }) => {
 
     return (
         <li id={`folder_id_${folder.id}`} className={classes} onClick={handleClick}>
+
             <span className="folder-name">{folder.title}</span>
+
             {/* You'd need to fetch item count if you want to display it */}
             {/* <span className="item-count">{folder.itemCount || 0}</span> */}
         </li>
