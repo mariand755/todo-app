@@ -30,6 +30,9 @@ function App() {
 
     // Logic for loading items, replacing show_folder_items()
     const loadFolderItems = async (folderId) => {
+        if (folderId === activeFolderId) {
+            return; // No need to reload the same folder
+        }
         const data = await makeAPICall("GET", `/folders/${folderId}/items/`);
         if (data) {
             const folders = await data.json();
@@ -57,7 +60,22 @@ function App() {
             });
         }
     };
-    
+    // Logic for editing a folder title, replacing edit_folder_title()
+    const handleEditFolder = async (folderId, newTitle) => {
+        const rawApiResponse = await makeAPICall("PUT", `/folders/${folderId}`, { title: newTitle });
+        if (rawApiResponse) {
+            const updatedFolder = await rawApiResponse.json();
+            setFolders(prevFolders => 
+                prevFolders.map(folder => {
+                    if (folder.id === folderId) {
+                        return updatedFolder;
+                    }
+                    return folder;
+                })
+            );
+        }
+    };
+
     // Determine the title to display
     const activeFolder = folders.find(f => f.id === activeFolderId);
     const currentTitle = activeFolder ? activeFolder.title : "Select a Folder";
@@ -69,6 +87,7 @@ function App() {
                 activeFolderId={activeFolderId} 
                 onFolderClick={loadFolderItems}
                 onNewFolder={handleNewFolder}
+                onEditFolder={handleEditFolder}
             />
             <MainContent 
                 currentFolderTitle={currentTitle} 

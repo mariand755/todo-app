@@ -15,22 +15,32 @@ const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
             return !previous
         })
     }
-    const handleEdit = () => {
-        onEdit(folder.id);
+    const handleEdit = (newTitle) => {
+        onEdit(folder.id, newTitle);
     };
 
     // The logic to add the 'active' class is now handled by a prop check
     const classes = `folder-item ${isActive ? 'active' : ''}`;
 
-    return (
-        <li id={`folder_id_${folder.id}`} className={classes} onClick={handleClick}>
-
-            <span className="folder-name">{folder.title}</span>
-
-            {/* You'd need to fetch item count if you want to display it */}
-            {/* <span className="item-count">{folder.itemCount || 0}</span> */}
-        </li>
+    return isEditing ? (
+        <input
+            type="text"
+            defaultValue={folder.title}
+            onBlur={e => {
+                handleEdit(e.target.value);
+                setIsEditing(false);
+            }}
+            onKeyDown={e => {
+                if (e.key === 'Enter') {
+                    handleEdit(e.target.value);
+                    setIsEditing(false);
+                }
+            }}
+            className={classes}
+            autoFocus
+        />
+    ) : (
+        <span className={`folder-name ${classes}`} onClick={handleClick}>{folder.title}</span>
     );
-};
-
+}
 export default FolderItem;
