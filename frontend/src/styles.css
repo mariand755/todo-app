@@ -9,9 +9,10 @@ body {
 
 #app-container {
     display: flex;
-    max-width: 1200px;
+    width: calc(100% - 40px); /* full width with 20px side gutters */
+    max-width: none; /* allow full width */
     height: 90vh; /* Adjust as needed for fullscreen view */
-    margin: 5vh auto;
+    margin: 5vh 20px; /* keep vertical spacing, add horizontal gutters */
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle, flat shadow */
     overflow: hidden;
@@ -28,6 +29,7 @@ body {
     color: #ecf0f1;
     padding: 20px 0;
     box-sizing: border-box;
+    overflow-y: auto; /* <-- keep sidebar usable when many folders exist */
 }
 
 #folder-sidebar h2 {
@@ -56,6 +58,7 @@ body {
     transition: background-color 0.2s, color 0.2s;
     border-left: 5px solid transparent;
     box-sizing: border-box;
+    position: relative; /* <-- allow absolute delete button to position correctly */
 }
 
 .folder-item:hover {
@@ -67,14 +70,19 @@ body {
     color: #fff;
     border-left: 5px solid #fff;
 }
+
 /* make folder name able to shrink so siblings (like the input) don't force overflow */
 .folder-name {
     font-weight: 500;
-     flex: 1 1 auto;
+    flex: 1 1 auto;
     min-width: 0; /* allows text to truncate instead of forcing the container wider */
+    overflow: hidden;            /* truncate long names */
+    text-overflow: ellipsis;     /* show ellipsis */
+    white-space: nowrap;         /* keep it on one line */
 }
+
 .edit-folder-btn {
-    font-size: 2rem;
+    font-size: 1.4rem; /* reduced from 2rem for better balance */
     color: rgb(80, 227, 194);
 }
 
@@ -86,12 +94,14 @@ body {
     font-size: 0.8em;
     min-width: 10px;
     text-align: center;
+    flex-shrink: 0; /* avoid shrinking when space is tight */
 }
 
 .folder-item.active .item-count {
     background-color: #fff;
     color: #1abc9c;
 }
+
 /* add-folder row specific layout so the input/button behave */
 .add-folder {
     margin-top: 10px;
@@ -101,10 +111,11 @@ body {
     gap: 8px;
     padding: 8px 20px;
 }
+
 /* make shoelace input behave inside the flex row:
    - allow it to take remaining space but not grow past the container
    - min-width: 0 is required so flex child can shrink properly */
-.add-folder sl-input {
+.add-folder sl_input {
     flex: 1 1 auto;
     min-width: 0;
     max-width: 100%;
@@ -115,6 +126,21 @@ body {
 .add-folder sl-icon-button {
     flex: 0 0 auto;
     margin-left: 4px;
+}
+
+.folder-item sl-icon-button.delete-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+
+.folder-item:hover sl-icon-button.delete-btn {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* -------------------- */
@@ -226,7 +252,9 @@ input[type="checkbox"] {
     border: 2px solid #ccc;
     border-radius: 4px;
     cursor: pointer;
-    position: relative;
+    position: relative; /* required for pseudo-element positioning */
+    display: inline-block; /* ensure pseudo-element positions relative to box */
+    vertical-align: middle;
     outline: none;
     transition: all 0.2s;
 }
@@ -240,9 +268,10 @@ input[type="checkbox"]:checked {
 input[type="checkbox"]:checked::after {
     content: '✓';
     position: absolute;
-    top: -2px;
-    left: 2px;
-    font-size: 16px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* center the checkmark */
+    font-size: 14px;
     color: white;
     font-weight: bold;
 }
@@ -265,3 +294,38 @@ input[type="checkbox"]:checked::after {
     background-color: #e74c3c;
     color: white;
 }
+
+/* Responsive: stack sidebar under content on narrow screens */
+@media (max-width: 800px) {
+    #app-container {
+        flex-direction: column;
+        height: auto;
+        margin: 2vh auto;
+    }
+    #folder-sidebar {
+        width: 100%;
+        order: 2;
+        padding: 10px 0;
+    }
+    #todo-main-content {
+        order: 1;
+        padding: 20px;
+    }
+    .folder-item {
+        padding: 10px 14px;
+    }
+    #folder-list {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+}
+
+@media (min-width: 1400px) {
+    /* optional: limit extreme wide screens slightly so layout doesn't stretch too much */
+    #app-container {
+        width: 1200px;
+        margin: 5vh auto;
+    }
+}
+

@@ -1,7 +1,7 @@
 // Replaces create_folder_item (part of it) and the click handler
 import React, {useState} from 'react';
 
-const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
+const FolderItem = ({ folder, isActive, onClick, onEdit, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
     // Check for the special 'add-folder' item from the original HTML
     if (folder.isInput) {
@@ -11,12 +11,16 @@ const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
     const handleClick = () => {
         onClick(folder.id);
         setIsEditing(previous => {
-            console.log(previous)
             return !previous
         })
     }
     const handleEdit = (newTitle) => {
         onEdit(folder.id, newTitle);
+    };
+     // Handle delete action (stop propagation so it doesn't trigger folder click)
+    const handleDelete = (e) => {
+        e.stopPropagation();
+        if (onDelete) onDelete(folder.id);
     };
 
     // The logic to add the 'active' class is now handled by a prop check
@@ -40,7 +44,9 @@ const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
             autoFocus
         />
     ) : (
-        <span className={`folder-name ${classes}`} onClick={handleClick}>{folder.title}</span>
+
+        <span className={`folder-name ${classes}`} onClick={handleClick}>{folder.title}</span> 
+    
     );
 }
 export default FolderItem;

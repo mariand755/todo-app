@@ -3,6 +3,10 @@ import { makeAPICall } from './useApi';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import './styles.css'; 
+import '@shoelace-style/shoelace/dist/themes/light.css';
+import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
+setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/');
+
 
 function App() {
     const [folders, setFolders] = useState([]);

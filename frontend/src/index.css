@@ -1,3 +1,17 @@
+/* Basic root sizing to avoid external constraints */
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* make all elements inherit box-sizing */
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
