@@ -80,9 +80,20 @@ function App() {
         }
     };
 
+    const handleDeleteFolder = async (folderId) => {
+        const rawApiResponse = await makeAPICall("DELETE", `/folders/${folderId}`);
+        if (rawApiResponse) {
+            setFolders(prevFolders => prevFolders.filter(folder => folder.id !== folderId));
+            if (folderId === activeFolderId) {
+                setActiveFolderId(null);
+                setItems([]);
+            }
+        }
+    };
+
     // Determine the title to display
     const activeFolder = folders.find(f => f.id === activeFolderId);
-    const currentTitle = activeFolder ? activeFolder.title : "Select a Folder";
+    const currentTitle = activeFolder ? activeFolder.title : "";
 
     return (
         <div id="app-container">
@@ -95,7 +106,10 @@ function App() {
             />
             <MainContent 
                 currentFolderTitle={currentTitle} 
-                items={items} 
+                items={items}
+                currentFolderId={activeFolderId}
+                onEditFolder={handleEditFolder}
+                onDeleteFolder={handleDeleteFolder}    
                 // Placeholder for item actions (add, toggle, delete)
             />
         </div>

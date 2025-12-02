@@ -7,51 +7,101 @@ import SlMenuItem from '@shoelace-style/shoelace/dist/react/menu-item/index.js';
 import SlDropdown from '@shoelace-style/shoelace/dist/react/dropdown/index.js';
 import SlDialog from '@shoelace-style/shoelace/dist/react/dialog/index.js';
 import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
+import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
 
-const MainContent = ({ currentFolderTitle, items }) => {
+
+const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, onAddTodo }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState(false);
 
+    // new local state for the todo input
+    const [newTodo, setNewTodo] = useState('');
+
+    const handleEdit = (newTitle) => {
+        onEditFolder(currentFolderId, newTitle);
+    };
+
+    const handleDelete = () => {
+        onDeleteFolder(currentFolderId);
+    };
+
+    // handle form submit (Enter or click)
+    const handleAddTodo = (e) => {
+        e.preventDefault();
+        const trimmed = newTodo.trim();
+        if (!trimmed) return;
+        if (typeof onAddTodo === 'function') {
+            onAddTodo(currentFolderId, trimmed);
+        } else {
+            // fallback: just log if parent didn't provide a handler
+            console.info('Add todo:', { folderId: currentFolderId, text: trimmed });
+        }
+        setNewTodo('');
+    };
 
     return (
         <main id="todo-main-content">
             <header>
-                <h1 id="current-folder-title">{currentFolderTitle} 
-                <SlDropdown
-                // Bind the open state to our React state
-                open={isOpen}
-                // Open when mouse enters the entire component area
-                onMouseEnter={() => setIsOpen(true)}
-                // Close when mouse leaves the entire component area
-                onMouseLeave={() => setIsOpen(false)}
-                >  
+                <div className="folder-header">
+                    <h1 id="current-folder-title">{currentFolderTitle}</h1>
 
-                  <SlIcon slot="trigger" name="three-dots-vertical"></SlIcon>
-                  <SlMenu style={{ maxWidth: '200px' }}>
-                  <SlMenuItem value="edit" onClick={() => setOpenDialog(true)}>Edit</SlMenuItem>
-                  <SlDivider/>
-                  <SlMenuItem value="delete" onClick={() => setDeleteDialog(true)}>Delete</SlMenuItem>
-                  </SlMenu> 
-                </SlDropdown>
-                <SlDialog label="Edit Folder Name" open={openDialog} onSlAfterHide={() => setOpenDialog(false)}>
-                <SlButton slot="footer" variant="primary" onClick={() => setOpenDialog(false)}>
-                Close
-                </SlButton>
-                </SlDialog>
-                <SlDialog label="Delete Folder" open={deleteDialog} onSlAfterHide={() => setDeleteDialog(false)}>
-                <SlButton slot="footer" variant="primary" onClick={() => setDeleteDialog(false)}>
-                Close
-                </SlButton>
-                </SlDialog>
-
-
-
-                </h1>
-                <div className="actions">
-                    <input type="text" id="new-todo-input" placeholder="What needs to be added?" />
-                    <button id="add-todo-btn">Add Items</button>
+                    {
+                       currentFolderId && (
+                       <div className="folder-controls">
+                        <SlDropdown
+                            open={isOpen}
+                            onMouseEnter={() => setIsOpen(true)}
+                            onMouseLeave={() => setIsOpen(false)}
+                        >
+                            <SlIcon slot="trigger" name="three-dots-vertical"></SlIcon>
+                            <SlMenu style={{ maxWidth: '200px' }}>
+                                <SlMenuItem value="edit" onClick={() => setOpenDialog(true)}>Edit</SlMenuItem>
+                                <SlDivider/>
+                                <SlMenuItem value="delete" onClick={() => setDeleteDialog(true)}>Delete</SlMenuItem>
+                            </SlMenu>
+                        </SlDropdown>
+                    </div>
+                    )
+                    }
                 </div>
+
+                <SlDialog label="Edit Folder Name" open={openDialog} onSlAfterHide={() => setOpenDialog(false)}>
+                    <SlButton slot="footer" variant="primary" onClick={(e) => 
+                    {
+                        const inputElement = document.getElementById('edit-folder-input');
+                        handleEdit(inputElement.value); 
+                        setOpenDialog(false); 
+                    }}>
+                        OK
+                    </SlButton>
+
+                    <SlInput id="edit-folder-input" 
+                        onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                            handleEdit(e.target.value);     
+                            setOpenDialog(false);}
+                        }}
+                        size="medium" value={currentFolderTitle} pill/>
+                </SlDialog>
+
+                <SlDialog label={`Delete "${currentFolderTitle}"?`} open={deleteDialog} onSlAfterHide={() => setDeleteDialog(false)}>
+                    <SlButton slot="footer" variant="primary" onClick={(e) => { handleDelete(); setDeleteDialog(false); }}>
+                        OK
+                    </SlButton>
+                </SlDialog>
+
+                <form className="actions" onSubmit={handleAddTodo}>
+                    <input
+                        type="text"
+                        id="new-todo-input"
+                        placeholder="What needs to be added?"
+                        value={newTodo}
+                        onChange={e => setNewTodo(e.target.value)}
+                        aria-label="New todo"
+                    />
+                    <button id="add-todo-btn" type="submit">Add Items</button>
+                </form>
             </header>
 
             <ul id="todo-list">
@@ -63,7 +113,6 @@ const MainContent = ({ currentFolderTitle, items }) => {
                         <TodoItem 
                             key={item.id} 
                             item={item}
-                            // Pass action handlers here later
                         />
                     ))
                 )}

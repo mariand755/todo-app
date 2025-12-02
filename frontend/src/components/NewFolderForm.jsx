@@ -1,5 +1,9 @@
 // Replaces input_new_folder_title() and enter_new_folder_tiltle_option()
 import React, { useState } from 'react';
+import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
+import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
+import SlIcon from '@shoelace-style/shoelace/dist/react/icon/index.js';
+
 
 const NewFolderForm = ({ onNewFolder }) => {
     const [title, setTitle] = useState('');
@@ -17,27 +21,27 @@ const NewFolderForm = ({ onNewFolder }) => {
         }
     };
 
-    // Shoelace components are used in the original index.html, 
-    // but here we use standard React input for simplicity unless a Shoelace React wrapper is used.
-    // If you need Shoelace, you'll install the React wrapper or ensure the scripts load globally.
-
     return (
         <>
-            <input 
+            {/* Keep elements directly inside the li.add-folder so current CSS applies */}
+            <SlInput 
                 id="new-folder-input" 
                 type="text" 
                 placeholder="Add New Folder" 
                 value={title} 
-                onChange={(e) => setTitle(e.target.value)}
+                onSlInput={(e) => setTitle(e.target.value)}
                 onKeyUp={handleKeyPress}
+                size="medium"
             />
-            <button 
+            <SlButton 
                 id="add-folder-btn" 
+                variant="primary"
                 onClick={handleSubmit}
+                size="medium"
+                title="Create folder"
             >
-                +
-            </button>
-            {/* The Shoelace icon/button would need the Shoelace component or custom styling */}
+                <SlIcon name="folder-plus" style={{ fontSize: '1.2rem' }} />
+            </SlButton>
         </>
     );
 };
