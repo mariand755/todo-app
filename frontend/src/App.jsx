@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { makeAPICall } from './useApi'; 
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
+import LandingContent from './components/LandingContent';
 import './styles.css'; 
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
@@ -90,6 +91,11 @@ function App() {
             }
         }
     };
+    // Logic for handling home click to show landing content
+    const handleHomeClick = () => {
+        setActiveFolderId(null);
+        setItems([]);
+    };
 
     // Determine the title to display
     const activeFolder = folders.find(f => f.id === activeFolderId);
@@ -103,15 +109,16 @@ function App() {
                 onFolderClick={loadFolderItems}
                 onNewFolder={handleNewFolder}
                 onEditFolder={handleEditFolder}
+                onHomeClick={handleHomeClick}
             />
-            <MainContent 
+            {activeFolderId ? <MainContent  
                 currentFolderTitle={currentTitle} 
                 items={items}
                 currentFolderId={activeFolderId}
                 onEditFolder={handleEditFolder}
                 onDeleteFolder={handleDeleteFolder}    
-                // Placeholder for item actions (add, toggle, delete)
             />
+            : <LandingContent/>}
         </div>
     );
 }
