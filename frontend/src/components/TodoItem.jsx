@@ -1,10 +1,14 @@
 // Replaces the HTML string generation in create_folder_item_list()
 import React from 'react';
 
-const TodoItem = ({ item }) => {
+const TodoItem = ({item, onToggle, onDelete, onEdit}) => {
     // Placeholder for item actions
-    const handleToggle = () => { /* Logic to toggle 'complete' state via prop function */ };
-    const handleDelete = () => { /* Logic to delete item via prop function */ };
+    const handleToggle = () => {
+         onToggle(item.id);
+    };
+
+    const handleDelete = () => { onDelete(item.id); };
+    const handleEdit = (newTitle) => { onEdit(item.id, newTitle); };
 
     const classes = `todo-item ${item.completed ? 'complete' : ''}`;
 

@@ -10,7 +10,7 @@ import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
 import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
 
 
-const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, onAddTodo }) => {
+const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, onAddTodo, onToggleTodo, onDeleteTodo, onEditTodo }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState(false);
@@ -32,11 +32,8 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
         const trimmed = newTodo.trim();
         if (!trimmed) return;
         if (typeof onAddTodo === 'function') {
-            onAddTodo(currentFolderId, trimmed);
-        } else {
-            // fallback: just log if parent didn't provide a handler
-            console.info('Add todo:', { folderId: currentFolderId, text: trimmed });
-        }
+            onAddTodo(trimmed);
+        } 
         setNewTodo('');
     };
 
@@ -113,6 +110,9 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                         <TodoItem 
                             key={item.id} 
                             item={item}
+                            onToggle={onToggleTodo}
+                            onDelete={onDeleteTodo}
+                            onEdit={onEditTodo}
                         />
                     ))
                 )}
