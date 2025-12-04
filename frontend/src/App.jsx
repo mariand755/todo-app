@@ -128,6 +128,28 @@ function App() {
     //         );
     //     }
     };
+    // Logic for handling deleting a todo item
+    const handleDeleteToDoItem = async (itemId) => {
+        const rawApiResponse = await makeAPICall("DELETE", `/folders/${activeFolderId}/items/${itemId}`);
+        if (rawApiResponse) {
+            setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+        }
+    };
+    // Logic for handling editing a todo item
+    const handleEditToDoItem = async (itemId, newTitle) => {
+        const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/items/${itemId}`, { title: newTitle });
+        if (rawApiResponse) {
+            const updatedItem = await rawApiResponse.json();
+            setItems(prevItems => 
+                prevItems.map(item => {
+                    if (item.id === itemId) {
+                        return updatedItem;
+                    }
+                    return item;
+                })
+            );
+        }
+    };
 
     // Determine the title to display
     const activeFolder = folders.find(f => f.id === activeFolderId);
@@ -151,8 +173,8 @@ function App() {
                 onDeleteFolder={handleDeleteFolder}  
                 onAddTodo={handleAddTodo}
                 onToggleTodo={onToggleTodo}
-                //onDeleteTodo={handleDeleteTodo}
-                //onEditTodo={handleEditTodo}
+                onDeleteToDoItem={handleDeleteToDoItem}
+                onEditToDoItem={handleEditToDoItem}
             />
             : <LandingContent/>}
         </div>

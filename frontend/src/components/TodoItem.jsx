@@ -34,7 +34,6 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem}) => {
                 onChange={handleToggle} 
             />
             <span className="todo-text">{item.title}</span>
-            <button className="delete-btn" onClick={handleDelete}>Delete</button>
         
             <div className="item-actions">
                 {item && (
@@ -59,14 +58,14 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem}) => {
                         <SlDialog label="Edit Item Name" open={openDialog} onSlAfterHide={() => setOpenDialog(false)}>
                             <SlButton slot="footer" variant="primary" onClick={(e) => 
                             {
-                                const inputElement = document.getElementById('edit-item-input');
+                                const inputElement = document.getElementById(`edit-${item.id}-input`);
                                 handleEdit(inputElement.value); 
                                 setOpenDialog(false); 
                             }}>
                                 OK
                             </SlButton>
         
-                            <SlInput id="edit-item-input" 
+                            <SlInput id={`edit-${item.id}-input`} 
                                 onKeyDown={e => {
                                 if (e.key === 'Enter') {
                                     handleEdit(e.target.value);     
