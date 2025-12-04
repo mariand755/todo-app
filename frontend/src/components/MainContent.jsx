@@ -10,7 +10,7 @@ import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
 import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
 
 
-const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, onAddTodo, onToggleTodo, onDeleteTodo, onEditTodo }) => {
+const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, onAddTodo, onToggleTodo, onDeleteToDoItem, onEditToDoItem }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState(false);
@@ -111,8 +111,8 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                             key={item.id} 
                             item={item}
                             onToggle={onToggleTodo}
-                            onDelete={onDeleteTodo}
-                            onEdit={onEditTodo}
+                            onDeleteToDoItem={onDeleteToDoItem}
+                            onEditToDoItem={onEditToDoItem}
                         />
                     ))
                 )}
