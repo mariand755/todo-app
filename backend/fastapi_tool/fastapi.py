@@ -86,6 +86,7 @@ class ItemResponse(BaseModel):
     id: int
     title: str
     folder_id: int
+    completed: bool
 
     class Config:
         from_attributes = True
@@ -175,3 +176,18 @@ async def undo_item(folder_id:int, item_id:int, db_session:Session = Depends(get
     db_session.commit()
     return item
 
+@app.put("/folders/{folder_id}/items/{item_id}/toggle", response_model=ItemResponse)
+async def toggle_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
+    folder = db_session.get(FolderModel, folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    item = db_session.query(TodoItemModel).filter(
+        TodoItemModel.folder_id == folder_id,
+        TodoItemModel.id == item_id,
+    ).first()
+    if item == None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    item.completed = not item.completed
+    db_session.add(item)
+    db_session.commit()
+    return item

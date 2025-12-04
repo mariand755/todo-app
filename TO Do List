@@ -28,6 +28,7 @@ Project Outline
 - FrontEnd
 - Load data from backend/api server
     - Landing Page   (done)   
+    - Deeplink to specific folder (nice to have)
     - Display all folders on the left side (done)
     - Main Menu 
         - List Folders (done)

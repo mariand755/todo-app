@@ -4,14 +4,23 @@ CREATE TABLE folder (
     title VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE todo_item (
-    -- SERIAL is used again for the primary key
-    id SERIAL PRIMARY KEY, 
-    title VARCHAR(255) NOT NULL, 
-    -- Standard INT for the Foreign Key
-    folder_id INT, 
-    -- Defines the Foreign Key relationship, referencing the new 'folder' table name
-    FOREIGN KEY (folder_id) REFERENCES folder(id) 
-        -- ON DELETE CASCADE: If a folder is deleted, all associated todo_items are deleted
-        ON DELETE CASCADE 
+-- public.todo_item definition
+
+-- Drop table
+
+-- DROP TABLE public.todo_item;
+
+CREATE TABLE public.todo_item (
+	id serial4 NOT NULL,
+	title varchar(255) NOT NULL,
+	folder_id int4 NULL,
+	is_deleted bool DEFAULT false NULL,
+	completed bool DEFAULT false NULL,
+	CONSTRAINT todo_item_pkey PRIMARY KEY (id)
 );
+
+
+-- public.todo_item foreign keys
+
+ALTER TABLE public.todo_item 
+ADD CONSTRAINT todo_item_folder_id_fkey FOREIGN KEY (folder_id) REFERENCES public.folder(id) ON DELETE CASCADE;

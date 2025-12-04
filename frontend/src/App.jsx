@@ -106,27 +106,18 @@ function App() {
     };
     // Logic for handling toggling a todo item
     const onToggleTodo = async (itemId) => {
-        setItems(prevItems => {
-            return prevItems.map(item => {
-                if (item.id === itemId) {
-                    return { ...item, completed: !item.completed };
-                }
-                return item;
-            });
-        });
-
-    //     const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/items/${itemId}/toggle`);
-    //     if (rawApiResponse) {
-    //         const updatedItem = await rawApiResponse.json();
-    //         setItems(prevItems => 
-    //             prevItems.map(item => {
-    //                 if (item.id === itemId) {
-    //                     return updatedItem;
-    //                 }
-    //                 return item;
-    //             })
-    //         );
-    //     }
+        const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/items/${itemId}/toggle`);
+        if (rawApiResponse) {
+            const updatedItem = await rawApiResponse.json();
+            setItems(prevItems => 
+                prevItems.map(item => {
+                    if (item.id === itemId) {
+                        return updatedItem;
+                    }
+                    return item;
+                })
+            );
+        }
     };
     // Logic for handling deleting a todo item
     const handleDeleteToDoItem = async (itemId) => {
