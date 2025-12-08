@@ -22,7 +22,7 @@ const Sidebar = ({ folders, activeFolderId, onFolderClick, onNewFolder, onEditFo
                     <FolderItem
                         key={folder.id}
                         folder={folder}
-                        isActive={folder.id === activeFolderId}
+                        isActive={String(folder.id) === String(activeFolderId)}
                         onClick={onFolderClick}
                         onEdit={onEditFolder}
                     />

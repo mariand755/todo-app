@@ -189,8 +189,34 @@ function App() {
         }
     };
 
-    // Determine the title to display
-    const activeFolder = folders.find(f => f.id === activeFolderId);
+    // ensure folder metadata is available so folder title can render after a reload/deeplink
+    useEffect(() => {
+        if (!activeFolderId) return;
+        const exists = folders.some(f => String(f.id) === String(activeFolderId));
+        if (exists) return;
+
+        let cancelled = false;
+        (async () => {
+            const res = await makeAPICall('GET', `/folders/${encodeURIComponent(activeFolderId)}`);
+            if (cancelled || !res) return;
+            try {
+                const folder = await res.json();
+                if (!folder) return;
+                setFolders(prev => {
+                    // avoid duplicate if another fetch/refresh already added it
+                    if (prev.some(f => String(f.id) === String(folder.id))) return prev;
+                    return [...prev, folder];
+                });
+            } catch (e) {
+                // silent fail — UI will show empty title fallback
+                console.info('Failed to fetch folder metadata', e);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [activeFolderId, folders]);
+
+    // Determine the title to display (compare IDs as strings to avoid type mismatch)
+    const activeFolder = folders.find(f => String(f.id) === String(activeFolderId));
     const currentTitle = activeFolder ? activeFolder.title : "";
 
     return (
