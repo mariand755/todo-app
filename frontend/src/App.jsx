@@ -14,7 +14,7 @@ function App() {
     const [items, setItems] = useState([]);
     const [activeFolderId, setActiveFolderId] = useState(null);
 
-    // useEffect hook replaces the initial IIFE logic from script.js
+    // Fetch folders on mount
     useEffect(() => {
         // Fetch all folders on initial load
         const fetchFolders = async () => {
@@ -33,18 +33,59 @@ function App() {
         fetchFolders();
     }, []); // Empty dependency array ensures it runs once on mount
 
-    // Logic for loading items, replacing show_folder_items()
-    const loadFolderItems = async (folderId) => {
-        if (folderId === activeFolderId) {
-            return; // No need to reload the same folder
+    // Helper: extract folder id from URL (supports /folders/:id or ?folder=ID)
+    const getFolderIdFromURL = () => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('folder')) {
+                return params.get('folder');
+            }
+            const m = window.location.pathname.match(/\/folders\/([^\/?#]+)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        } catch (err) {
+            return null;
         }
+    };
+
+    // Logic for loading items, now optionally controls history push
+    const loadFolderItems = async (folderId, pushHistory = true) => {
+        if (!folderId) return;
+        if (folderId === activeFolderId) return; // No need to reload the same folder
         const data = await makeAPICall("GET", `/folders/${folderId}/items/`);
         if (data) {
             const folders = await data.json();
             setItems(folders);
             setActiveFolderId(folderId);
+            if (pushHistory) {
+                // reflect selection in the URL for deep-linking / sharing
+                const url = `/folders/${encodeURIComponent(folderId)}`;
+                try {
+                    window.history.pushState({ folderId }, '', url);
+                } catch (e) { /* ignore history errors */ }
+            }
         }
     };
+
+    // respond to browser back/forward
+    useEffect(() => {
+        const onPop = () => {
+            const id = getFolderIdFromURL();
+            if (id) {
+                loadFolderItems(id, false); // don't push when reacting to popstate
+            } else {
+                // no folder in URL -> show home/landing
+                setActiveFolderId(null);
+                setItems([]);
+            }
+        };
+        window.addEventListener('popstate', onPop);
+        // check initial URL on mount and load folder if present
+        const initial = getFolderIdFromURL();
+        if (initial) {
+            loadFolderItems(initial, false);
+        }
+        return () => window.removeEventListener('popstate', onPop);
+    }, []); // run once on mount
 
     // Logic for adding a new folder, replacing input_new_folder_title()
     const handleNewFolder = async (title) => {
@@ -88,6 +129,9 @@ function App() {
             if (folderId === activeFolderId) {
                 setActiveFolderId(null);
                 setItems([]);
+                try {
+                    window.history.pushState({}, '', '/'); // reset URL to root
+                } catch (e) { /* ignore */ }
             }
         }
     };
@@ -95,6 +139,9 @@ function App() {
     const handleHomeClick = () => {
         setActiveFolderId(null);
         setItems([]);
+        try {
+            window.history.pushState({}, '', '/');
+        } catch (e) { /* ignore */ }
     };
     // Logic for handling adding a new todo item
     const handleAddTodo = async (title) => {

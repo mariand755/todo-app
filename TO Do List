@@ -38,11 +38,11 @@ Project Outline
         - Select Folder (to manage items)   (done)
     - Todo Item Menu (for selected folder)
         - List Items (in folder) (done)
-        - Add Item
-        - Edit Item
-        - Delete Item
+        - Add Item (done)
+        - Edit Item (done)
+        - Delete Item (done)
         - Search Item by Title
-        - Toggle Item Complete/Incomplete (nice to have)
+        - Toggle Item Complete/Incomplete  (done)
    
 
 - Backend
@@ -102,13 +102,31 @@ Nice to have
     - color code in run time (eg Invalid Entries, Mode of Operations) https://jakob-bagterp.github.io/colorist-for-python/
    (done)
   - comments in code to learn what the functions and methods are doing
-   - list # of items in folder when listing folders
-    - implement a better search algorithm (eg partial match, case insensitive)
+   - list # of items in folder when listing folders (done)  
+- Future Improvements
     - improve the ui/ux flow
-    - implement logging for better debugging and tracking
-    - implement user authentication for multi-user support
-    - implement due dates and reminders for todo items
-    - implement priority levels for todo items
+        - hover inidcator with hand over Folder Home 
+        - better layout for main menu and item menu
+        - Welcome screen with app info and instructions
+        - responsive design for different screen sizes  
+        - implement drag and drop for reordering folders and items 
+        - enable direct linking in brwowser to specific folders or items  
+        - dark mode toggle for better accessibility
+        - enhance accessibility features (eg keyboard navigation, screen reader support)  
+        - optimize performance for large number of folders and items
+        - implement a search algorithm (eg partial match, case insensitive)
+
+- Advanced Features
+        - integrate with third-party services (eg calendar apps, notifications services)
+        - implement due dates and reminders for todo items
+        - implement logging for better debugging and tracking
+
+    - Automation and Integration
+        - add automation testing (unit tests, integration tests, end-to-end tests)
+        - integrate into Ci/CD pipeline for automated testing and deployment (eg GitHub Actions, Jenkins)
+
+
+
 
 
 https://shoelace.style/components/radio-button

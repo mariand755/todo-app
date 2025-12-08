@@ -40,6 +40,14 @@ body {
     padding-bottom: 10px;
     font-size: 1.5em;
     font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s, border-bottom-color 0.2s;
+}
+
+/* match hover color to the sidebar add-folder button / active folder teal */
+#folder-sidebar h2:hover {
+    color: #1abc9c;               /* teal - same as active folder and add button */
+    border-bottom-color: #1abc9c;
 }
 
 #folder-list {
@@ -79,6 +87,46 @@ body {
     overflow: hidden;            /* truncate long names */
     text-overflow: ellipsis;     /* show ellipsis */
     white-space: nowrap;         /* keep it on one line */
+    position: relative; /* ensure ::after positions relative to this element */
+}
+
+/* tooltip (hidden by default) */
+.folder-name::after {
+    content: attr(data-full);
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    white-space: normal;
+    max-width: 320px;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 120ms ease, transform 120ms ease;
+    pointer-events: none;
+    z-index: 50;
+    display: block;
+    visibility: hidden;
+}
+
+/* show tooltip on hover/focus */
+.folder-name:hover::after,
+.folder-name:focus::after {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+/* Small screens: disable tooltip to avoid overlap issues */
+@media (max-width: 480px) {
+    .folder-name::after {
+        display: none;
+    }
 }
 
 .edit-folder-btn {
@@ -110,29 +158,45 @@ body {
     align-items: center;
     gap: 8px;
     padding: 8px 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* make shoelace input behave inside the flex row:
-   - allow it to take remaining space but not grow past the container
-   - min-width: 0 is required so flex child can shrink properly */
+/* Support both correct custom element names and any accidental variants */
+.add-folder sl_input,
 .add-folder sl-input {
     flex: 1 1 auto;
     min-width: 0;
-    max-width: 100%;
+    width: 100%;
     box-sizing: border-box;
-    --sl-input-height-medium: 36px; /* try to keep height consistent with buttons */
+    --sl-input-height-medium: 36px;
 }
 
-/* keep the icon/button a fixed size so it doesn't get pushed */
+/* keep the icon/button a fixed size so it doesn't get pushed (support both names) */
+.add-folder sl_button,
 .add-folder sl-button,
+.add-folder sl_icon-button,
 .add-folder sl-icon-button {
-    flex: 0 0 auto;
-    margin-left: 4px;
+    flex: 0 0 44px;      /* fixed square button */
+    width: 44px;
     height: 36px;
-    min-width: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    margin-left: 4px;
+    background-color: #1abc9c;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+}
+
+/* hover state for the add-folder button */
+.add-folder sl-button:hover,
+.add-folder sl-icon-button:hover,
+.add-folder sl_button:hover,
+.add-folder sl_icon-button:hover {
+    background-color: #16a085;
+    color: #fff;
 }
 
 /* -------------------- */
@@ -305,37 +369,122 @@ input[type="checkbox"]:checked::after {
     box-sizing: border-box;
 }
 
-/* Responsive: stack sidebar under content on narrow screens */
+/* Responsive: stack sidebar under content on narrow screens -- improved */
 @media (max-width: 800px) {
     #app-container {
         flex-direction: column;
         height: auto;
-        margin: 2vh auto;
+        margin: 0; /* remove auto gutters for small screens */
     }
+    /* make the sidebar collapse into a top bar (compact) */
     #folder-sidebar {
         width: 100%;
-        order: 2;
-        padding: 10px 0;
-    }
-    #todo-main-content {
         order: 1;
-        padding: 20px;
+        padding: 8px 8px;
     }
-    .folder-item {
-        padding: 10px 14px;
-    }
+
+    /* ensure folder chips wrap into multiple rows (no horizontal scroll) */
     #folder-list {
         display: flex;
-        gap: 6px;
+        gap: 8px;
         flex-wrap: wrap;
+        overflow-x: visible; /* avoid scrollbars */
+        padding: 8px 12px;
+        margin: 0;
+    }
+
+    /* flexible chips: allow shrinking, truncation if needed */
+    .folder-item {
+        flex: 1 0 calc(50% - 12px); /* two per row where space allows */
+        box-sizing: border-box;
+        padding: 8px 12px;
+        border-left: none;
+        border-radius: 999px;
+        white-space: nowrap;
+        min-width: 0;        /* allow truncation */
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .folder-item.active {
+        background-color: #1abc9c;
+        color: #fff;
+        border-left: none;
+    }
+
+    /* ensure add-folder sits full-width below chips and input grows */
+    .add-folder {
+        display: flex;
+        gap: 8px;
+        padding: 8px 12px;
+        margin-top: 8px;
+        width: 100%;
+    }
+    /* use same selectors as above to ensure consistent sizing on mobile */
+    .add-folder sl_input,
+    .add-folder sl-input {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .add-folder sl_button,
+    .add-folder sl-button,
+    .add-folder sl_icon-button,
+    .add-folder sl-icon-button {
+        flex: 0 0 44px;
+    }
+
+    /* main content stacked below the sidebar */
+    #todo-main-content {
+        order: 2;
+        padding: 16px;
     }
 }
 
-@media (min-width: 1400px) {
-    /* optional: limit extreme wide screens slightly so layout doesn't stretch too much */
+/* Very small screens: stack input/button vertically */
+@media (max-width: 480px) {
+    .folder-item {
+        flex: 1 0 100%;
+    }
+    .add-folder {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .add-folder sl_button,
+    .add-folder sl-button,
+    .add-folder sl_icon-button,
+    .add-folder sl-icon-button {
+        width: 44px;
+        height: 44px;
+        align-self: flex-end;
+    }
+}
+
+/* Medium screens (tablets / small laptops) — slightly narrower sidebar and tighter padding */
+@media (min-width: 801px) and (max-width: 1100px) {
+    #folder-sidebar {
+        width: 220px;
+    }
+    #todo-main-content {
+        padding: 20px;
+    }
+    .folder-item {
+        padding: 10px 16px;
+    }
+}
+
+/* Very large screens: cap width to maintain readable line length */
+@media (min-width: 1101px) {
     #app-container {
-        width: 1200px;
-        margin: 5vh auto;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    #folder-sidebar {
+        height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+    #todo-main-content {
+        height: calc(100vh - 40px);
+        overflow-y: auto;
     }
 }
 
