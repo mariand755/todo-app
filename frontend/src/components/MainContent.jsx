@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import TodoItem from './TodoItem.jsx';
 import SlIcon from '@shoelace-style/shoelace/dist/react/icon/index.js';
 import SlMenu from '@shoelace-style/shoelace/dist/react/menu/index.js';
@@ -10,11 +10,12 @@ import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
 import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
 
 
-const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, onAddTodo, onToggleTodo, onDeleteToDoItem, onEditToDoItem }) => {
+const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, 
+    onAddTodo, onToggleTodo, onDeleteToDoItem, onEditToDoItem, moveToDoItem}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState(false);
-
+  
     // new local state for the todo input
     const [newTodo, setNewTodo] = useState('');
 
@@ -37,6 +38,22 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
         setNewTodo('');
     };
 
+    // Drag and drop handlers
+    const renderToDoItem = useCallback((item, index) => {
+      return (
+        <TodoItem 
+            key={item.id} 
+            item={item}
+            index={index}
+            onToggle={onToggleTodo}
+            onDeleteToDoItem={onDeleteToDoItem}
+            onEditToDoItem={onEditToDoItem}
+            moveToDoItem={moveToDoItem}
+        />
+      )
+    }, [])
+
+    // Render the main content area
     return (
         <main id="todo-main-content">
             <header>
@@ -106,15 +123,7 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                 {items.length === 0 ? (
                     <p>No items in this folder.</p>
                 ) : (
-                    items.map((item) => (
-                        <TodoItem 
-                            key={item.id} 
-                            item={item}
-                            onToggle={onToggleTodo}
-                            onDeleteToDoItem={onDeleteToDoItem}
-                            onEditToDoItem={onEditToDoItem}
-                        />
-                    ))
+                    items.map((item, index) => renderToDoItem(item, index))
                 )}
             </ul>
         </main>

@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback} from 'react';
+import update from 'immutability-helper'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 import { makeAPICall } from './useApi'; 
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
@@ -218,7 +221,20 @@ function App() {
     // Determine the title to display (compare IDs as strings to avoid type mismatch)
     const activeFolder = folders.find(f => String(f.id) === String(activeFolderId));
     const currentTitle = activeFolder ? activeFolder.title : "";
+    
+    // Drag and drop handler
+    const moveToDoItem = useCallback((dragIndex, hoverIndex) => {
+      setItems((prevItems) =>
+        update(prevItems, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, prevItems[dragIndex]],
+          ],
+        }),
+      )
+    }, [])
 
+    // Render the main app layout
     return (
         <div id="app-container">
             <Sidebar 
@@ -229,6 +245,8 @@ function App() {
                 onEditFolder={handleEditFolder}
                 onHomeClick={handleHomeClick}
             />
+        <DndProvider backend={HTML5Backend}>    
+
             {activeFolderId ? <MainContent  
                 currentFolderTitle={currentTitle} 
                 items={items}
@@ -239,8 +257,10 @@ function App() {
                 onToggleTodo={onToggleTodo}
                 onDeleteToDoItem={handleDeleteToDoItem}
                 onEditToDoItem={handleEditToDoItem}
+                moveToDoItem={moveToDoItem}
             />
             : <LandingContent/>}
+        </DndProvider>
         </div>
     );
 }

@@ -101,17 +101,18 @@ Nice to have
     - call handle_item_operations for selected folder (done)
     - color code in run time (eg Invalid Entries, Mode of Operations) https://jakob-bagterp.github.io/colorist-for-python/
    (done)
-  - comments in code to learn what the functions and methods are doing
-   - list # of items in folder when listing folders (done)  
+    - list # of items in folder when listing folders (done)  
+    - comments in code to learn what the functions and methods are doing
+
 - Future Improvements
     - improve the ui/ux flow
-        - hover inidcator with hand over Folder Home 
-        - better layout for main menu and item menu
-        - Welcome screen with app info and instructions
-        - responsive design for different screen sizes  
-        - implement drag and drop for reordering folders and items 
-        - enable direct linking in brwowser to specific folders or items  
+        - hover inidcator with hand over Folder Home (done)
+        - Welcome screen with app info and instructions (done)
+        - better layout for main menu and item menu (done)
+        - enable direct linking in brwowser to specific folders or items  (done)
+        - responsive design for different screen sizes  (done)
         - dark mode toggle for better accessibility
+        - implement drag and drop for reordering folders and items 
         - enhance accessibility features (eg keyboard navigation, screen reader support)  
         - optimize performance for large number of folders and items
         - implement a search algorithm (eg partial match, case insensitive)
