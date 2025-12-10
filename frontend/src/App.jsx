@@ -192,6 +192,16 @@ function App() {
         }
     };
 
+    // handle ordering of items
+    const handleReorderItems = async (itemIds) => {
+        if (!activeFolderId) return;
+        const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/item_order`, { itemOrder_id: itemIds });
+        if (rawApiResponse) {
+            const reorderedItems = await rawApiResponse.json();
+            setItems(reorderedItems);
+        }
+    };
+
     // ensure folder metadata is available so folder title can render after a reload/deeplink
     useEffect(() => {
         if (!activeFolderId) return;
@@ -224,13 +234,17 @@ function App() {
     
     // Drag and drop handler
     const moveToDoItem = useCallback((dragIndex, hoverIndex) => {
-      setItems((prevItems) =>
-        update(prevItems, {
+      setItems((prevItems) => {
+        const updatedItems = update(prevItems, { 
           $splice: [
             [dragIndex, 1],
             [hoverIndex, 0, prevItems[dragIndex]],
           ],
-        }),
+        })
+        const updatedIds = updatedItems.map(item => item.id);
+        handleReorderItems(updatedIds);
+        return updatedItems;                    
+      }
       )
     }, [])
 

@@ -16,6 +16,7 @@ CREATE TABLE public.todo_item (
 	folder_id int4 NULL,
 	is_deleted bool DEFAULT false NULL,
 	completed bool DEFAULT false NULL,
+	position int4 DEFAULT -1 NOT NULL,
 	CONSTRAINT todo_item_pkey PRIMARY KEY (id)
 );
 

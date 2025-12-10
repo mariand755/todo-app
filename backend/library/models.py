@@ -44,5 +44,6 @@ class TodoItem(Base):
     folder_id = sa.Column(sa.Integer, sa.ForeignKey('folder.id'), nullable=False)
     is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
     completed = sa.Column(sa.Boolean, default=False, nullable=False)
+    position = sa.Column(sa.Integer, default= -1, nullable=False)
 
 

@@ -111,11 +111,12 @@ Nice to have
         - better layout for main menu and item menu (done)
         - enable direct linking in brwowser to specific folders or items  (done)
         - responsive design for different screen sizes  (done)
-        - dark mode toggle for better accessibility
-        - implement drag and drop for reordering folders and items 
+        - implement drag and drop for reordering items (done)
+        - implement ordering of todo items (in array)) (done)
         - enhance accessibility features (eg keyboard navigation, screen reader support)  
         - optimize performance for large number of folders and items
         - implement a search algorithm (eg partial match, case insensitive)
+        - dark mode toggle for better accessibility
 
 - Advanced Features
         - integrate with third-party services (eg calendar apps, notifications services)

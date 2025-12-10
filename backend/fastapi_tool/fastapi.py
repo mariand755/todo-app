@@ -76,7 +76,8 @@ async def get_folder_items(folder_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
     if folder == None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
-    todo_items = db_session.query(TodoItemModel).filter(TodoItemModel.folder_id == folder_id, TodoItemModel.is_deleted == False).all()
+    todo_items = db_session.query(TodoItemModel).filter(TodoItemModel.folder_id == folder_id, 
+    TodoItemModel.is_deleted == False).order_by(TodoItemModel.position).all()
     return todo_items
 
 class CreateItem(BaseModel):
@@ -87,9 +88,13 @@ class ItemResponse(BaseModel):
     title: str
     folder_id: int
     completed: bool
+    position: int
 
     class Config:
         from_attributes = True
+    
+class ItemArrayResponse(BaseModel):
+    items: list[ItemResponse]
 
 @app.post("/folders/{folder_id}/items", response_model=ItemResponse)
 async def create_new_item(folder_id:int, new_item_request:CreateItem, db_session:Session = Depends(get_db)):
@@ -149,32 +154,32 @@ async def delete_item(folder_id:int, item_id:int, db_session:Session = Depends(g
     db_session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.put("/folders/{folder_id}/undo", response_model=FolderResponse)
-async def undo_folder(folder_id:int, db_session:Session = Depends(get_db)):
-    folder = db_session.get(FolderModel, folder_id)
-    if folder == None:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    folder.is_deleted = False
-    db_session.add(folder)
-    db_session.commit()
-    return folder
+#@app.put("/folders/{folder_id}/undo", response_model=FolderResponse)
+# async def undo_folder(folder_id:int, db_session:Session = Depends(get_db)):
+#     folder = db_session.get(FolderModel, folder_id)
+#     if folder == None:
+#         raise HTTPException(status_code=404, detail="Folder not found")
+#     folder.is_deleted = False
+#     db_session.add(folder)
+#     db_session.commit()
+#     return folder
 
 
-@app.put("/folders/{folder_id}/items/{item_id}/undo", response_model=ItemResponse)
-async def undo_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
-    folder = db_session.get(FolderModel, folder_id)
-    if folder == None:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    item = db_session.query(TodoItemModel).filter(
-        TodoItemModel.folder_id == folder_id, 
-        TodoItemModel.id == item_id, 
-    ).first()    
-    if item == None:
-        raise HTTPException(status_code=404, detail="Item not found")
-    item.is_deleted = False
-    db_session.add(item)
-    db_session.commit()
-    return item
+# @app.put("/folders/{folder_id}/items/{item_id}/undo", response_model=ItemResponse)
+# async def undo_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
+#     folder = db_session.get(FolderModel, folder_id)
+#     if folder == None:
+#         raise HTTPException(status_code=404, detail="Folder not found")
+#     item = db_session.query(TodoItemModel).filter(
+#         TodoItemModel.folder_id == folder_id, 
+#         TodoItemModel.id == item_id, 
+#     ).first()    
+#     if item == None:
+#         raise HTTPException(status_code=404, detail="Item not found")
+#     item.is_deleted = False
+#     db_session.add(item)
+#     db_session.commit()
+#     return item
 
 @app.put("/folders/{folder_id}/items/{item_id}/toggle", response_model=ItemResponse)
 async def toggle_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
@@ -191,3 +196,25 @@ async def toggle_item(folder_id:int, item_id:int, db_session:Session = Depends(g
     db_session.add(item)
     db_session.commit()
     return item
+
+class UpdateItemOrder(BaseModel):
+    itemOrder_id: list[int]
+
+@app.put("/folders/{folder_id}/item_order", response_model=ItemArrayResponse)
+async def item_order(folder_id:int, update_item_order:UpdateItemOrder, db_session:Session = Depends(get_db)):
+    folder = db_session.get(FolderModel, folder_id)
+    if folder == None:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    item = db_session.query(TodoItemModel).filter(
+        TodoItemModel.folder_id.in_(update_item_order.itemOrder_id) == folder_id,
+    ).all()
+    for i in item:
+        index = update_item_order.itemOrder_id.index(i.id)
+        i.position = index
+    db_session.add_all(item)
+    db_session.commit()
+    def item_pos(i):
+        return i.position
+    item = sorted(item, key=item_pos)
+    return ItemArrayResponse(items=item)
+
