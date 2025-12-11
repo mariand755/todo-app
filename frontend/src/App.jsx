@@ -195,6 +195,7 @@ function App() {
     // handle ordering of items
     const handleReorderItems = async (itemIds) => {
         if (!activeFolderId) return;
+        console.log('Reordering items:', itemIds);
         const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/item_order`, { itemOrder_id: itemIds });
         if (rawApiResponse) {
             const reorderedItems = await rawApiResponse.json();
