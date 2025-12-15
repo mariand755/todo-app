@@ -11,10 +11,12 @@ class Folder:
         self.__new_id = 1 
 
 
-    def __str__(self): #when we write 'print' it will call this
+    def __str__(self): 
         return f"ID {self.id}: {self.title}"   
 
-    def add_new_items_to_folder(self, new_items:List[str]):
+    def add_new_items_to_folder(self, new_items:List[str]): 
+        if isinstance(new_items, list) is False:
+            raise ValueError("input is not array")
         for item in new_items:
           self.add_new_item_to_folder(item)
     
