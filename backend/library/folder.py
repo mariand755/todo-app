@@ -21,6 +21,10 @@ class Folder:
           self.add_new_item_to_folder(item)
     
     def add_new_item_to_folder(self, new_item_title:str):
+        if isinstance(new_item_title, str) is False:
+            raise ValueError("input is not a string")
+        if new_item_title == "":
+            raise ValueError("input is empty")
         new_item = TodoItem(
                 id = self.__new_id,
                 title = new_item_title

@@ -10,8 +10,6 @@ def test_folder():
     t_f = Folder(dummy_id, dummy_title)
     return t_f
 
-
-
 # happy path first
 def test_add_new_items_to_folder_success(test_folder):
     # arrange
@@ -34,7 +32,6 @@ def test_add_new_items_to_folder_non_array_input_throws_exception(test_folder):
     with pytest.raises(ValueError):
         test_folder.add_new_items_to_folder(test_items_not_array)
     
-
 # edge case
 def test_add_new_items_to_folder_empty_array_adds_no_items(test_folder):
     # arrange
@@ -47,3 +44,34 @@ def test_add_new_items_to_folder_empty_array_adds_no_items(test_folder):
     expected = 0
     actual = len(test_folder.items)
     assert expected == actual
+
+# happy path
+def test_add_new_item_to_folder_success(test_folder):
+    #arrange
+    test_item = "test_item1"
+
+    #act
+    test_folder.add_new_item_to_folder(test_item)
+    #assert
+    excepted = 1
+    actual = len(test_folder.items)
+    assert excepted == actual
+
+# error handling
+def test_add_new_item_to_folder_non_str_inputs_raises_error(test_folder):
+    #arrange
+    non_str_input = ()
+
+    #act /assert
+    with pytest.raises(ValueError):
+        test_folder.add_new_item_to_folder(non_str_input)
+  
+# edge case
+def test_add_new_item_to_folder_empty_str_inputs_raises_error(test_folder):
+    #arrange
+    empty_str_input = ""
+
+    #act /assert
+    with pytest.raises(ValueError) as err:
+        test_folder.add_new_item_to_folder(empty_str_input)
+    assert "input is empty" == err.value.args[0]
