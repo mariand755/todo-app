@@ -1,6 +1,10 @@
 from library.folder import Folder
 from typing import List, Dict, Union
 
+class FolderManagerConstants:
+    ERR_ADD_FOLDER_NON_STR = "input is not a string"
+    ERR_EMPTY_FOLDER = "input is empty"
+    
 
 class FolderManager:
     def __init__(self):
@@ -8,6 +12,10 @@ class FolderManager:
         self.__new_folder_id = 1 
 
     def add_folder(self, folder_title:str)-> Folder:
+        if isinstance(folder_title, str) is False:
+            raise ValueError(FolderManagerConstants.ERR_ADD_FOLDER_NON_STR)
+        if folder_title == "":
+            raise ValueError(FolderManagerConstants.ERR_EMPTY_FOLDER)
         new_folder = Folder(
             id = self.__new_folder_id, 
             title = folder_title 

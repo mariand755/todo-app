@@ -1,4 +1,4 @@
-from library.folder import Folder 
+from library.folder import Folder, FolderConstants 
 import pytest
 
 # Fixture
@@ -26,11 +26,12 @@ def test_add_new_items_to_folder_success(test_folder):
 # error handling
 def test_add_new_items_to_folder_non_array_input_throws_exception(test_folder):
     # arrange
-    test_items_not_array = {}
+    items_not_array = {}
 
     # act / assert
-    with pytest.raises(ValueError):
-        test_folder.add_new_items_to_folder(test_items_not_array)
+    with pytest.raises(ValueError) as err:
+        test_folder.add_new_items_to_folder(items_not_array)
+    assert FolderConstants.ERR_ITEMS_NOT_ARRAY ==  err.value.args[0]
     
 # edge case
 def test_add_new_items_to_folder_empty_array_adds_no_items(test_folder):
@@ -63,8 +64,9 @@ def test_add_new_item_to_folder_non_str_inputs_raises_error(test_folder):
     non_str_input = ()
 
     #act /assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as err:
         test_folder.add_new_item_to_folder(non_str_input)
+    assert FolderConstants.ERR_NON_STR_INPUT == err.value.args[0]
   
 # edge case
 def test_add_new_item_to_folder_empty_str_inputs_raises_error(test_folder):
@@ -74,7 +76,7 @@ def test_add_new_item_to_folder_empty_str_inputs_raises_error(test_folder):
     #act /assert
     with pytest.raises(ValueError) as err:
         test_folder.add_new_item_to_folder(empty_str_input)
-    assert "input is empty" == err.value.args[0]
+    assert FolderConstants.ERR_EMPTY_STR_INPUT == err.value.args[0]
 
 
 

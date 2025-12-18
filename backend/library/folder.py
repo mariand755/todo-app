@@ -2,6 +2,10 @@ from library.todo_item import TodoItem
 from typing import List, Dict, Union
 from colorist import effect_bold, Color
 
+class FolderConstants:
+    ERR_NON_STR_INPUT = "input is not a string"
+    ERR_EMPTY_STR_INPUT = "input is empty"
+    ERR_ITEMS_NOT_ARRAY = "input is not array"
 
 class Folder:
     def __init__(self, id:int, title:str):
@@ -16,15 +20,15 @@ class Folder:
 
     def add_new_items_to_folder(self, new_items:List[str]): 
         if isinstance(new_items, list) is False:
-            raise ValueError("input is not array")
+            raise ValueError(FolderConstants.ERR_ITEMS_NOT_ARRAY)
         for item in new_items:
           self.add_new_item_to_folder(item)
     
     def add_new_item_to_folder(self, new_item_title:str):
         if isinstance(new_item_title, str) is False:
-            raise ValueError("input is not a string")
+            raise ValueError(FolderConstants.ERR_NON_STR_INPUT)
         if new_item_title == "":
-            raise ValueError("input is empty")
+            raise ValueError(FolderConstants.ERR_EMPTY_STR_INPUT)
         new_item = TodoItem(
                 id = self.__new_id,
                 title = new_item_title
