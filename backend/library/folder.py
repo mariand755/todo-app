@@ -69,34 +69,6 @@ class Folder:
             return self.items[index_to_edit]
         return None
     
-
-    def search_for_item_in_folder(self, id_to_find:int):
-        index_to_find = self.__find_index(id_to_find)
-        if index_to_find != -1:
-            return self.items[index_to_find]
-        return None
-    
-
-    """
-    def search_for_item_using_title(self, title_to_find:str)->TodoItem:
-        lowercase_title = title_to_find.lower().strip()
-        for item in self.items:
-            #searching usng prefix search
-            if item.title.lower().startswith(lowercase_title):
-                return item
-        return None
-    """
-
-    def search_for_items_using_title(self, title_to_find:str)->List[TodoItem]:
-        results = []
-        lowercase_title = title_to_find.lower().strip()
-        for item in self.items:
-            #searching usng prefix search
-            if item.title.lower().startswith(lowercase_title):
-                results.append(item)
-        return results
-
-
     def __find_index(self, id_to_find:int):
         index_to_find = -1
         for index, item in enumerate(self.items):
@@ -118,4 +90,34 @@ class Folder:
             return self.items[item_index_to_find]
         else:
             return None
+        
+"""
+    def search_for_item_in_folder(self, id_to_find:int):
+        index_to_find = self.__find_index(id_to_find)
+        if index_to_find != -1:
+            return self.items[index_to_find]
+        return None
+    
+
+
+    def search_for_item_using_title(self, title_to_find:str)->TodoItem:
+        lowercase_title = title_to_find.lower().strip()
+        for item in self.items:
+            #searching usng prefix search
+            if item.title.lower().startswith(lowercase_title):
+                return item
+        return None
+    
+
+    def search_for_items_using_title(self, title_to_find:str)->List[TodoItem]:
+        results = []
+        lowercase_title = title_to_find.lower().strip()
+        for item in self.items:
+            #searching usng prefix search
+            if item.title.lower().startswith(lowercase_title):
+                results.append(item)
+        return results
+"""
+
+    
     

@@ -77,9 +77,6 @@ def test_add_new_item_to_folder_empty_str_inputs_raises_error(test_folder):
     assert "input is empty" == err.value.args[0]
 
 
-# -----------------------------
-# Tests for remaining Folder methods
-# -----------------------------
 
 def test_remove_item_within_folder_success(test_folder):
     # arrange
@@ -168,6 +165,61 @@ def test_edit_items_within_folder_success_and_skips_missing(test_folder):
     assert test_folder.get_item(2).title == "B"
 
 
+def test_does_item_exist_true_and_false(test_folder):
+    # arrange
+    test_folder.add_new_item_to_folder("exists")  # id 1
+
+    # act / assert
+    assert test_folder.does_item_exist(1) is True
+    assert test_folder.does_item_exist(999) is False
+
+
+def test_get_items_and_get_item_are_in_listformat(test_folder):
+    # arrange
+    test_folder.add_new_item_to_folder("x")  # id 1
+    test_folder.add_new_item_to_folder("y")  # id 2
+
+    # act
+    items = test_folder.get_items()
+
+    # assert
+    assert isinstance(items, list)
+
+def test_get_items_and_get_item_num_in_folder(test_folder:Folder):
+    # arrange
+    test_folder.add_new_item_to_folder("x")  # id 1
+    test_folder.add_new_item_to_folder("y")  # id 2
+
+    # act
+    items = test_folder.get_items()
+
+    # assert
+    assert len(items) == 2
+
+
+def test__get_item_not_empty(test_folder:Folder):
+    # arrange
+    test_folder.add_new_item_to_folder("x")  # id 1
+    test_folder.add_new_item_to_folder("y")  # id 2
+
+    # act
+    item = test_folder.get_item(id=2)
+
+    # assert
+    assert item is not None and item.title == "y"
+
+def test_get_item_none_existing_item_fails_silently(test_folder:Folder):
+    # arrange
+    test_folder.add_new_item_to_folder("x")  # id 1
+    test_folder.add_new_item_to_folder("y")  # id 2
+
+    # act
+    missing = test_folder.get_item(99)
+
+    # assert
+    assert missing is None
+
+"""
 def test_search_for_item_in_folder_and_none(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("first")  # id 1
@@ -192,30 +244,4 @@ def test_search_for_items_using_title_prefix_case_insensitive(test_folder):
     titles = [r.title for r in results]
     assert "Alpha One" in titles and "Alpine" in titles
     assert len(titles) == 2
-
-
-def test_does_item_exist_true_and_false(test_folder):
-    # arrange
-    test_folder.add_new_item_to_folder("exists")  # id 1
-
-    # act / assert
-    assert test_folder.does_item_exist(1) is True
-    assert test_folder.does_item_exist(999) is False
-
-
-def test_get_items_and_get_item_edge_cases(test_folder):
-    # arrange
-    test_folder.add_new_item_to_folder("x")  # id 1
-    test_folder.add_new_item_to_folder("y")  # id 2
-
-    # act
-    items = test_folder.get_items()
-    item = test_folder.get_item(2)
-    missing = test_folder.get_item(99)
-
-    # assert
-    assert isinstance(items, list)
-    assert len(items) == 2
-    assert item is not None and item.title == "y"
-    assert missing is None
-
+"""
