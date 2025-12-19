@@ -12,13 +12,16 @@ class FolderManager:
         self.__new_folder_id = 1 
 
     def add_folder(self, folder_title:str)-> Folder:
+        # validate type
         if isinstance(folder_title, str) is False:
             raise ValueError(FolderManagerConstants.ERR_ADD_FOLDER_NON_STR)
-        if folder_title == "":
+        # strip whitespace-only titles and reject empty titles
+        stripped_title = folder_title.strip()
+        if stripped_title == "":
             raise ValueError(FolderManagerConstants.ERR_EMPTY_FOLDER)
         new_folder = Folder(
             id = self.__new_folder_id, 
-            title = folder_title 
+            title = stripped_title 
         )
         self.folders.append(new_folder)
         self.__new_folder_id +=1 
@@ -37,9 +40,16 @@ class FolderManager:
             self.edit_folder_within_app(id, updated_title)
 
     def edit_folder_within_app(self, id_to_edit:int, updated_title:str):
+        # validate updated title
+        if isinstance(updated_title, str) is False:
+            raise ValueError(FolderManagerConstants.ERR_ADD_FOLDER_NON_STR)
+        stripped_title = updated_title.strip()
+        if stripped_title == "":
+            raise ValueError(FolderManagerConstants.ERR_EMPTY_FOLDER)
+
         index_to_edit = self.__find_index(id_to_edit)
         if index_to_edit != -1:
-            self.folders[index_to_edit].title = updated_title
+            self.folders[index_to_edit].title = stripped_title
             return self.folders[index_to_edit]
         return None
   
@@ -68,15 +78,6 @@ class FolderManager:
         if index_to_remove != -1:
             del self.folders[index_to_remove]
 
-    def search_for_folders_using_title(self, title_to_find:str)->List[Folder]:
-        results = []
-        lowercase_title = title_to_find.lower().strip()
-        for folder in self.folders:
-            #searching usng prefix search
-            if folder.title.lower().startswith(lowercase_title):
-                results.append(folder)
-        return results
-    
     def get_folder(self, id:int)-> Union[Folder, None]:
         index_to_find = self.__find_index(id)
         if index_to_find != -1:
@@ -86,3 +87,18 @@ class FolderManager:
         
     def get_folders(self)->List[Folder]:
         return self.folders
+    
+    def search_for_folders_using_title(self, title_to_find:str)->List[Folder]:
+        # validate input type
+        if isinstance(title_to_find, str) is False:
+            raise ValueError(FolderManagerConstants.ERR_ADD_FOLDER_NON_STR)
+        results = []
+        lowercase_title = title_to_find.lower().strip()
+        # empty search should return no results
+        if lowercase_title == "":
+            return results
+        for folder in self.folders:
+            # searching using prefix search
+            if folder.title.lower().startswith(lowercase_title):
+                results.append(folder)
+        return results
