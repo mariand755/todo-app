@@ -2,6 +2,10 @@ from library.todo_item import TodoItem
 from typing import List, Dict, Union
 from colorist import effect_bold, Color
 
+class FolderConstants:
+    ERR_NON_STR_INPUT = "input is not a string"
+    ERR_EMPTY_STR_INPUT = "input is empty"
+    ERR_ITEMS_NOT_ARRAY = "input is not array"
 
 class Folder:
     def __init__(self, id:int, title:str):
@@ -16,11 +20,15 @@ class Folder:
 
     def add_new_items_to_folder(self, new_items:List[str]): 
         if isinstance(new_items, list) is False:
-            raise ValueError("input is not array")
+            raise ValueError(FolderConstants.ERR_ITEMS_NOT_ARRAY)
         for item in new_items:
           self.add_new_item_to_folder(item)
     
     def add_new_item_to_folder(self, new_item_title:str):
+        if isinstance(new_item_title, str) is False:
+            raise ValueError(FolderConstants.ERR_NON_STR_INPUT)
+        if new_item_title == "":
+            raise ValueError(FolderConstants.ERR_EMPTY_STR_INPUT)
         new_item = TodoItem(
                 id = self.__new_id,
                 title = new_item_title
@@ -65,34 +73,6 @@ class Folder:
             return self.items[index_to_edit]
         return None
     
-
-    def search_for_item_in_folder(self, id_to_find:int):
-        index_to_find = self.__find_index(id_to_find)
-        if index_to_find != -1:
-            return self.items[index_to_find]
-        return None
-    
-
-    """
-    def search_for_item_using_title(self, title_to_find:str)->TodoItem:
-        lowercase_title = title_to_find.lower().strip()
-        for item in self.items:
-            #searching usng prefix search
-            if item.title.lower().startswith(lowercase_title):
-                return item
-        return None
-    """
-
-    def search_for_items_using_title(self, title_to_find:str)->List[TodoItem]:
-        results = []
-        lowercase_title = title_to_find.lower().strip()
-        for item in self.items:
-            #searching usng prefix search
-            if item.title.lower().startswith(lowercase_title):
-                results.append(item)
-        return results
-
-
     def __find_index(self, id_to_find:int):
         index_to_find = -1
         for index, item in enumerate(self.items):
@@ -114,4 +94,34 @@ class Folder:
             return self.items[item_index_to_find]
         else:
             return None
+        
+"""
+    def search_for_item_in_folder(self, id_to_find:int):
+        index_to_find = self.__find_index(id_to_find)
+        if index_to_find != -1:
+            return self.items[index_to_find]
+        return None
+    
+
+
+    def search_for_item_using_title(self, title_to_find:str)->TodoItem:
+        lowercase_title = title_to_find.lower().strip()
+        for item in self.items:
+            #searching usng prefix search
+            if item.title.lower().startswith(lowercase_title):
+                return item
+        return None
+    
+
+    def search_for_items_using_title(self, title_to_find:str)->List[TodoItem]:
+        results = []
+        lowercase_title = title_to_find.lower().strip()
+        for item in self.items:
+            #searching usng prefix search
+            if item.title.lower().startswith(lowercase_title):
+                results.append(item)
+        return results
+"""
+
+    
     
