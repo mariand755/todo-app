@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Session
-from fastapi_tool.fastapi import Base
+from library.models import Base
 
 
 @pytest.fixture(scope="module")
