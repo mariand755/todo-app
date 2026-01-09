@@ -18,6 +18,8 @@ def create_test_folder(testing_db_session: Session, random_title:str=f"test_{uui
     testing_db_session.commit()
     return folder
 
+def create_test_payload(num:int) -> list[dict]:
+    return [{"title":f"test_{uuid.uuid4()}"} for i in range(num)]
     
 def test_get_default_empty_folders_success(test_client: TestClient):
     response = test_client.get("/folders")
@@ -45,4 +47,20 @@ def test_get_deleted_folders_not_in_response(test_client: TestClient, testing_db
     assert response.json() == []
 
 
-#def test_create_folder_success(test_client: TestClient):
+def test_create_folder_success(test_client: TestClient):
+    #arrange
+    test_payload = create_test_payload(1)
+    #act
+    response = test_client.post("/folders", json=test_payload[0])
+    #assert
+    assert response.status_code == 200
+    res_json = response.json()
+    assert res_json["title"] == test_payload[0]["title"]
+
+def test_create_folders_bad_input_success(test_client: TestClient):
+    #arrange
+    bad_payload = []
+    #act
+    response = test_client.post("/folders", json=bad_payload)
+    #assert
+    assert response.status_code == 400
