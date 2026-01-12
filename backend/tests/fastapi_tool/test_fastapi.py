@@ -12,7 +12,7 @@ def test_client(testing_db_session: Session):
         app.dependency_overrides[get_db] = lambda: testing_db_session
         yield client
 
-def create_test_folder(testing_db_session: Session, random_title:str=f"test_{uuid.uuid4()}", is_folder_deleted:bool=False) -> Folder:
+def seed_db_with_test_folder(testing_db_session: Session, random_title:str=f"test_{uuid.uuid4()}", is_folder_deleted:bool=False) -> Folder:
     folder = Folder(title=random_title, is_deleted=is_folder_deleted)
     testing_db_session.add(folder)
     testing_db_session.commit()
@@ -28,7 +28,7 @@ def test_get_default_empty_folders_success(test_client: TestClient):
 
 def test_get_active_folders_success(test_client: TestClient, testing_db_session: Session):
     #arrange
-    folder = create_test_folder(testing_db_session)
+    folder = seed_db_with_test_folder(testing_db_session)
     #act
     response = test_client.get("/folders")
     #assert
@@ -39,7 +39,7 @@ def test_get_active_folders_success(test_client: TestClient, testing_db_session:
 
 def test_get_deleted_folders_not_in_response(test_client: TestClient, testing_db_session: Session):
     #arrange
-    create_test_folder(testing_db_session, is_folder_deleted=True)
+    seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
     #act
     response = test_client.get("/folders")
     #assert
@@ -64,3 +64,31 @@ def test_create_folders_bad_input_success(test_client: TestClient):
     response = test_client.post("/folders", json=bad_payload)
     #assert
     assert response.status_code == 400
+
+# anything instead of int for folder
+def test_single_folder_id_exist_success(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    seed_folder = seed_db_with_test_folder(testing_db_session)
+    #act
+    response = test_client.get(f"/folders/{seed_folder.id}")
+    #assert
+    assert response.status_code == 200
+    res_json = response.json()
+    assert res_json["title"] == seed_folder.title
+
+def test_folder_id_not_found(test_client: TestClient):
+    #arrange
+    none_existing_folder = 3
+    #act
+    response = test_client.get(f"/folders/{none_existing_folder}")
+    #assert
+    assert response.status_code == 404
+
+def test_existing_folder_is_deleted(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    #act
+    response = test_client.get(f"/folders/{seed_folder.id}")
+    #assert
+    assert response.status_code == 404
+
