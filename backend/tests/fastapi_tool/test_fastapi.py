@@ -65,7 +65,6 @@ def test_create_folders_bad_input_success(test_client: TestClient):
     #assert
     assert response.status_code == 400
 
-# anything instead of int for folder
 def test_single_folder_id_exist_success(test_client: TestClient, testing_db_session: Session):
     #arrange
     seed_folder = seed_db_with_test_folder(testing_db_session)
@@ -91,4 +90,41 @@ def test_existing_folder_is_deleted(test_client: TestClient, testing_db_session:
     response = test_client.get(f"/folders/{seed_folder.id}")
     #assert
     assert response.status_code == 404
+
+def test_anydata_instead_of_int(test_client: TestClient):
+    #arrange
+    bad_data = "this"
+    #act
+    response = test_client.get(f"folders/{bad_data}")
+    #assert
+    assert response.status_code == 400
+
+# check an update folder is deleted
+# update non existing folder tilte
+# update with int instead of a str
+
+def test_update_folder_title(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    seed_folder = seed_db_with_test_folder(testing_db_session)
+    new_folder_title = create_test_payload(1)
+    #act
+    updated_response = test_client.put(f"folders/{seed_folder.id}", json=new_folder_title[0])
+    #assert
+    assert updated_response.status_code == 200
+    res_json = updated_response.json()
+    assert res_json["title"] == new_folder_title[0]["title"] 
+
+def test_update_folder_with_same_title(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    seed_folder = seed_db_with_test_folder(testing_db_session)
+    #act
+    #place in a variable  = extract form the db the title of the folder via title
+    #use the variable to update the seed_folder title via the api call
+    seed_res_payload = {"title": seed_folder.title}
+
+    updated_folder_title = test_client.put(f"folders/{seed_folder.id}", json=seed_res_payload)
+    #assert
+    assert updated_folder_title.status_code == 200
+    res_json = updated_folder_title.json()
+    assert res_json["title"] == seed_folder.title
 
