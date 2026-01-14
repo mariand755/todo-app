@@ -46,7 +46,6 @@ def test_get_deleted_folders_not_in_response(test_client: TestClient, testing_db
     assert response.status_code == 200
     assert response.json() == []
 
-
 def test_create_folder_success(test_client: TestClient):
     #arrange
     test_payload = create_test_payload(1)
@@ -99,9 +98,6 @@ def test_anydata_instead_of_int(test_client: TestClient):
     #assert
     assert response.status_code == 400
 
-# check an update folder is deleted
-# update non existing folder tilte
-# update with int instead of a str
 
 def test_update_folder_title(test_client: TestClient, testing_db_session: Session):
     #arrange
@@ -121,10 +117,49 @@ def test_update_folder_with_same_title(test_client: TestClient, testing_db_sessi
     #place in a variable  = extract form the db the title of the folder via title
     #use the variable to update the seed_folder title via the api call
     seed_res_payload = {"title": seed_folder.title}
-
     updated_folder_title = test_client.put(f"folders/{seed_folder.id}", json=seed_res_payload)
     #assert
     assert updated_folder_title.status_code == 200
     res_json = updated_folder_title.json()
     assert res_json["title"] == seed_folder.title
 
+
+def test_updated_folder_is_deleted(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    #seed the db with data, delete the data = set is_deleted to True
+    #check payload obj with the seed_data obj incase tilte
+    #check the response status code is not found 404
+    seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    seed_res_payload = {"title": seed_folder.title}
+    #act
+    deleted_folder = test_client.put(f"folders/{seed_folder.id}", json=seed_res_payload)
+    #assert
+    assert deleted_folder.status_code == 404
+    res_json = deleted_folder.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#use payload for a diff folder
+#update the folder of the seeded data (using put api call)
+#check the json response of the the updated folder is not found 
+def test_non_existing_updated_folder(test_client: TestClient):
+    #arrange
+    res_payload = {"title": "None Existing Folder"}
+    #act
+    update_nonexisting_folder = test_client.put("folders/1", json=res_payload)
+    #assert
+    assert update_nonexisting_folder.status_code == 404
+    res_json = update_nonexisting_folder.json()
+    assert res_json == {"detail": "Folder not found"}
+
+# manipulating the api url
+# dont need to seed data
+# do need a mock url (on the id)
+# verify the status code & json resp
+def test_put_api_endpoint_without_int_id(test_client: TestClient):
+    #arrange
+    manipulated_endpoint = {"title": "None Existing Folder"}
+    #act
+    endpoint_without_int_id = test_client.put("folders/ndpoint", json=manipulated_endpoint)
+    #assert
+    assert endpoint_without_int_id.status_code == 400
+  
