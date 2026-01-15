@@ -154,7 +154,7 @@ def test_non_existing_updated_folder(test_client: TestClient):
 # manipulating the api url
 # dont need to seed data
 # do need a mock url (on the id)
-# verify the status code & json resp
+# verify the status code 
 def test_put_api_endpoint_without_int_id(test_client: TestClient):
     #arrange
     manipulated_endpoint = {"title": "None Existing Folder"}
@@ -162,4 +162,57 @@ def test_put_api_endpoint_without_int_id(test_client: TestClient):
     endpoint_without_int_id = test_client.put("folders/ndpoint", json=manipulated_endpoint)
     #assert
     assert endpoint_without_int_id.status_code == 400
-  
+
+def test_delete_existing_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    #seed db to have an existing folder 
+    seed_folder = seed_db_with_test_folder(testing_db_session)  
+    #act
+    #call the delete api 
+    deleted_folder = test_client.delete(f"folders/{seed_folder.id}")
+    #assert
+    #check status code 204
+    assert deleted_folder.status_code == 204
+
+def test_delete_already_deleted_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    #seed data will have it set to is_deleted true
+    #db session
+    seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    #act
+    #call the delet api 
+    already_deleted_folder = test_client.delete(f"folders/{seed_folder.id}")
+    #assert
+    #check status code 404
+    #check error message
+    assert already_deleted_folder.status_code == 404
+    res_json = already_deleted_folder.json()
+    assert res_json == {"detail": "Folder not found"}
+     
+def test_delete_nonexisting_folder(test_client: TestClient):
+    #arrange
+    #folder do not exist so no need for seed data
+    #create a variable for a random folder id
+    non_existing_folder = 1
+    #act
+    #delete the random folder id
+    delete_non_existing_folder = test_client.delete(f"folders/{non_existing_folder}")
+    #assert
+    #check status code = 404
+    #check error message
+    assert delete_non_existing_folder.status_code == 404
+    res_json = delete_non_existing_folder.json()
+    assert res_json == {"detail": "Folder not found"}
+
+# send an invalid delete endpoint
+def test_invalid_delete_endpoint(test_client: TestClient):
+    #arrange
+    #create a variable for a manipulate the invalid endpoint
+    invalid_endpoint = "invalid"
+    #act
+    #call the invalid api 
+    delete_invalid_endpoint = test_client.delete(f"folders/{invalid_endpoint}")
+    #arrange
+    #check status code = 400
+    assert delete_invalid_endpoint.status_code == 400
+    
