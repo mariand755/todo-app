@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi_tool.fastapi import app 
 from sqlalchemy.orm import Session
-from library.models import get_db, Folder
+from library.models import get_db, Folder, TodoItem
 import uuid
 
 
@@ -20,7 +20,15 @@ def seed_db_with_test_folder(testing_db_session: Session, random_title:str=f"tes
 
 def create_test_payload(num:int) -> list[dict]:
     return [{"title":f"test_{uuid.uuid4()}"} for i in range(num)]
-    
+
+def seed_db_with_test_item(testing_db_session: Session, folder:Folder, random_title:str=f"test_{uuid.uuid4()}", 
+                           is_item_deleted:bool=False, completed:bool=False, 
+                           position:int=-1) -> TodoItem:
+    item = TodoItem(folder_id=folder.id, title=random_title, is_deleted=is_item_deleted, completed=completed, position=position)
+    testing_db_session.add(item)
+    testing_db_session.commit()
+    return item
+
 def test_get_default_empty_folders_success(test_client: TestClient):
     response = test_client.get("/folders")
     assert response.status_code == 200
@@ -215,4 +223,26 @@ def test_invalid_delete_endpoint(test_client: TestClient):
     #arrange
     #check status code = 400
     assert delete_invalid_endpoint.status_code == 400
-    
+
+#create item within folder
+def test_create_item_within_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    #seed the db with item
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    #act
+    #call the get item api with the seed data
+    item_within_folder = test_client.get(f"folders/{folder.id}/items")
+    #assert
+    #check the status code of the call = 200
+    #check the res json tilte = the seed data tilte
+    assert item_within_folder.status_code == 200
+    res_json = item_within_folder.json()
+    assert res_json[0]["title"] == item.title
+
+#create multiple items (3)
+# verify #items in folder 
+# verify empty items api call return 200
+#verify no item in folder returns 404
+#verify existing item is deleted returns 404
+#verify invalid api call returns 400
