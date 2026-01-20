@@ -241,8 +241,33 @@ def test_create_item_within_folder(test_client: TestClient, testing_db_session: 
     assert res_json[0]["title"] == item.title
 
 #create multiple items (3)
-# verify #items in folder 
-# verify empty items api call return 200
+def test_create_multiple_items_within_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    #seed folder data
+    folder = seed_db_with_test_folder(testing_db_session)
+    #seed multiple items data 
+    items = []
+    for i in range(3):
+       item = seed_db_with_test_item(testing_db_session, folder) 
+       items.append(item)
+    #act
+    #call the get item api with the seed data
+    items_within_folder = test_client.get(f"folders/{folder.id}/items")
+    #assert
+    #check the status code of the call = 200
+    assert items_within_folder.status_code == 200
+    #verify the number of items within folder
+    res_json = items_within_folder.json()
+    assert len(res_json) == 3
+    #check the res json tiltes = the items seed data titles
+    for i in range(3):
+        item = items[i]
+        for res_item in res_json:
+            if res_item["id"] == item.id:
+                assert res_item["title"] == item.title 
+
+#verify #items in folder 
+#verify empty items api call return 200
 #verify no item in folder returns 404
 #verify existing item is deleted returns 404
 #verify invalid api call returns 400
