@@ -255,19 +255,57 @@ def test_create_multiple_items_within_folder(test_client: TestClient, testing_db
     items_within_folder = test_client.get(f"folders/{folder.id}/items")
     #assert
     #check the status code of the call = 200
-    assert items_within_folder.status_code == 200
-    #verify the number of items within folder
-    res_json = items_within_folder.json()
-    assert len(res_json) == 3
+    assert items_within_folder.status_code == 200 
     #check the res json tiltes = the items seed data titles
+    res_json = items_within_folder.json()
     for i in range(3):
         item = items[i]
         for res_item in res_json:
             if res_item["id"] == item.id:
                 assert res_item["title"] == item.title 
 
-#verify #items in folder 
+# verify num of items within folder
+# seed db with data - folder/items
+# create a for loop to seed multiple items data
+# call the api to created the muliple items
+# verify the response json status code
+# verify the len of items to get #
+def test_num_of_items_in_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    #seed folder data
+    folder = seed_db_with_test_folder(testing_db_session)
+    #seed multiple items data 
+    for i in range(5):
+       item = seed_db_with_test_item(testing_db_session, folder) 
+    #act
+    #call the get item api with the seed data
+    items_within_folder = test_client.get(f"folders/{folder.id}/items")
+    #assert
+    #check the status code of the call = 200
+    assert items_within_folder.status_code == 200
+    #verify the number of items within folder
+    res_json = items_within_folder.json()
+    assert len(res_json) == 5
+
+
 #verify empty items api call return 200
+# seed db with folder data 
+# do not seed with items data
+# call the items api
+# verify response status code 200
+def test_empty_folder_returns_successfully(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    #seed folder data
+    folder = seed_db_with_test_folder(testing_db_session)
+    #act
+    #call the get item api with the seed data
+    folder_without_items = test_client.get(f"folders/{folder.id}/items")
+    #assert
+    #check the status code of the call = 200
+    assert folder_without_items.status_code == 200 
+    res_json = folder_without_items.json()
+    assert len(res_json) == 0
+
 #verify no item in folder returns 404
 #verify existing item is deleted returns 404
 #verify invalid api call returns 400
