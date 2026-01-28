@@ -462,3 +462,323 @@ def test_create_item_default_values(test_client: TestClient, testing_db_session:
     res_json = create_item_response.json()
     assert res_json["completed"] == False
     assert res_json["position"] == -1
+
+# GET /folders/{folder_id}/items/{item_id} - Get specific item within folder
+
+#verify get existing item returns 200
+# seed db with folder and item
+# call the get item api with folder_id and item_id
+# verify response status code 200
+# verify response contains correct item details
+def test_get_item_success(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    #act
+    get_item_response = test_client.get(f"folders/{folder.id}/items/{item.id}")
+    #assert
+    assert get_item_response.status_code == 200
+    res_json = get_item_response.json()
+    assert res_json["id"] == item.id
+    assert res_json["title"] == item.title
+    assert res_json["folder_id"] == folder.id
+
+#verify get item with correct response model
+# seed db with folder and item
+# call the get item api
+# verify response contains all required fields
+def test_get_item_response_model(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    #act
+    get_item_response = test_client.get(f"folders/{folder.id}/items/{item.id}")
+    #assert
+    assert get_item_response.status_code == 200
+    res_json = get_item_response.json()
+    assert "id" in res_json
+    assert "title" in res_json
+    assert "folder_id" in res_json
+    assert "completed" in res_json
+    assert "position" in res_json
+
+#verify get non-existing item returns 404
+# seed db with folder but no item
+# call the get item api with non-existing item_id
+# verify response status code 404
+def test_get_nonexisting_item(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    non_existing_item_id = 999
+    #act
+    get_item_response = test_client.get(f"folders/{folder.id}/items/{non_existing_item_id}")
+    #assert
+    assert get_item_response.status_code == 404
+    res_json = get_item_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+#verify get item from non-existing folder returns 404
+# do not seed folder
+# call the get item api with non-existing folder_id
+# verify response status code 404
+def test_get_item_from_nonexisting_folder(test_client: TestClient):
+    #arrange
+    non_existing_folder_id = 999
+    non_existing_item_id = 1
+    #act
+    get_item_response = test_client.get(f"folders/{non_existing_folder_id}/items/{non_existing_item_id}")
+    #assert
+    assert get_item_response.status_code == 404
+    res_json = get_item_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify get item from deleted folder returns 404
+# seed db with deleted folder
+# seed db with item
+# call the get item api with deleted folder_id
+# verify response status code 404
+def test_get_item_from_deleted_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    #act
+    get_item_response = test_client.get(f"folders/{folder.id}/items/{item.id}")
+    #assert
+    assert get_item_response.status_code == 404
+    res_json = get_item_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify get item with invalid folder_id type returns 400
+# create invalid folder_id type
+# call the get item api with invalid folder_id
+# verify response status code 400
+def test_get_item_invalid_folder_id_type(test_client: TestClient):
+    #arrange
+    invalid_folder_id = "invalid"
+    item_id = 1
+    #act
+    get_item_response = test_client.get(f"folders/{invalid_folder_id}/items/{item_id}")
+    #assert
+    assert get_item_response.status_code == 400
+
+#verify get item with invalid item_id type returns 400
+# seed db with folder
+# create invalid item_id type
+# call the get item api with invalid item_id
+# verify response status code 400
+def test_get_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    invalid_item_id = "invalid"
+    #act
+    get_item_response = test_client.get(f"folders/{folder.id}/items/{invalid_item_id}")
+    #assert
+    assert get_item_response.status_code == 400
+
+#verify get item from wrong folder returns 404
+# seed db with two folders and items in each
+# call the get item api with folder_id and item_id from different folders
+# verify response status code 404
+def test_get_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder1 = seed_db_with_test_folder(testing_db_session)
+    folder2 = seed_db_with_test_folder(testing_db_session)
+    item_in_folder1 = seed_db_with_test_item(testing_db_session, folder1)
+    #act
+    get_item_response = test_client.get(f"folders/{folder2.id}/items/{item_in_folder1.id}")
+    #assert
+    assert get_item_response.status_code == 404
+    res_json = get_item_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+# PUT /folders/{folder_id}/items/{item_id} - Update item within folder
+
+#verify update existing item returns 200
+# seed db with folder and item
+# create update payload with new title
+# call the update item api
+# verify response status code 200
+# verify response contains updated item details
+def test_update_item_success(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 200
+    res_json = update_item_response.json()
+    assert res_json["id"] == item.id
+    assert res_json["title"] == update_payload["title"]
+    assert res_json["folder_id"] == folder.id
+
+#verify update item with same title returns 200
+# seed db with folder and item
+# create update payload with same title
+# call the update item api
+# verify response status code 200
+# verify response title matches
+def test_update_item_same_title(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    update_payload = {"title": item.title}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 200
+    res_json = update_item_response.json()
+    assert res_json["title"] == item.title
+
+#verify update non-existing item returns 404
+# seed db with folder but no item
+# create update payload
+# call the update item api with non-existing item_id
+# verify response status code 404
+def test_update_nonexisting_item(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    non_existing_item_id = 999
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{non_existing_item_id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 404
+    res_json = update_item_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+#verify update item in non-existing folder returns 404
+# do not seed folder
+# create update payload
+# call the update item api with non-existing folder_id
+# verify response status code 404
+def test_update_item_in_nonexisting_folder(test_client: TestClient):
+    #arrange
+    non_existing_folder_id = 999
+    item_id = 1
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{non_existing_folder_id}/items/{item_id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 404
+    res_json = update_item_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify update item in deleted folder returns 404
+# seed db with deleted folder
+# seed db with item
+# create update payload
+# call the update item api
+# verify response status code 404
+def test_update_item_in_deleted_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 404
+    res_json = update_item_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify update deleted item returns 404
+# seed db with folder and deleted item
+# create update payload
+# call the update item api
+# verify response status code 404
+def test_update_deleted_item(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, is_item_deleted=True)
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 404
+    res_json = update_item_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+#verify update item with bad input returns 400
+# seed db with folder and item
+# create empty/invalid update payload
+# call the update item api with bad payload
+# verify response status code 400
+def test_update_item_bad_input(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    bad_payload = {}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=bad_payload)
+    #assert
+    assert update_item_response.status_code == 400
+
+#verify update item with invalid folder_id type returns 400
+# create update payload
+# call the update item api with invalid folder_id type
+# verify response status code 400
+def test_update_item_invalid_folder_id_type(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    invalid_folder_id = "invalid"
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{invalid_folder_id}/items/{item.id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 400
+
+#verify update item with invalid item_id type returns 400
+# seed db with folder
+# create update payload
+# call the update item api with invalid item_id type
+# verify response status code 400
+def test_update_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    invalid_item_id = "invalid"
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{invalid_item_id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 400
+
+#verify update item from wrong folder returns 404
+# seed db with two folders and items in each
+# create update payload
+# call the update item api with folder_id and item_id from different folders
+# verify response status code 404
+def test_update_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder1 = seed_db_with_test_folder(testing_db_session)
+    folder2 = seed_db_with_test_folder(testing_db_session)
+    item_in_folder1 = seed_db_with_test_item(testing_db_session, folder1)
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{folder2.id}/items/{item_in_folder1.id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 404
+    res_json = update_item_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+#verify update item preserves other fields
+# seed db with folder and item with specific values
+# create update payload with only title
+# call the update item api
+# verify completed and position fields are preserved
+def test_update_item_preserves_other_fields(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, completed=True, position=5)
+    update_payload = {"title": "updated_title"}
+    #act
+    update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
+    #assert
+    assert update_item_response.status_code == 200
+    res_json = update_item_response.json()
+    assert res_json["title"] == update_payload["title"]
+    assert res_json["completed"] == True # we will have to change this bus logic so completed items title do not get updated
+    assert res_json["position"] == 5
+
