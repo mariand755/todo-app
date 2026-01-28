@@ -72,7 +72,7 @@ def test_create_folders_bad_input_success(test_client: TestClient):
     #assert
     assert response.status_code == 400
 
-def test_single_folder_id_exist_success(test_client: TestClient, testing_db_session: Session):
+def test_get_single_folder_id_exist_success(test_client: TestClient, testing_db_session: Session):
     #arrange
     seed_folder = seed_db_with_test_folder(testing_db_session)
     #act
@@ -82,7 +82,7 @@ def test_single_folder_id_exist_success(test_client: TestClient, testing_db_sess
     res_json = response.json()
     assert res_json["title"] == seed_folder.title
 
-def test_folder_id_not_found(test_client: TestClient):
+def test_get_folder_id_not_found(test_client: TestClient):
     #arrange
     none_existing_folder = 3
     #act
@@ -90,7 +90,7 @@ def test_folder_id_not_found(test_client: TestClient):
     #assert
     assert response.status_code == 404
 
-def test_existing_folder_is_deleted(test_client: TestClient, testing_db_session: Session):
+def test_get_existing_folder_is_deleted(test_client: TestClient, testing_db_session: Session):
     #arrange
     seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
     #act
@@ -98,7 +98,7 @@ def test_existing_folder_is_deleted(test_client: TestClient, testing_db_session:
     #assert
     assert response.status_code == 404
 
-def test_anydata_instead_of_int(test_client: TestClient):
+def test_get_anydata_instead_of_int(test_client: TestClient):
     #arrange
     bad_data = "this"
     #act
@@ -225,7 +225,7 @@ def test_invalid_delete_endpoint(test_client: TestClient):
     assert delete_invalid_endpoint.status_code == 400
 
 #create item within folder
-def test_create_item_within_folder(test_client: TestClient, testing_db_session: Session):
+def test_get_item_within_folder(test_client: TestClient, testing_db_session: Session):
     #arrange
     #seed the db with item
     folder = seed_db_with_test_folder(testing_db_session)
@@ -241,7 +241,7 @@ def test_create_item_within_folder(test_client: TestClient, testing_db_session: 
     assert res_json[0]["title"] == item.title
 
 #create multiple items (3)
-def test_create_multiple_items_within_folder(test_client: TestClient, testing_db_session: Session):
+def test_get_multiple_items_within_folder(test_client: TestClient, testing_db_session: Session):
     #arrange
     #seed folder data
     folder = seed_db_with_test_folder(testing_db_session)
@@ -270,7 +270,7 @@ def test_create_multiple_items_within_folder(test_client: TestClient, testing_db
 # call the api to created the muliple items
 # verify the response json status code
 # verify the len of items to get #
-def test_num_of_items_in_folder(test_client: TestClient, testing_db_session: Session):
+def test_get_num_of_items_in_folder(test_client: TestClient, testing_db_session: Session):
     #arrange
     #seed folder data
     folder = seed_db_with_test_folder(testing_db_session)
@@ -293,7 +293,7 @@ def test_num_of_items_in_folder(test_client: TestClient, testing_db_session: Ses
 # do not seed with items data
 # call the items api
 # verify response status code 200
-def test_empty_folder_returns_successfully(test_client: TestClient, testing_db_session: Session):
+def test_get_empty_folder_returns_successfully(test_client: TestClient, testing_db_session: Session):
     #arrange
     #seed folder data
     folder = seed_db_with_test_folder(testing_db_session)
@@ -309,7 +309,7 @@ def test_empty_folder_returns_successfully(test_client: TestClient, testing_db_s
 #verify in folder returns 404
 # call a non existing folder with items api call
 # check response returns 404
-def test_non_existing_folder_with_items_api(test_client: TestClient):
+def test_get_non_existing_folder_with_items_api(test_client: TestClient):
     #arrange
     non_existing_folder = 3
     #act
@@ -325,7 +325,7 @@ def test_non_existing_folder_with_items_api(test_client: TestClient):
 # call the is_deleted on the seeded folder
 # call the items api on the deleted seed folder
 # verify the response returns 404
-def test_existing_folder_with_items_isdeleted(test_client: TestClient, testing_db_session: Session):
+def test_get_existing_folder_with_items_isdeleted(test_client: TestClient, testing_db_session: Session):
     # arrange
     seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
     # act
@@ -338,7 +338,7 @@ def test_existing_folder_with_items_isdeleted(test_client: TestClient, testing_d
 #verify invalid api call returns 400
 # create invalid folder id type
 # verify the response returns 400
-def test_invalid_api_call(test_client: TestClient):
+def test_get_invalid_api_call(test_client: TestClient):
     # arrange
     invalid_folder_id = "pops"
     # act
@@ -346,3 +346,119 @@ def test_invalid_api_call(test_client: TestClient):
     # assert
     assert invalid_api_call.status_code == 400
 
+# POST /folders/{folder_id}/items - Create item within folder
+
+#verify create item within folder returns 200
+# seed db with folder data 
+# create item payload
+# call the create item api
+# verify response status code 200
+# verify response contains item details
+def test_create_item_success(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item_payload = {"title": "test_item"}
+    #act
+    create_item_response = test_client.post(f"folders/{folder.id}/items", json=item_payload)
+    #assert
+    assert create_item_response.status_code == 200
+    res_json = create_item_response.json()
+    assert res_json["title"] == item_payload["title"]
+    assert res_json["folder_id"] == folder.id
+
+#verify create multiple items within folder returns 200
+# seed db with folder data
+# create multiple item payloads
+# call the create item api multiple times
+# verify response status code 200 for each
+# verify each response contains correct item details
+def test_create_multiple_items_success(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item_payloads = create_test_payload(3)
+    #act
+    created_items = []
+    for payload in item_payloads:
+        response = test_client.post(f"folders/{folder.id}/items", json=payload)
+        created_items.append(response)
+    #assert
+    for i, response in enumerate(created_items):
+        assert response.status_code == 200
+        res_json = response.json()
+        assert res_json["title"] == item_payloads[i]["title"]
+        assert res_json["folder_id"] == folder.id
+
+#verify create item within non-existing folder returns 404
+# create item payload
+# call the create item api with non-existing folder id
+# verify response status code 404
+def test_create_item_in_nonexisting_folder(test_client: TestClient):
+    #arrange
+    non_existing_folder = 999
+    item_payload = {"title": "test_item"}
+    #act
+    create_item_response = test_client.post(f"folders/{non_existing_folder}/items", json=item_payload)
+    #assert
+    assert create_item_response.status_code == 404
+    res_json = create_item_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify create item within deleted folder returns 404
+# seed db with folder (is_deleted=True)
+# create item payload
+# call the create item api with deleted folder id
+# verify response status code 404
+def test_create_item_in_deleted_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    item_payload = {"title": "test_item"}
+    #act
+    create_item_response = test_client.post(f"folders/{folder.id}/items", json=item_payload)
+    #assert
+    assert create_item_response.status_code == 404
+    res_json = create_item_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify create item with bad input returns 400
+# seed db with folder data
+# create empty/invalid item payload
+# call the create item api with bad payload
+# verify response status code 400
+def test_create_item_bad_input(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    bad_payload = {}
+    #act
+    create_item_response = test_client.post(f"folders/{folder.id}/items", json=bad_payload)
+    #assert
+    assert create_item_response.status_code == 400
+
+#verify create item with invalid folder id type returns 400
+# create item payload
+# call the create item api with invalid folder id type
+# verify response status code 400
+def test_create_item_invalid_folder_id_type(test_client: TestClient):
+    #arrange
+    invalid_folder_id = "invalid"
+    item_payload = {"title": "test_item"}
+    #act
+    create_item_response = test_client.post(f"folders/{invalid_folder_id}/items", json=item_payload)
+    #assert
+    assert create_item_response.status_code == 400
+
+#verify created item has correct default values
+# seed db with folder data
+# create item payload
+# call the create item api
+# verify response contains correct default values (completed=False, position=-1)
+def test_create_item_default_values(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item_payload = {"title": "test_item"}
+    #act
+    create_item_response = test_client.post(f"folders/{folder.id}/items", json=item_payload)
+    #assert
+    assert create_item_response.status_code == 200
+    res_json = create_item_response.json()
+    assert res_json["completed"] == False
+    assert res_json["position"] == -1
