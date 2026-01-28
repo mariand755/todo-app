@@ -306,6 +306,43 @@ def test_empty_folder_returns_successfully(test_client: TestClient, testing_db_s
     res_json = folder_without_items.json()
     assert len(res_json) == 0
 
-#verify no item in folder returns 404
-#verify existing item is deleted returns 404
+#verify in folder returns 404
+# call a non existing folder with items api call
+# check response returns 404
+def test_non_existing_folder_with_items_api(test_client: TestClient):
+    #arrange
+    non_existing_folder = 3
+    #act
+    non_existing_folder_with_items_api = test_client.get(f"folders/{non_existing_folder}/items")
+    #assert
+    assert non_existing_folder_with_items_api.status_code == 404
+    res_json = non_existing_folder_with_items_api.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify existing folder with items is deleted returns 404
+# seed db with folder
+# seed db with items
+# call the is_deleted on the seeded folder
+# call the items api on the deleted seed folder
+# verify the response returns 404
+def test_existing_folder_with_items_isdeleted(test_client: TestClient, testing_db_session: Session):
+    # arrange
+    seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    # act
+    existing_folder_with_items_isdeleted = test_client.get(f"folders/{seed_folder.id}/items") 
+    # assert 
+    assert existing_folder_with_items_isdeleted.status_code == 404
+    res_json = existing_folder_with_items_isdeleted.json()
+    assert res_json == {"detail": "Folder not found"}
+
 #verify invalid api call returns 400
+# create invalid folder id type
+# verify the response returns 400
+def test_invalid_api_call(test_client: TestClient):
+    # arrange
+    invalid_folder_id = "pops"
+    # act
+    invalid_api_call = test_client.get(f"folders/{invalid_folder_id}/items")
+    # assert
+    assert invalid_api_call.status_code == 400
+
