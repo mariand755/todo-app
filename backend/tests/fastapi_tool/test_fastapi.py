@@ -776,9 +776,284 @@ def test_update_item_preserves_other_fields(test_client: TestClient, testing_db_
     #act
     update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
     #assert
-    assert update_item_response.status_code == 200
+    assert update_item_response.status_code == 200 #
     res_json = update_item_response.json()
     assert res_json["title"] == update_payload["title"]
     assert res_json["completed"] == True # we will have to change this bus logic so completed items title do not get updated
     assert res_json["position"] == 5
+
+# DELETE /folders/{folder_id}/items/{item_id} - Delete item within folder
+
+#verify delete existing item returns 204
+# seed db with folder and item
+# call the delete item api
+# verify response status code 204
+def test_delete_item_success(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    #act
+    delete_response = test_client.delete(f"folders/{folder.id}/items/{item.id}")
+    #assert
+    assert delete_response.status_code == 204
+
+#verify delete non-existing item returns 404
+# seed db with folder but no item
+# call the delete item api with non-existing item_id
+# verify response status code 404
+def test_delete_nonexisting_item(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    non_existing_item_id = 999
+    #act
+    delete_response = test_client.delete(f"folders/{folder.id}/items/{non_existing_item_id}")
+    #assert
+    assert delete_response.status_code == 404
+    res_json = delete_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+#verify delete item from non-existing folder returns 404
+# do not seed folder
+# call the delete item api with non-existing folder_id
+# verify response status code 404
+def test_delete_item_from_nonexisting_folder(test_client: TestClient):
+    #arrange
+    non_existing_folder_id = 999
+    item_id = 1
+    #act
+    delete_response = test_client.delete(f"folders/{non_existing_folder_id}/items/{item_id}")
+    #assert
+    assert delete_response.status_code == 404
+    res_json = delete_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify delete item from deleted folder returns 404
+# seed db with deleted folder and item
+# call the delete item api
+# verify response status code 404
+def test_delete_item_from_deleted_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    #act
+    delete_response = test_client.delete(f"folders/{folder.id}/items/{item.id}")
+    #assert
+    assert delete_response.status_code == 404
+    res_json = delete_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify delete already deleted item returns 404
+# seed db with folder and deleted item
+# call the delete item api
+# verify response status code 404
+def test_delete_already_deleted_item(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, is_item_deleted=True)
+    #act
+    delete_response = test_client.delete(f"folders/{folder.id}/items/{item.id}")
+    #assert
+    assert delete_response.status_code == 404
+    res_json = delete_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+#verify delete item with invalid folder_id type returns 400
+def test_delete_item_invalid_folder_id_type(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    invalid_folder_id = "invalid"
+    #act
+    delete_response = test_client.delete(f"folders/{invalid_folder_id}/items/{item.id}")
+    #assert
+    assert delete_response.status_code == 400
+
+#verify delete item with invalid item_id type returns 400
+def test_delete_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    invalid_item_id = "invalid"
+    #act
+    delete_response = test_client.delete(f"folders/{folder.id}/items/{invalid_item_id}")
+    #assert
+    assert delete_response.status_code == 400
+
+#verify delete item from wrong folder returns 404
+# seed db with two folders and item in one
+# call the delete api on the other folder with that item id
+# verify response status code 404
+def test_delete_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder1 = seed_db_with_test_folder(testing_db_session)
+    folder2 = seed_db_with_test_folder(testing_db_session)
+    item_in_folder1 = seed_db_with_test_item(testing_db_session, folder1)
+    #act
+    delete_response = test_client.delete(f"folders/{folder2.id}/items/{item_in_folder1.id}")
+    #assert
+    assert delete_response.status_code == 404
+    res_json = delete_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+# PUT /folders/{folder_id}/items/{item_id}/toggle - Toggle item completed status
+
+#verify toggle item from incomplete to complete returns 200
+# seed db with folder and item (completed=False)
+# call the toggle item api
+# verify response status code 200
+# verify completed field changed to True
+def test_toggle_item_incomplete_to_complete(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, completed=False)
+    #act
+    toggle_response = test_client.put(f"folders/{folder.id}/items/{item.id}/toggle")
+    #assert
+    assert toggle_response.status_code == 200
+    res_json = toggle_response.json()
+    assert res_json["id"] == item.id
+    assert res_json["completed"] == True
+
+#verify toggle item from complete to incomplete returns 200
+# seed db with folder and item (completed=True)
+# call the toggle item api
+# verify response status code 200
+# verify completed field changed to False
+def test_toggle_item_complete_to_incomplete(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, completed=True)
+    #act
+    toggle_response = test_client.put(f"folders/{folder.id}/items/{item.id}/toggle")
+    #assert
+    assert toggle_response.status_code == 200
+    res_json = toggle_response.json()
+    assert res_json["id"] == item.id
+    assert res_json["completed"] == False
+
+#verify toggle item preserves other fields
+# seed db with folder and item with specific values
+# call the toggle item api
+# verify title, folder_id, position fields are preserved
+def test_toggle_item_preserves_other_fields(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, completed=False, position=3)
+    original_title = item.title
+    #act
+    toggle_response = test_client.put(f"folders/{folder.id}/items/{item.id}/toggle")
+    #assert
+    assert toggle_response.status_code == 200
+    res_json = toggle_response.json()
+    assert res_json["title"] == original_title
+    assert res_json["folder_id"] == folder.id
+    assert res_json["position"] == 3
+    assert res_json["completed"] == True
+
+#verify toggle non-existing item returns 404
+# seed db with folder but no item
+# call the toggle item api with non-existing item_id
+# verify response status code 404
+def test_toggle_nonexisting_item(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    non_existing_item_id = 999
+    #act
+    toggle_response = test_client.put(f"folders/{folder.id}/items/{non_existing_item_id}/toggle")
+    #assert
+    assert toggle_response.status_code == 404
+    res_json = toggle_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+#verify toggle item in non-existing folder returns 404
+# do not seed folder
+# call the toggle item api with non-existing folder_id
+# verify response status code 404
+def test_toggle_item_in_nonexisting_folder(test_client: TestClient):
+    #arrange
+    non_existing_folder_id = 999
+    item_id = 1
+    #act
+    toggle_response = test_client.put(f"folders/{non_existing_folder_id}/items/{item_id}/toggle")
+    #assert
+    assert toggle_response.status_code == 404
+    res_json = toggle_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify toggle item in deleted folder returns 200 (we need to change this bus logic)
+# note: toggle endpoint does not check if folder is deleted
+# seed db with deleted folder and item
+# call the toggle item api
+# verify response status code 200 (toggles anyway)
+def test_toggle_item_in_deleted_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
+    item = seed_db_with_test_item(testing_db_session, folder, completed=False)
+    #act
+    toggle_response = test_client.put(f"folders/{folder.id}/items/{item.id}/toggle")
+    #assert
+    assert toggle_response.status_code == 200
+    res_json = toggle_response.json()
+    assert res_json["completed"] == True
+
+#verify toggle deleted item returns 200 (we need to change this bus logic)
+# note: toggle endpoint does not check if item is deleted
+# seed db with folder and deleted item
+# call the toggle item api
+# verify response status code 200 (toggles anyway)
+def test_toggle_deleted_item(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, is_item_deleted=True, completed=False)
+    #act
+    toggle_response = test_client.put(f"folders/{folder.id}/items/{item.id}/toggle")
+    #assert
+    assert toggle_response.status_code == 200
+    res_json = toggle_response.json()
+    assert res_json["completed"] == True
+
+#verify toggle item with invalid folder_id type returns 400
+# create invalid folder_id type
+# call the toggle item api with invalid folder_id
+# verify response status code 400
+def test_toggle_item_invalid_folder_id_type(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder)
+    invalid_folder_id = "invalid"
+    #act
+    toggle_response = test_client.put(f"folders/{invalid_folder_id}/items/{item.id}/toggle")
+    #assert
+    assert toggle_response.status_code == 400
+
+#verify toggle item with invalid item_id type returns 400
+# seed db with folder
+# create invalid item_id type
+# call the toggle item api with invalid item_id
+# verify response status code 400
+def test_toggle_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    invalid_item_id = "invalid"
+    #act
+    toggle_response = test_client.put(f"folders/{folder.id}/items/{invalid_item_id}/toggle")
+    #assert
+    assert toggle_response.status_code == 400
+
+#verify toggle item from wrong folder returns 404
+# seed db with two folders and item in one
+# call the toggle api on the other folder with that item id
+# verify response status code 404
+def test_toggle_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder1 = seed_db_with_test_folder(testing_db_session)
+    folder2 = seed_db_with_test_folder(testing_db_session)
+    item_in_folder1 = seed_db_with_test_item(testing_db_session, folder1)
+    #act
+    toggle_response = test_client.put(f"folders/{folder2.id}/items/{item_in_folder1.id}/toggle")
+    #assert
+    assert toggle_response.status_code == 404
+    res_json = toggle_response.json()
+    assert res_json == {"detail": "Item not found"}
+
+
 
