@@ -1055,5 +1055,163 @@ def test_toggle_item_from_wrong_folder(test_client: TestClient, testing_db_sessi
     res_json = toggle_response.json()
     assert res_json == {"detail": "Item not found"}
 
+# PUT /folders/{folder_id}/item_order - Reorder items within folder
+
+#verify update item order returns 200
+# seed db with folder and multiple items
+# create payload with reordered item ids
+# call the item order api
+# verify response status code 200
+# verify items are returned in new order
+def test_update_item_order_success(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item1 = seed_db_with_test_item(testing_db_session, folder, position=0)
+    item2 = seed_db_with_test_item(testing_db_session, folder, position=1)
+    item3 = seed_db_with_test_item(testing_db_session, folder, position=2)
+    # reorder to 3, 1, 2
+    order_payload = {"itemOrder_id": [item3.id, item1.id, item2.id]}
+    #act
+    updated_order_response = test_client.put(f"folders/{folder.id}/item_order", json=order_payload)
+    #assert
+    assert updated_order_response.status_code == 200
+    res_json = updated_order_response.json()
+    assert len(res_json["items"]) == 3
+    assert res_json["items"][0]["id"] == item3.id
+    assert res_json["items"][0]["position"] == 0
+    assert res_json["items"][1]["id"] == item1.id
+    assert res_json["items"][1]["position"] == 1
+    assert res_json["items"][2]["id"] == item2.id
+    assert res_json["items"][2]["position"] == 2
+
+#verify update item order with two items
+# seed db with folder and two items
+# create payload with reordered item ids
+# call the item order api
+# verify items are in correct order
+def test_update_item_order_two_items(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item1 = seed_db_with_test_item(testing_db_session, folder, position=0)
+    item2 = seed_db_with_test_item(testing_db_session, folder, position=1)
+    # reorder to 2, 1
+    order_payload = {"itemOrder_id": [item2.id, item1.id]}
+    #act
+    updated_order_response = test_client.put(f"folders/{folder.id}/item_order", json=order_payload)
+    #assert
+    assert updated_order_response.status_code == 200
+    res_json = updated_order_response.json()
+    assert res_json["items"][0]["id"] == item2.id
+    assert res_json["items"][0]["position"] == 0
+    assert res_json["items"][1]["id"] == item1.id
+    assert res_json["items"][1]["position"] == 1
+
+#verify update item order with same order
+# seed db with folder and items
+# create payload with same order as current
+# call the item order api
+# verify response status code 200
+def test_update_item_order_same_order(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item1 = seed_db_with_test_item(testing_db_session, folder, position=0)
+    item2 = seed_db_with_test_item(testing_db_session, folder, position=1)
+    item3 = seed_db_with_test_item(testing_db_session, folder, position=2)
+    # same order as current
+    order_payload = {"itemOrder_id": [item1.id, item2.id, item3.id]}
+    #act
+    updated_order_response = test_client.put(f"folders/{folder.id}/item_order", json=order_payload)
+    #assert
+    assert updated_order_response.status_code == 200
+    res_json = updated_order_response.json()
+    assert res_json["items"][0]["id"] == item1.id
+    assert res_json["items"][1]["id"] == item2.id
+    assert res_json["items"][2]["id"] == item3.id
+
+#verify update item order in non-existing folder returns 404
+# do not seed folder
+# create payload with item ids
+# call the item order api with non-existing folder_id
+# verify response status code 404
+def test_update_item_order_nonexisting_folder(test_client: TestClient):
+    #arrange
+    non_existing_folder_id = 999
+    order_payload = {"itemOrder_id": [1, 2, 3]}
+    #act
+    updated_order_response = test_client.put(f"folders/{non_existing_folder_id}/item_order", json=order_payload)
+    #assert
+    assert updated_order_response.status_code == 404
+    res_json = updated_order_response.json()
+    assert res_json == {"detail": "Folder not found"}
+
+#verify update item order with invalid folder_id type returns 400
+# create invalid folder_id type
+# create payload with item ids
+# call the item order api with invalid folder_id
+# verify response status code 400
+def test_update_item_order_invalid_folder_id_type(test_client: TestClient):
+    #arrange
+    invalid_folder_id = "invalid"
+    order_payload = {"itemOrder_id": [1, 2, 3]}
+    #act
+    updated_order_response = test_client.put(f"folders/{invalid_folder_id}/item_order", json=order_payload)
+    #assert
+    assert updated_order_response.status_code == 400
+
+#verify update item order with bad payload returns 400
+# seed db with folder
+# create empty/invalid payload
+# call the item order api with bad payload
+# verify response status code 400
+def test_update_item_order_bad_payload(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    bad_payload = {}
+    #act
+    updated_order_response = test_client.put(f"folders/{folder.id}/item_order", json=bad_payload)
+    #assert
+    assert updated_order_response.status_code == 400
+
+#verify update item order with empty list returns 200
+# seed db with folder and items
+# create payload with empty item list
+# call the item order api
+# verify response status code 200
+def test_update_item_order_empty_list(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    seed_db_with_test_item(testing_db_session, folder)
+    order_payload = {"itemOrder_id": []}
+    #act
+    updated_order_response = test_client.put(f"folders/{folder.id}/item_order", json=order_payload)
+    #assert
+    assert updated_order_response.status_code == 200
+    res_json = updated_order_response.json()
+    assert len(res_json["items"]) == 0
+
+#verify update item order preserves item data
+# seed db with folder and items with various properties
+# create payload with reordered ids
+# call the item order api
+# verify item titles and other properties are preserved
+def test_update_item_order_preserves_item_data(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item1 = seed_db_with_test_item(testing_db_session, folder, position=0, completed=True)
+    item2 = seed_db_with_test_item(testing_db_session, folder, position=1, completed=False)
+    item1_title = item1.title
+    item2_title = item2.title
+    # reorder to 2, 1
+    order_payload = {"itemOrder_id": [item2.id, item1.id]}
+    #act
+    updated_order_response = test_client.put(f"folders/{folder.id}/item_order", json=order_payload)
+    #assert
+    assert updated_order_response.status_code == 200
+    res_json = updated_order_response.json()
+    assert res_json["items"][0]["title"] == item2_title
+    assert res_json["items"][0]["completed"] == False
+    assert res_json["items"][1]["title"] == item1_title
+    assert res_json["items"][1]["completed"] == True
+
 
 
