@@ -131,5 +131,5 @@ Nice to have
 -  We will have to change the bus logic so that the "title" of items can not be updated when marked completed.
 -  We will have to change the bus logic so that the deleted items can not be changed to marked completed or change back to uncompleted.
 -  We will have to change the bus logic so that the deleted folder can not be have items within it changed to be marked completed or change back to uncompleted.
-
+- Fix TODO-APP folder structure to have better separation of concerns (eg separate files for models, api routes, database interactions, etc)
 https://shoelace.style/components/radio-button
