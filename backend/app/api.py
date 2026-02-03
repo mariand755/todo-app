@@ -1,3 +1,4 @@
+from fastapi.responses import JSONResponse
 from library.models import get_db
 from library.models import SessionLocal, Folder as FolderModel, TodoItem as TodoItemModel
 from sqlalchemy.orm import Session
@@ -5,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware 
 from library.folder_manager import FolderManager
 from pydantic import BaseModel
+from fastapi.exceptions import RequestValidationError
 
 
 app = FastAPI()
@@ -18,6 +20,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    # Custom logic to reformat the errors
+    errors = exc.errors()
+    simplified_errors = []
+    for error in errors:
+        simplified_errors.append({
+            "field": error["loc"][-1],
+            "problem": error["msg"]
+        })
+    return JSONResponse(
+        status_code=400,
+        content={"errors": simplified_errors},
+    )
 
 @app.get("/folders")
 async def get_folders(db_session:Session = Depends(get_db)):

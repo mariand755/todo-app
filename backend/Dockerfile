@@ -3,4 +3,4 @@ RUN pip install uv
 WORKDIR /app
 COPY . .
 RUN uv sync
-CMD ["uv", "run", "fastapi", "dev", "fastapi_tool/fastapi.py", "--port", "8000", "--host", "0.0.0.0"]
+CMD ["uv", "run", "fastapi", "dev", "app/api.py", "--port", "8000", "--host", "0.0.0.0"]
