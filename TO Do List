@@ -129,13 +129,12 @@ Nice to have
         - add automation testing (unit tests, integration tests, end-to-end tests)
         - integrate into Ci/CD pipeline for automated testing and deployment (eg GitHub Actions, Jenkins)
 
-
-
 Business Logic Changes
 -  We will have to change the bus logic so that the "title" of items can not be updated when marked completed.
 -  We will have to change the bus logic so that the deleted items can not be changed to marked completed or change back to uncompleted.
 -  We will have to change the bus logic so that the deleted folder can not be have items within it changed to be marked completed or change back to uncompleted.
-- We will have to change the bus logic so that an update with an empty list does not return a 200 when using put api.
+-  We will have to change the bus logic so that an update with an empty list does not return a 200 when using put api.
+
 
   - comments in code to learn what the functions and methods are doing
 https://shoelace.style/components/radio-button
