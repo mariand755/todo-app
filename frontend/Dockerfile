@@ -20,8 +20,9 @@ WORKDIR /usr/src/app
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
 # Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
 # into this layer.
+RUN npm install -g vite
 COPY package.json package-lock.json ./
-RUN  npm i 
+RUN  npm i --include=dev 
 
 # Run the application as a non-root user.
 # USER node

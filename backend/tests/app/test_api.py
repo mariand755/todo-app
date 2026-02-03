@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from fastapi_tool.fastapi import app 
+from backend.app.api import app 
 from sqlalchemy.orm import Session
 from library.models import get_db, Folder, TodoItem
 import uuid
@@ -1172,7 +1172,7 @@ def test_update_item_order_bad_payload(test_client: TestClient, testing_db_sessi
     #assert
     assert updated_order_response.status_code == 400
 
-#verify update item order with empty list returns 200
+#verify update item order with empty list returns 200 (we need to update this endpoint to fix this)
 # seed db with folder and items
 # create payload with empty item list
 # call the item order api
