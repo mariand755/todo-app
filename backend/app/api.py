@@ -150,6 +150,8 @@ async def update_item(folder_id:int, item_id:int, update_item_request:UpdateItem
     ).first()    
     if item == None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
+    if item.completed:
+        raise HTTPException(status_code=403, detail="Item completed and cannot be updated")
     item.title = update_item_request.title
     db_session.add(item)
     db_session.commit()

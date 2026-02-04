@@ -771,16 +771,35 @@ def test_update_item_from_wrong_folder(test_client: TestClient, testing_db_sessi
 def test_update_item_preserves_other_fields(test_client: TestClient, testing_db_session: Session):
     #arrange
     folder = seed_db_with_test_folder(testing_db_session)
-    item = seed_db_with_test_item(testing_db_session, folder, completed=True, position=5)
+    item = seed_db_with_test_item(testing_db_session, folder, completed=False, position=5)
     update_payload = {"title": "updated_title"}
     #act
     update_item_response = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
     #assert
-    assert update_item_response.status_code == 200 #
+    assert update_item_response.status_code == 200 
     res_json = update_item_response.json()
     assert res_json["title"] == update_payload["title"]
-    assert res_json["completed"] == True # we will have to change this bus logic so completed items title do not get updated
+    assert res_json["completed"] == False
     assert res_json["position"] == 5
+
+#verify update cannot be made on a item marked complete
+# seed db with folder and item marked complete
+# create updated payload 
+# call the update item api
+# verify response status code 403 and detail content 
+def test_update_completed_item_unsuccessful(test_client: TestClient, testing_db_session: Session):
+    #arrange
+    folder = seed_db_with_test_folder(testing_db_session)
+    item = seed_db_with_test_item(testing_db_session, folder, completed=True)
+    update_payload = {"title":"updated_title"}
+    #act
+    update_item_reponse = test_client.put(f"folders/{folder.id}/items/{item.id}", json=update_payload)
+    #assert
+    assert update_item_reponse.status_code == 403
+    res_json = update_item_reponse.json()
+    assert res_json == {"detail": "Item completed and cannot be updated"}
+
+
 
 # DELETE /folders/{folder_id}/items/{item_id} - Delete item within folder
 
