@@ -998,11 +998,11 @@ def test_toggle_item_in_nonexisting_folder(test_client: TestClient):
     res_json = toggle_response.json()
     assert res_json == {"detail": "Folder not found"}
 
-#verify toggle item in deleted folder returns 200 (we need to change this bus logic)
-# note: toggle endpoint does not check if folder is deleted
+#verify toggle item in deleted folder returns 404 
+# toggle endpoint does check if folder is deleted
 # seed db with deleted folder and item
 # call the toggle item api
-# verify response status code 200 (toggles anyway)
+# verify response status code 404 & detail = folder not found
 def test_toggle_item_in_deleted_folder(test_client: TestClient, testing_db_session: Session):
     #arrange
     folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -1010,15 +1010,15 @@ def test_toggle_item_in_deleted_folder(test_client: TestClient, testing_db_sessi
     #act
     toggle_response = test_client.put(f"folders/{folder.id}/items/{item.id}/toggle")
     #assert
-    assert toggle_response.status_code == 200
+    assert toggle_response.status_code == 404
     res_json = toggle_response.json()
-    assert res_json["completed"] == True
+    assert res_json == {"detail": "Folder not found"}
 
-#verify toggle deleted item returns 200 (we need to change this bus logic)
-# note: toggle endpoint does not check if item is deleted
+#verify toggle deleted item returns 404
+# toggle endpoint does check if item is deleted
 # seed db with folder and deleted item
 # call the toggle item api
-# verify response status code 200 (toggles anyway)
+# verify response status code 404 & detail = item not found
 def test_toggle_deleted_item(test_client: TestClient, testing_db_session: Session):
     #arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1026,9 +1026,9 @@ def test_toggle_deleted_item(test_client: TestClient, testing_db_session: Sessio
     #act
     toggle_response = test_client.put(f"folders/{folder.id}/items/{item.id}/toggle")
     #assert
-    assert toggle_response.status_code == 200
+    assert toggle_response.status_code == 404
     res_json = toggle_response.json()
-    assert res_json["completed"] == True
+    assert res_json == {"detail": "Item not found"}
 
 #verify toggle item with invalid folder_id type returns 400
 # create invalid folder_id type
@@ -1191,11 +1191,11 @@ def test_update_item_order_bad_payload(test_client: TestClient, testing_db_sessi
     #assert
     assert updated_order_response.status_code == 400
 
-#verify update item order with empty list returns 200 (we need to update this endpoint to fix this)
+#verify update item order with empty list returns 400
 # seed db with folder and items
 # create payload with empty item list
 # call the item order api
-# verify response status code 200
+# verify response status code 400
 def test_update_item_order_empty_list(test_client: TestClient, testing_db_session: Session):
     #arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1204,9 +1204,8 @@ def test_update_item_order_empty_list(test_client: TestClient, testing_db_sessio
     #act
     updated_order_response = test_client.put(f"folders/{folder.id}/item_order", json=order_payload)
     #assert
-    assert updated_order_response.status_code == 200
-    res_json = updated_order_response.json()
-    assert len(res_json["items"]) == 0
+    assert updated_order_response.status_code == 400
+
 
 #verify update item order preserves item data
 # seed db with folder and items with various properties
