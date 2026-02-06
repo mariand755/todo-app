@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware 
 from library.folder_manager import FolderManager
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi.exceptions import RequestValidationError
 
 
@@ -150,6 +150,8 @@ async def update_item(folder_id:int, item_id:int, update_item_request:UpdateItem
     ).first()    
     if item == None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
+    if item.completed:
+        raise HTTPException(status_code=403, detail="Item completed and cannot be updated")
     item.title = update_item_request.title
     db_session.add(item)
     db_session.commit()
@@ -201,13 +203,13 @@ async def delete_item(folder_id:int, item_id:int, db_session:Session = Depends(g
 @app.put("/folders/{folder_id}/items/{item_id}/toggle", response_model=ItemResponse)
 async def toggle_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None:
+    if folder == None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = db_session.query(TodoItemModel).filter(
         TodoItemModel.folder_id == folder_id,
         TodoItemModel.id == item_id,
     ).first()
-    if item == None:
+    if item == None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     item.completed = not item.completed
     db_session.add(item)
@@ -215,7 +217,7 @@ async def toggle_item(folder_id:int, item_id:int, db_session:Session = Depends(g
     return item
 
 class UpdateItemOrder(BaseModel):
-    itemOrder_id: list[int]
+    itemOrder_id: list[int] = Field(..., min_length=1)
 
 @app.put("/folders/{folder_id}/item_order", response_model=ItemArrayResponse)
 async def item_order(folder_id:int, update_item_order:UpdateItemOrder, db_session:Session = Depends(get_db)):
