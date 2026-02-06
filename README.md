@@ -1,85 +1,157 @@
 # Todo-App
-A simple command-line To-Do List application written in Python.  
+A simple To-Do List project with a Python backend (CLI + library) and a React frontend.
+
 Organize tasks into folders, add, edit, delete, and search items efficiently.
 
+**Contents overview:**
+- `backend/`: 
+   - Python backend and command-line interface. 
+   - CLI entry: `backend/commandline_interface/main.py`. 
+   - Core library lives in `backend/library/`.
+
+- `frontend/`: 
+   - React app (development with `npm run dev`).
+
+
 ## Features
-- **Folder Management**
-  - Add, edit, delete folders
-  - Search folders by title
-  - List all folders
+- **Backend (Python)**: 
+   CLI entry `backend/commandline_interface/main.py`, core library in `backend/library/` (folder & item management).
 
-- **Todo Item Management**
-  - Add, edit, delete items within folders
-  - Search items by title
-  - List items in a folder
+- **Frontend (React)**: 
+   Single-page app in `frontend/` for a graphical UI.
 
-- **User-Friendly CLI**
-  - Interactive prompts
-  - Command aliases for quick navigation
+- **Folder Management**: 
+   Add, edit, delete folders; search by title; list folders.
+
+- **Todo Item Management**: Add, edit, delete items within folders; search by title; list items.
+
+- **Persistence**: 
+   Simple SQL setup in `backend/db/db_setup.sql` for storing folders and items.
+
+- **User-Friendly CLI**: 
+   Interactive prompts and command aliases for quick navigation.
+
+- **Dev & Deployment**: 
+   Dockerfiles for `backend` and `frontend`; `docker-compose.yaml` to run services locally.
+
+- **Testing**: 
+   Unit tests under `backend/tests/`.
+
 
 ## Project Structure
-
+Note: Dotfiles and dotfolders (.*) omitted
 ```
 todo-app/
-├── main.py                # Entry point for the CLI app
-├── README.md              # Project documentation
-├── TO Do List             # Project outline and notes
-├── library/
-│   ├── __init__.py
-│   ├── folder_manager.py  # Manages folders
-│   ├── folder.py          # Folder class and item management
-│   ├── todo_item.py       # TodoItem class
-│   └── __pycache__/       # Python cache files (ignored)
-└── .gitignore             # Files/folders to ignore in git
+├── docker-compose.yaml
+├── README.md
+├── TO Do List
+├── backend/
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   ├── app/
+│   │   ├── __init__.py
+│   │   └── api.py
+│   ├── commandline_interface/
+│   │   └── main.py
+│   ├── db/
+│   │   └── db_setup.sql
+│   ├── library/
+│   │   ├── __init__.py
+│   │   ├── folder_manager.py
+│   │   ├── folder.py
+│   │   ├── models.py
+│   │   └── todo_item.py
+│   └── tests/
+├── frontend/
+│   ├── Dockerfile
+│   ├── package.json
+│   └── src/
+│       ├── App.jsx
+│       ├── main.jsx
+│       ├── useApi.js
+│       └── components/
+│           ├── FolderItem.jsx
+│           ├── LandingContent.jsx
+│           ├── MainContent.jsx
+│           ├── NewFolderForm.jsx
+│           ├── Sidebar.jsx
+│           └── TodoItem.jsx
+└── scripts/
+  └── terminal_command.sh
 ```
 
 
 ## Getting Started
 
 ### Prerequisites
+- Python `3.11` or higher (recommended)
+- Node.js `16+` and npm (for the frontend)
 
-- Python 3.11 or higher (recommended)
-
-## Installation
-
+### Installation
 Clone the repository:
 ```sh
 git clone git@github.com:mariand755/todo-app.git
 cd todo-app
 ```
 
-## Running the App
-
-Run the main script:
+### Running the App
+Run the CLI (backend):
 ```sh
-python main.py
+python backend/commandline_interface/main.py
 ```
 
-Follow the interactive prompts to manage folders and todo items.
+Run the frontend (development):
+```sh
+cd frontend
+npm install
+npm run dev
+```
 
-## Usage
+Or run the full stack with Docker Compose (if configured):
+```sh
+docker-compose up --build
+```
 
-- **Folders:** Add, view, edit, delete, and search folders.
-- **Items:** Add, view, edit, delete, and search todo items within a selected folder.
-- **Exit:** Quit the application at any time.
+## Features Overview
+- Follow the interactive prompts to manage folders and todo items from the CLI. 
+- Or use the React frontend for a graphical experience.
 
-## Example Workflow
+### Usage
+- **Folders:** 
+   - Add, view, edit, delete, and search folders via the CLI 
+   - Or the frontend UI.
 
-1. Start the app:  
-   `python main.py`
-2. Add a folder:  
-   Choose `folders` → `add`
-3. Add items to a folder:  
-   Choose `items` → select folder ID → `add`
-4. Edit or delete items/folders as needed.
+- **Items:** 
+   - Add, view, edit, delete, and search todo items inside a selected folder.
 
-## Contributing
+- **Exit:** 
+   - Quit the CLI with the `exit` command 
+   - Or close the frontend browser tab.
 
-Feel free to fork and submit pull requests.  
-Suggestions and improvements are welcome!
+
+### Example Workflow
+1. Start the CLI:
+   ```sh
+   python backend/commandline_interface/main.py
+   ```
+2. Add a folder: 
+   - Choose `folders` → `add` in the CLI 
+   - Or use the frontend New Folder form.
+
+3. Add items to a folder: 
+   - Choose `items` → select folder ID → `add`.
+
+4. Edit or delete items/folders: 
+   - Use the `edit` / `delete` commands in the CLI 
+   - Or the frontend controls.
+
+5. Exit the CLI: 
+   - Enter `exit` 
+   - Or stop `docker-compose` / close the frontend tab.
+
 
 ## License
-
 This project is for learning purposes and does not have a formal license.
 
 ---
