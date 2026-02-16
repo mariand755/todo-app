@@ -226,3 +226,4 @@ build/
 
 # Optional: local editor settings
 .vscode/
+copilot-instructions.md

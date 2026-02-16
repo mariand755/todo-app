@@ -120,21 +120,36 @@ Nice to have
         - implement a search algorithm (eg partial match, case insensitive)
         - dark mode toggle for better accessibility
 
-- Advanced Features
-        - integrate with third-party services (eg calendar apps, notifications services)
-        - implement due dates and reminders for todo items
-        - implement logging for better debugging and tracking
-
-    - Automation and Integration
-        - add automation testing (unit tests, integration tests, end-to-end tests)
-        - integrate into Ci/CD pipeline for automated testing and deployment (eg GitHub Actions, Jenkins)
-
 
 Business Logic Changes
 -  We will have to change the bus logic so that the "title" of items can not be updated when marked completed. (done)
 -  We will have to change the bus logic so that the deleted items can not be changed to marked completed or change back to uncompleted. (done)
 -  We will have to change the bus logic so that the deleted folder can not be have items within it changed to be marked completed or change back to uncompleted.(done)
 - We will have to change the bus logic so that an update with an empty list does not return a 200 when using put api.(done)
+
+
+ - Automation and Integration
+        - add automation testing (unit tests, integration tests, end-to-end tests)
+        - integrate into Ci/CD pipeline for automated testing (eg GitHub Actions, Jenkins) 
+        - deploy to cloud platform (eg AWS, Heroku) for public access and scalability
+
+- Frontend Enhancements
+        - implement a more modern and responsive UI using a frontend framework (eg React, Vue, Angular)
+        - add animations and transitions for better user experience
+        - implement user authentication and authorization for personalized todo lists
+
+
+- Advanced Features
+        - integrate with third-party services (eg calendar apps, notifications services)
+        - implement due dates and reminders for todo items
+        - implement logging for better debugging and tracking
+
+- System Design (Scalability, Performance, Reliability) - Digram and design the system architecture for scalability, performance, and reliability
+        - implement a microservices architecture for better scalability and maintainability
+        - implement caching for improved performance
+        - implement load balancing for high availability
+        - implement monitoring and alerting for system health and performance
+   
 
   - comments in code to learn what the functions and methods are doing
 https://shoelace.style/components/radio-button
