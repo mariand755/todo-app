@@ -29,10 +29,12 @@ def seed_db_with_test_item(testing_db_session: Session, folder:Folder, random_ti
     testing_db_session.commit()
     return item
 
+
 def test_get_default_empty_folders_success(test_client: TestClient):
-    response = test_client.get("/folders")
+    response = test_client.get("folders")
     assert response.status_code == 200
     assert response.json() == []
+
 
 def test_get_active_folders_success(test_client: TestClient, testing_db_session: Session):
     #arrange
@@ -276,7 +278,7 @@ def test_get_num_of_items_in_folder(test_client: TestClient, testing_db_session:
     folder = seed_db_with_test_folder(testing_db_session)
     #seed multiple items data 
     for i in range(5):
-       item = seed_db_with_test_item(testing_db_session, folder) 
+       seed_db_with_test_item(testing_db_session, folder) 
     #act
     #call the get item api with the seed data
     items_within_folder = test_client.get(f"folders/{folder.id}/items")
@@ -460,7 +462,7 @@ def test_create_item_default_values(test_client: TestClient, testing_db_session:
     #assert
     assert create_item_response.status_code == 200
     res_json = create_item_response.json()
-    assert res_json["completed"] == False
+    assert not res_json["completed"]
     assert res_json["position"] == -1
 
 # GET /folders/{folder_id}/items/{item_id} - Get specific item within folder
@@ -779,7 +781,7 @@ def test_update_item_preserves_other_fields(test_client: TestClient, testing_db_
     assert update_item_response.status_code == 200 
     res_json = update_item_response.json()
     assert res_json["title"] == update_payload["title"]
-    assert res_json["completed"] == False
+    assert not res_json["completed"]
     assert res_json["position"] == 5
 
 #verify update cannot be made on a item marked complete
@@ -930,7 +932,7 @@ def test_toggle_item_incomplete_to_complete(test_client: TestClient, testing_db_
     assert toggle_response.status_code == 200
     res_json = toggle_response.json()
     assert res_json["id"] == item.id
-    assert res_json["completed"] == True
+    assert res_json["completed"] 
 
 #verify toggle item from complete to incomplete returns 200
 # seed db with folder and item (completed=True)
@@ -947,7 +949,7 @@ def test_toggle_item_complete_to_incomplete(test_client: TestClient, testing_db_
     assert toggle_response.status_code == 200
     res_json = toggle_response.json()
     assert res_json["id"] == item.id
-    assert res_json["completed"] == False
+    assert not res_json["completed"] 
 
 #verify toggle item preserves other fields
 # seed db with folder and item with specific values
@@ -966,7 +968,7 @@ def test_toggle_item_preserves_other_fields(test_client: TestClient, testing_db_
     assert res_json["title"] == original_title
     assert res_json["folder_id"] == folder.id
     assert res_json["position"] == 3
-    assert res_json["completed"] == True
+    assert res_json["completed"] 
 
 #verify toggle non-existing item returns 404
 # seed db with folder but no item
@@ -1227,9 +1229,9 @@ def test_update_item_order_preserves_item_data(test_client: TestClient, testing_
     assert updated_order_response.status_code == 200
     res_json = updated_order_response.json()
     assert res_json["items"][0]["title"] == item2_title
-    assert res_json["items"][0]["completed"] == False
+    assert not res_json["items"][0]["completed"]
     assert res_json["items"][1]["title"] == item1_title
-    assert res_json["items"][1]["completed"] == True
+    assert res_json["items"][1]["completed"]
 
 
 

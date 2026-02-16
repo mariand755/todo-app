@@ -1,4 +1,4 @@
-from library.folder import Folder
+
 from library.folder_manager import FolderManager, FolderManagerConstants
 import pytest
 
@@ -6,6 +6,7 @@ import pytest
 def test_folder_manager():
     new_folder_manager = FolderManager()
     return new_folder_manager
+
 
 # happy path
 def test_add_folder_success(test_folder_manager:FolderManager):

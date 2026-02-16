@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from library.models import get_db
-from library.models import SessionLocal, Folder as FolderModel, TodoItem as TodoItemModel
+from library.models import Folder as FolderModel, TodoItem as TodoItemModel
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware 
@@ -38,7 +38,7 @@ async def validation_exception_handler(request, exc):
 
 @app.get("/folders")
 async def get_folders(db_session:Session = Depends(get_db)):
-    folders = db_session.query(FolderModel).filter(FolderModel.is_deleted == False).all()
+    folders = db_session.query(FolderModel).filter(FolderModel.is_deleted.is_(False)).all()
     return folders
 
 class CreateFolder(BaseModel):
@@ -61,7 +61,7 @@ async def create_folder(new_folder_request:CreateFolder, db_session:Session = De
 @app.get("/folders/{folder_id}")
 async def get_folder(folder_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     return folder
 
@@ -71,7 +71,7 @@ class UpdateFolder(BaseModel):
 @app.put("/folders/{folder_id}", response_model=FolderResponse)
 async def update_folder(folder_id:int, update_folder_request:UpdateFolder, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.title = update_folder_request.title
     db_session.add(folder)
@@ -81,7 +81,7 @@ async def update_folder(folder_id:int, update_folder_request:UpdateFolder, db_se
 @app.delete("/folders/{folder_id}")
 async def delete_folder(folder_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.is_deleted = True
     db_session.add(folder) 
@@ -91,10 +91,10 @@ async def delete_folder(folder_id:int, db_session:Session = Depends(get_db)):
 @app.get("/folders/{folder_id}/items")
 async def get_folder_items(folder_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     todo_items = db_session.query(TodoItemModel).filter(TodoItemModel.folder_id == folder_id, 
-    TodoItemModel.is_deleted == False).order_by(TodoItemModel.position).all()
+    TodoItemModel.is_deleted.is_(False)).order_by(TodoItemModel.position).all()
     return todo_items
 
 class CreateItem(BaseModel):
@@ -116,7 +116,7 @@ class ItemArrayResponse(BaseModel):
 @app.post("/folders/{folder_id}/items", response_model=ItemResponse)
 async def create_new_item(folder_id:int, new_item_request:CreateItem, db_session:Session = Depends(get_db)):
     folder = db_session.query(FolderModel).filter(FolderModel.id == folder_id).first()
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     add_new_item = TodoItemModel(title = new_item_request.title, folder_id = folder_id)
     db_session.add(add_new_item)
@@ -126,13 +126,13 @@ async def create_new_item(folder_id:int, new_item_request:CreateItem, db_session
 @app.get("/folders/{folder_id}/items/{item_id}")
 async def get_folder_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.query(FolderModel).filter(FolderModel.id == folder_id).first()
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = db_session.query(TodoItemModel).filter(
         TodoItemModel.folder_id == folder_id, 
         TodoItemModel.id == item_id, 
     ).first()
-    if item == None:
+    if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
@@ -142,13 +142,13 @@ class UpdateItem(BaseModel):
 @app.put("/folders/{folder_id}/items/{item_id}", response_model=ItemResponse)
 async def update_item(folder_id:int, item_id:int, update_item_request:UpdateItem, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = db_session.query(TodoItemModel).filter(
         TodoItemModel.folder_id == folder_id, 
         TodoItemModel.id == item_id, 
     ).first()    
-    if item == None or item.is_deleted:
+    if item is None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     if item.completed:
         raise HTTPException(status_code=403, detail="Item completed and cannot be updated")
@@ -160,13 +160,13 @@ async def update_item(folder_id:int, item_id:int, update_item_request:UpdateItem
 @app.delete("/folders/{folder_id}/items/{item_id}")
 async def delete_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = db_session.query(TodoItemModel).filter(
         TodoItemModel.folder_id == folder_id, 
         TodoItemModel.id == item_id, 
     ).first()
-    if item == None or item.is_deleted:
+    if item is None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     item.is_deleted = True
     db_session.add(item) 
@@ -203,13 +203,13 @@ async def delete_item(folder_id:int, item_id:int, db_session:Session = Depends(g
 @app.put("/folders/{folder_id}/items/{item_id}/toggle", response_model=ItemResponse)
 async def toggle_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None or folder.is_deleted:
+    if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = db_session.query(TodoItemModel).filter(
         TodoItemModel.folder_id == folder_id,
         TodoItemModel.id == item_id,
     ).first()
-    if item == None or item.is_deleted:
+    if item is None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     item.completed = not item.completed
     db_session.add(item)
@@ -222,7 +222,7 @@ class UpdateItemOrder(BaseModel):
 @app.put("/folders/{folder_id}/item_order", response_model=ItemArrayResponse)
 async def item_order(folder_id:int, update_item_order:UpdateItemOrder, db_session:Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
-    if folder == None:
+    if folder is None:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = db_session.query(TodoItemModel).filter(
         TodoItemModel.folder_id.in_(update_item_order.itemOrder_id) == folder_id,

@@ -22,10 +22,10 @@ def todo_list():
             while True:
                 folder_manager.list_folders_within_app()
                 folder_id = handle_input_int("Which folder do you want to add items to, unless done adding. ID: ")
-                if folder_id == None:
+                if folder_id is None:
                     break
                 folder = folder_manager.get_folder(folder_id)
-                if folder == None:
+                if folder is None:
                     continue
                 handle_item_operations(folder)
         elif command == "exit" or command == "ex":
@@ -54,7 +54,7 @@ def handle_folder_operations(folder_manager: FolderManager):
             while True:
                 folder_manager.list_folders_within_app()
                 edit_id = handle_input_int("Which folder title do you want to edit, unless done editing. ID: ")
-                if edit_id == None:
+                if edit_id is None:
                     break
                 elif not folder_manager.does_folder_exist(edit_id):
                     continue
@@ -67,7 +67,7 @@ def handle_folder_operations(folder_manager: FolderManager):
             while True:
                 folder_manager.list_folders_within_app()
                 delete_id = handle_input_int("Which folder title do you want to delete, unless done deleting. ID: ")
-                if delete_id == None:
+                if delete_id is None:
                     break
                 elif not folder_manager.does_folder_exist(delete_id):
                     continue
@@ -109,7 +109,7 @@ def handle_item_operations(folder:Folder):
             while True:
                 folder.list_items_within_folder()
                 edit_id = handle_input_int("Which title do you want to edit, unless done editing. ID: ")
-                if edit_id == None:
+                if edit_id is None:
                     break
                 elif not folder.does_item_exist(edit_id):
                     continue
@@ -122,7 +122,7 @@ def handle_item_operations(folder:Folder):
             while True:
                 folder.list_items_within_folder()
                 delete_id = handle_input_int("Which title do you want to delete, unless done deleting. ID: ")
-                if delete_id == None:
+                if delete_id is None:
                     break
                 elif not folder.does_item_exist(delete_id):
                     continue
@@ -150,7 +150,7 @@ def handle_input_int(user_prompt:str)-> Union[int, None]:
         if user_input == "":
             return None
         return int(user_input)
-    except ValueError as e:
+    except ValueError:
         effect_bold(f"{Color.RED}Invalid ID '{user_input}' was entered.{Color.OFF}")
         return -1
     
