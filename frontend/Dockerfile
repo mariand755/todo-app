@@ -22,7 +22,7 @@ WORKDIR /usr/src/app
 # into this layer.
 RUN npm install -g vite
 COPY package.json package-lock.json ./
-RUN  npm i --include=dev 
+RUN  npm i --include=dev
 
 # Run the application as a non-root user.
 # USER node

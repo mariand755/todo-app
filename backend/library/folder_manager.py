@@ -91,7 +91,7 @@ class FolderManager:
         # validate input type
         if isinstance(title_to_find, str) is False:
             raise ValueError(FolderManagerConstants.ERR_ADD_FOLDER_NON_STR)
-        results = []
+        results: List[Folder] = []
         lowercase_title = title_to_find.lower().strip()
         # empty search should return no results
         if lowercase_title == "":

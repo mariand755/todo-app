@@ -1,0 +1,33 @@
+repos:
+  # -----------------------
+  # Ruff (lint + format)
+  # -----------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # -----------------------
+  # Mypy (type checking)
+  # -----------------------
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: []
+        args: ["--config-file=backend/pyproject.toml"]
+        files: ^backend/(app|library|commandline_interface)/  # skip backend/tests
+
+
+  # -----------------------
+  # General hygiene
+  # -----------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        files: \.(py|yml|yaml|md|txt|sh|toml|json)$
+      - id: end-of-file-fixer
+        files: \.(py|yml|yaml|md|txt|sh|toml|json)$

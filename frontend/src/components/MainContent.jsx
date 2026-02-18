@@ -10,12 +10,12 @@ import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
 import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
 
 
-const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder, 
+const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder,
     onAddTodo, onToggleTodo, onDeleteToDoItem, onEditToDoItem, moveToDoItem}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState(false);
-  
+
     // new local state for the todo input
     const [newTodo, setNewTodo] = useState('');
 
@@ -34,15 +34,15 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
         if (!trimmed) return;
         if (typeof onAddTodo === 'function') {
             onAddTodo(trimmed);
-        } 
+        }
         setNewTodo('');
     };
 
     // Drag and drop handlers
     const renderToDoItem = useCallback((item, index) => {
       return (
-        <TodoItem 
-            key={item.id} 
+        <TodoItem
+            key={item.id}
             item={item}
             index={index}
             onToggle={onToggleTodo}
@@ -81,19 +81,19 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                 </div>
 
                 <SlDialog label="Edit Folder Name" open={openDialog} onSlAfterHide={() => setOpenDialog(false)}>
-                    <SlButton slot="footer" variant="primary" onClick={(e) => 
+                    <SlButton slot="footer" variant="primary" onClick={(e) =>
                     {
                         const inputElement = document.getElementById('edit-folder-input');
-                        handleEdit(inputElement.value); 
-                        setOpenDialog(false); 
+                        handleEdit(inputElement.value);
+                        setOpenDialog(false);
                     }}>
                         OK
                     </SlButton>
 
-                    <SlInput id="edit-folder-input" 
+                    <SlInput id="edit-folder-input"
                         onKeyDown={e => {
                         if (e.key === 'Enter') {
-                            handleEdit(e.target.value);     
+                            handleEdit(e.target.value);
                             setOpenDialog(false);}
                         }}
                         size="medium" value={currentFolderTitle} pill/>

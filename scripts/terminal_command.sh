@@ -1,9 +1,9 @@
- 
- 
-# starting the server
- docker-compose up -d 
 
-# create a folder 
+
+# starting the server
+ docker-compose up -d
+
+# create a folder
 curl -X POST http://localhost:8000/folders -H "Content-Type: application/json" -d '{ "title": "first_folder" }' | jq
 
 # listing all folders
@@ -26,7 +26,7 @@ curl -X POST http://localhost:8000/folders/1/items -H "Content-Type: application
 
 # get a specific item in a folder
  curl http://localhost:8000/folders/1/items/1 | jq
- 
+
 # update an item in a folder
  curl -X PUT http://localhost:8000/folders/1/items/1 -H "Content-Type: application/json" -d '{ "title": "updated_item" }' | jq
 

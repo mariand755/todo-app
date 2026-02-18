@@ -4,37 +4,37 @@ A simple To-Do List project with a Python backend (CLI + library) and a React fr
 Organize tasks into folders, add, edit, delete, and search items efficiently.
 
 **Contents overview:**
-- `backend/`: 
-   - Python backend and command-line interface. 
-   - CLI entry: `backend/commandline_interface/main.py`. 
+- `backend/`:
+   - Python backend and command-line interface.
+   - CLI entry: `backend/commandline_interface/main.py`.
    - Core library lives in `backend/library/`.
 
-- `frontend/`: 
+- `frontend/`:
    - React app (development with `npm run dev`).
 
 
 ## Features
-- **Backend (Python)**: 
+- **Backend (Python)**:
    CLI entry `backend/commandline_interface/main.py`, core library in `backend/library/` (folder & item management).
 
-- **Frontend (React)**: 
+- **Frontend (React)**:
    Single-page app in `frontend/` for a graphical UI.
 
-- **Folder Management**: 
+- **Folder Management**:
    Add, edit, delete folders; search by title; list folders.
 
 - **Todo Item Management**: Add, edit, delete items within folders; search by title; list items.
 
-- **Persistence**: 
+- **Persistence**:
    Simple SQL setup in `backend/db/db_setup.sql` for storing folders and items.
 
-- **User-Friendly CLI**: 
+- **User-Friendly CLI**:
    Interactive prompts and command aliases for quick navigation.
 
-- **Dev & Deployment**: 
+- **Dev & Deployment**:
    Dockerfiles for `backend` and `frontend`; `docker-compose.yaml` to run services locally.
 
-- **Testing**: 
+- **Testing**:
    Unit tests under `backend/tests/`.
 
 
@@ -114,19 +114,19 @@ docker-compose up --build
 ```
 
 ## Features Overview
-- Follow the interactive prompts to manage folders and todo items from the CLI. 
+- Follow the interactive prompts to manage folders and todo items from the CLI.
 - Or use the React frontend for a graphical experience.
 
 ### Usage
-- **Folders:** 
-   - Add, view, edit, delete, and search folders via the CLI 
+- **Folders:**
+   - Add, view, edit, delete, and search folders via the CLI
    - Or the frontend UI.
 
-- **Items:** 
+- **Items:**
    - Add, view, edit, delete, and search todo items inside a selected folder.
 
-- **Exit:** 
-   - Quit the CLI with the `exit` command 
+- **Exit:**
+   - Quit the CLI with the `exit` command
    - Or close the frontend browser tab.
 
 
@@ -135,19 +135,19 @@ docker-compose up --build
    ```sh
    python backend/commandline_interface/main.py
    ```
-2. Add a folder: 
-   - Choose `folders` → `add` in the CLI 
+2. Add a folder:
+   - Choose `folders` → `add` in the CLI
    - Or use the frontend New Folder form.
 
-3. Add items to a folder: 
+3. Add items to a folder:
    - Choose `items` → select folder ID → `add`.
 
-4. Edit or delete items/folders: 
-   - Use the `edit` / `delete` commands in the CLI 
+4. Edit or delete items/folders:
+   - Use the `edit` / `delete` commands in the CLI
    - Or the frontend controls.
 
-5. Exit the CLI: 
-   - Enter `exit` 
+5. Exit the CLI:
+   - Enter `exit`
    - Or stop `docker-compose` / close the frontend tab.
 
 
@@ -156,5 +156,5 @@ This project is for learning purposes and does not have a formal license.
 
 ---
 
-**Author:**  
+**Author:**
 Marian Dadzie

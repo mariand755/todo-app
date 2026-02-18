@@ -89,6 +89,17 @@ class Folder:
         else:
             return None
 
+    def search_for_items_using_title(self, title_to_find: str) -> List[TodoItem]:
+        results: List[TodoItem] = []
+        lowercase_title = title_to_find.lower().strip()
+        if lowercase_title == "":
+            return results
+        for item in self.items:
+            # searching usng prefix search
+            if item.title.lower().startswith(lowercase_title):
+                results.append(item)
+        return results
+
 
 """
     def search_for_item_in_folder(self, id_to_find:int):
@@ -96,7 +107,7 @@ class Folder:
         if index_to_find != -1:
             return self.items[index_to_find]
         return None
-    
+
 
 
     def search_for_item_using_title(self, title_to_find:str)->TodoItem:
@@ -106,14 +117,4 @@ class Folder:
             if item.title.lower().startswith(lowercase_title):
                 return item
         return None
-    
-
-    def search_for_items_using_title(self, title_to_find:str)->List[TodoItem]:
-        results = []
-        lowercase_title = title_to_find.lower().strip()
-        for item in self.items:
-            #searching usng prefix search
-            if item.title.lower().startswith(lowercase_title):
-                results.append(item)
-        return results
 """

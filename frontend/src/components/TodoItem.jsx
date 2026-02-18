@@ -95,17 +95,17 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem, moveToDoIte
     return (
 
         <li className={classes} ref={ref} style={{opacity}} data-handler-id={handlerId}>
-            <input 
-                type="checkbox" 
-                checked={item.completed} 
-                onChange={handleToggle} 
+            <input
+                type="checkbox"
+                checked={item.completed}
+                onChange={handleToggle}
             />
             <span className="todo-text">{item.title}</span>
-        
+
             <div className="item-actions">
                 {item && (
                     <div className="folder-actions">
-                        <SlDropdown  
+                        <SlDropdown
                             open={isOpen}
                             onMouseEnter={() => setIsOpen(true)}
                             onMouseLeave={() => setIsOpen(false)}
@@ -121,33 +121,33 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem, moveToDoIte
                             )
                             }
                         </div>
-        
+
                         <SlDialog label="Edit Item Name" open={openDialog} onSlAfterHide={() => setOpenDialog(false)}>
-                            <SlButton slot="footer" variant="primary" onClick={(e) => 
+                            <SlButton slot="footer" variant="primary" onClick={(e) =>
                             {
                                 const inputElement = document.getElementById(`edit-${item.id}-input`);
-                                handleEdit(inputElement.value); 
-                                setOpenDialog(false); 
+                                handleEdit(inputElement.value);
+                                setOpenDialog(false);
                             }}>
                                 OK
                             </SlButton>
-        
-                            <SlInput id={`edit-${item.id}-input`} 
+
+                            <SlInput id={`edit-${item.id}-input`}
                                 onKeyDown={e => {
                                 if (e.key === 'Enter') {
-                                    handleEdit(e.target.value);     
+                                    handleEdit(e.target.value);
                                     setOpenDialog(false);}
                                 }}
                                 size="medium" value={item.title} pill/>
                         </SlDialog>
-        
+
                         <SlDialog label={`Delete "${item.title}"?`} open={deleteDialog} onSlAfterHide={() => setDeleteDialog(false)}>
                             <SlButton slot="footer" variant="primary" onClick={(e) => { handleDelete(); setDeleteDialog(false); }}>
                                 OK
                             </SlButton>
                         </SlDialog>
-        
-        </li>  
+
+        </li>
     );
 };
 

@@ -24,7 +24,7 @@ def test_add_folder_success(test_folder_manager: FolderManager):
 # error handling
 def test_add_folder_non_str_title_raise_exception(test_folder_manager: FolderManager):
     # arrange
-    add_non_str_folder = []
+    add_non_str_folder: list[any] = []
 
     # act / assert
     with pytest.raises(ValueError) as e:

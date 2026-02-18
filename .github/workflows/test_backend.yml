@@ -1,14 +1,14 @@
 name: Test Backend
 on:
-  # Run tests on every push to main branch
+  # Run tests on every pull request targeting the main branch
   pull_request:
     branches: [ main ]
     paths:
       - 'backend/**'  # Only run tests if files in the backend directory are changed
-  
-  # Allow manual triggering of this workflow    
+
+  # Allow manual triggering of this workflow
   workflow_dispatch:
-    
+
 jobs:
   test-backend:
     runs-on: ubuntu-latest
@@ -17,7 +17,7 @@ jobs:
       run:
         working-directory: ./backend/
 
-    steps:  
+    steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -51,5 +51,5 @@ jobs:
     - name: Type check (mypy)
       run: uv run mypy .
 
-    - name: Run unit tests
-      run: uv run pytest --cov=. --cov-report=term-missing --cov-fail-under=70
+    - name: Run tests + coverage
+      run: uv run pytest --cov=app --cov=library --cov-report=term-missing --cov-fail-under=85

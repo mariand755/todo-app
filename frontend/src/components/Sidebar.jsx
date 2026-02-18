@@ -3,14 +3,14 @@ import FolderItem from './FolderItem';
 import NewFolderForm from './NewFolderForm'; // Defined below
 
 const Sidebar = ({ folders, activeFolderId, onFolderClick, onNewFolder, onEditFolder, onHomeClick }) => {
-    
+
     // Combine fetched folders with the static 'Add New Folder' input from index.html
     const listItems = [
         ...folders,
-        { 
-            id: 'new', 
-            isInput: true, 
-            content: <NewFolderForm onNewFolder={onNewFolder} /> 
+        {
+            id: 'new',
+            isInput: true,
+            content: <NewFolderForm onNewFolder={onNewFolder} />
         }
     ];
 

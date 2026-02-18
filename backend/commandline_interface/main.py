@@ -1,5 +1,3 @@
-from typing import Union
-
 from colorist import BrightColor, Color, effect_bold
 
 from library.folder import Folder
@@ -79,7 +77,7 @@ def handle_folder_operations(folder_manager: FolderManager):
 
         elif command == "search" or command == "s":
             while True:
-                input_title = input("Which foler title do you want to search, unless done searching. Title: ").strip()
+                input_title = input("Which folder title do you want to search, unless done searching. Title: ").strip()
                 if input_title == "":
                     break
                 result_item = folder_manager.search_for_folders_using_title(input_title)
@@ -150,7 +148,7 @@ def handle_item_operations(folder: Folder):
             break
 
 
-def handle_input_int(user_prompt: str) -> Union[int, None]:
+def handle_input_int(user_prompt: str) -> int | None:
     try:
         user_input = input(user_prompt).strip()
         if user_input == "":
@@ -161,4 +159,5 @@ def handle_input_int(user_prompt: str) -> Union[int, None]:
         return -1
 
 
-todo_list()
+if __name__ == "__main__":
+    todo_list()

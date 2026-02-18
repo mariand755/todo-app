@@ -1,7 +1,7 @@
 
 Project Outline
 - Features
-    - Add Folder(s) 
+    - Add Folder(s)
         - folder tile change to dynamic - user imput (done)
     - Edit Folders (s) (done)
     - Remove Folder(s) - (done)
@@ -12,9 +12,9 @@ Project Outline
     - Edit items within folder (done)
     - Search for item in folder (done)
     - Search for item using Title (done)
-    
-   
-- Properties 
+
+
+- Properties
     - Folder Manager
         - Folders[]
     - Folder
@@ -27,10 +27,10 @@ Project Outline
 
 - FrontEnd
 - Load data from backend/api server
-    - Landing Page   (done)   
+    - Landing Page   (done)
     - Deeplink to specific folder (nice to have)
     - Display all folders on the left side (done)
-    - Main Menu 
+    - Main Menu
         - List Folders (done)
         - Add Folder (done) fix input field from expanding
         - Edit Folder (dynamically) (done)
@@ -43,7 +43,7 @@ Project Outline
         - Delete Item (done)
         - Search Item by Title
         - Toggle Item Complete/Incomplete  (done)
-   
+
 
 - Backend
     - Api server (look up api servers)
@@ -51,7 +51,7 @@ Project Outline
         - Api endpoints (RESTful - RESTAPI)
             - /folders (done)
                 - GET (list all folders)
-                - POST (add new folder) 
+                - POST (add new folder)
             - /folders/{folder_id} (done)
                 - GET (get specific folder detail
                 - PUT (update folder details)
@@ -78,20 +78,20 @@ Issues
     - handle user input for valid ints (fix)
     - support for Deleting multiple todo items (fix)
     - support for Editing multiple todo items (fix)
-    - fix the invaild display text while in the 
+    - fix the invaild display text while in the
     delete mode when invalid string enter (fix)
-    - fix the auto view after delete id is entered to 
+    - fix the auto view after delete id is entered to
     display updated List (fix)
-    - fix the invaild display text while in the 
+    - fix the invaild display text while in the
     Editing mode when invalid string enter (fix)
     - fix the prompt after invalid string
     is entered in Edit mode (partial fix)
     - handle edge case of edit_id = -1 (fix)
     - handle only existing ids for edit & delete (fix)
-    
+
 
 Nice to have
-    - remove text (Welcome to our first 
+    - remove text (Welcome to our first
     ToDo_App) before item list (done)
     - Add text "ID" to returned title (done)
     - Return maultiple same title (done)
@@ -101,8 +101,8 @@ Nice to have
     - call handle_item_operations for selected folder (done)
     - color code in run time (eg Invalid Entries, Mode of Operations) https://jakob-bagterp.github.io/colorist-for-python/
    (done)
-    - list # of items in folder when listing folders (done)  
-  
+    - list # of items in folder when listing folders (done)
+
 
 - Fix TODO-APP folder structure to have better separation of concerns (eg separate files for models, api routes, database interactions, etc) (done)
 
@@ -115,7 +115,7 @@ Nice to have
         - responsive design for different screen sizes  (done)
         - implement drag and drop for reordering items (done)
         - implement ordering of todo items (in array)) (done)
-        - enhance accessibility features (eg keyboard navigation, screen reader support)  
+        - enhance accessibility features (eg keyboard navigation, screen reader support)
         - optimize performance for large number of folders and items
         - implement a search algorithm (eg partial match, case insensitive)
         - dark mode toggle for better accessibility
@@ -130,7 +130,7 @@ Business Logic Changes
 
  - Automation and Integration
         - add automation testing (unit tests, integration tests, end-to-end tests)
-        - integrate into Ci/CD pipeline for automated testing (eg GitHub Actions, Jenkins) 
+        - integrate into Ci/CD pipeline for automated testing (eg GitHub Actions, Jenkins)
         - deploy to cloud platform (eg AWS, Heroku) for public access and scalability
 
 - Frontend Enhancements
@@ -149,7 +149,7 @@ Business Logic Changes
         - implement caching for improved performance
         - implement load balancing for high availability
         - implement monitoring and alerting for system health and performance
-   
+
 
   - comments in code to learn what the functions and methods are doing
 https://shoelace.style/components/radio-button
