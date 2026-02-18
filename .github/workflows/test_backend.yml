@@ -12,6 +12,11 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend/
+
     steps:  
     - name: Checkout code
       uses: actions/checkout@v4
@@ -19,15 +24,32 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.13'
+        python-version: '3.12'
 
     - name: Install uv
       run: pip install uv
 
-    - name: Install dependencies
-      run: uv sync
-      working-directory: ./backend/
+    - name: Cache uv
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/uv
+        key: uv-${{ runner.os }}-${{ hashFiles('backend/uv.lock') }}
+        restore-keys: |
+          uv-${{ runner.os }}-
+
+    - name: Install dependencies (including dev tools)
+      run: uv sync --group dev
+
+    # -------- QUALITY GATES --------
+
+    - name: Lint (ruff)
+      run: uv run ruff check .
+
+    - name: Format check (ruff)
+      run: uv run ruff format --check .
+
+    - name: Type check (mypy)
+      run: uv run mypy .
 
     - name: Run unit tests
-      run: uv run pytest
-      working-directory: ./backend/
+      run: uv run pytest --cov=. --cov-report=term-missing --cov-fail-under=70

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware 
 from library.folder_manager import FolderManager
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from fastapi.exceptions import RequestValidationError
 
 
@@ -45,11 +45,10 @@ class CreateFolder(BaseModel):
     title: str 
 
 class FolderResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     title: str
 
-    class Config:
-        from_attributes = True
 
 @app.post("/folders", response_model=FolderResponse)
 async def create_folder(new_folder_request:CreateFolder, db_session:Session = Depends(get_db)):
@@ -101,14 +100,13 @@ class CreateItem(BaseModel):
     title: str
 
 class ItemResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     title: str
     folder_id: int
     completed: bool
-    position: int
+    position: int 
 
-    class Config:
-        from_attributes = True
     
 class ItemArrayResponse(BaseModel):
     items: list[ItemResponse]
