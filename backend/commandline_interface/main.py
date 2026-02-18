@@ -1,20 +1,23 @@
-from library.folder_manager import FolderManager
-from library.folder import Folder
 from typing import Union
-from colorist import Color, effect_bold, BrightColor
+
+from colorist import BrightColor, Color, effect_bold
+
+from library.folder import Folder
+from library.folder_manager import FolderManager
+
 
 def todo_list():
     folder_manager = FolderManager()
     effect_bold(f"{Color.MAGENTA}Welcome to the Todo List App!{Color.OFF}")  # Initialize an empty todo list
-    effect_bold("You can manage Folders, Items, or Exit the app.") 
+    effect_bold("You can manage Folders, Items, or Exit the app.")
     commands = ["(f)olders", "(i)tems", "(ex)it"]
     command_str = "/".join(commands)
     while True:
         command = input(f"Enter command ({command_str}): ").strip().lower()
-       
+
         if command == "folders" or command == "f":
-            handle_folder_operations(folder_manager = folder_manager)
-            
+            handle_folder_operations(folder_manager=folder_manager)
+
         elif command == "items" or command == "i":
             if not folder_manager.does_any_folder_exist_in_foldermanager():
                 effect_bold(f"{Color.RED}Need to create a folder first{Color.OFF}")
@@ -34,6 +37,7 @@ def todo_list():
         else:
             effect_bold(f"{Color.RED}Unknown command. Please use '(f)olders', '(i)tems', or '(ex)it'.{Color.OFF}")
 
+
 def handle_folder_operations(folder_manager: FolderManager):
     commands = ["add", "view", "exit", "edit", "delete", "search"]
     command_str = "/".join(commands)
@@ -47,7 +51,7 @@ def handle_folder_operations(folder_manager: FolderManager):
                     break
                 folder_manager.add_folder(new_title)
 
-        elif command == "view" or command == "v" :
+        elif command == "view" or command == "v":
             folder_manager.list_folders_within_app()
 
         elif command == "edit" or command == "ed":
@@ -63,7 +67,7 @@ def handle_folder_operations(folder_manager: FolderManager):
                 updated_item[edit_id] = updated_title
                 folder_manager.edit_folders_within_app(updated_item)
 
-        elif command == "delete" or command == "d":  
+        elif command == "delete" or command == "d":
             while True:
                 folder_manager.list_folders_within_app()
                 delete_id = handle_input_int("Which folder title do you want to delete, unless done deleting. ID: ")
@@ -84,12 +88,13 @@ def handle_folder_operations(folder_manager: FolderManager):
                     continue
                 for folder in result_item:
                     print(f"Found {folder}")
-        
+
         elif command == "exit" or command == "ex":
             effect_bold(f"{BrightColor.GREEN}Exiting the Folder Manager.{BrightColor.OFF}")
             break
 
-def handle_item_operations(folder:Folder):
+
+def handle_item_operations(folder: Folder):
     commands = ["add", "view", "exit", "edit", "delete", "search"]
     command_str = "/".join(commands)
     while True:
@@ -102,7 +107,7 @@ def handle_item_operations(folder:Folder):
                     break
                 folder.add_new_items_to_folder([new_title])
 
-        elif command == "view" or command == "v" :
+        elif command == "view" or command == "v":
             folder.list_items_within_folder()
 
         elif command == "edit" or command == "ed":
@@ -118,7 +123,7 @@ def handle_item_operations(folder:Folder):
                 updated_item[edit_id] = updated_title
                 folder.edit_items_within_folder(updated_item)
 
-        elif command == "delete" or command == "d":  
+        elif command == "delete" or command == "d":
             while True:
                 folder.list_items_within_folder()
                 delete_id = handle_input_int("Which title do you want to delete, unless done deleting. ID: ")
@@ -139,12 +144,13 @@ def handle_item_operations(folder:Folder):
                     continue
                 for item in result_item:
                     print(f"Found {item}")
-        
+
         elif command == "exit" or command == "ex":
             effect_bold(f"{BrightColor.GREEN}Exiting the ToDo Item Manager.{BrightColor.OFF}")
             break
-              
-def handle_input_int(user_prompt:str)-> Union[int, None]:
+
+
+def handle_input_int(user_prompt: str) -> Union[int, None]:
     try:
         user_input = input(user_prompt).strip()
         if user_input == "":
@@ -153,5 +159,6 @@ def handle_input_int(user_prompt:str)-> Union[int, None]:
     except ValueError:
         effect_bold(f"{Color.RED}Invalid ID '{user_input}' was entered.{Color.OFF}")
         return -1
-    
+
+
 todo_list()

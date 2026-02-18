@@ -1,6 +1,7 @@
+import pytest
 
 from library.folder_manager import FolderManager, FolderManagerConstants
-import pytest
+
 
 @pytest.fixture
 def test_folder_manager():
@@ -9,39 +10,40 @@ def test_folder_manager():
 
 
 # happy path
-def test_add_folder_success(test_folder_manager:FolderManager):
-    #arrange
+def test_add_folder_success(test_folder_manager: FolderManager):
+    # arrange
     add_newfolder = "New Test Folder"
-    #act
+    # act
     new_folder = test_folder_manager.add_folder(add_newfolder)
 
-    #assert
+    # assert
     assert 1 == len(test_folder_manager.folders)
     assert add_newfolder == new_folder.title
 
+
 # error handling
-def test_add_folder_non_str_title_raise_exception(test_folder_manager:FolderManager):
-    #arrange
+def test_add_folder_non_str_title_raise_exception(test_folder_manager: FolderManager):
+    # arrange
     add_non_str_folder = []
 
-    #act / assert
+    # act / assert
     with pytest.raises(ValueError) as e:
         test_folder_manager.add_folder(add_non_str_folder)
     assert FolderManagerConstants.ERR_ADD_FOLDER_NON_STR == e.value.args[0]
 
 
 # edge case
-def test_add_folder_empty_title_raise_exception(test_folder_manager:FolderManager):
-    #arrange
+def test_add_folder_empty_title_raise_exception(test_folder_manager: FolderManager):
+    # arrange
     add_empty_folder = ""
 
-    #act / assert
+    # act / assert
     with pytest.raises(ValueError) as e:
         test_folder_manager.add_folder(add_empty_folder)
     assert FolderManagerConstants.ERR_EMPTY_FOLDER == e.value.args[0]
 
 
-def test_add_folder_whitespace_only_raises_exception(test_folder_manager:FolderManager):
+def test_add_folder_whitespace_only_raises_exception(test_folder_manager: FolderManager):
     # arrange
     whitespace_title = "   "
 
@@ -51,7 +53,7 @@ def test_add_folder_whitespace_only_raises_exception(test_folder_manager:FolderM
     assert FolderManagerConstants.ERR_EMPTY_FOLDER == e.value.args[0]
 
 
-def test_edit_folder_within_app_success_updates_title(test_folder_manager:FolderManager):
+def test_edit_folder_within_app_success_updates_title(test_folder_manager: FolderManager):
     # arrange
     f = test_folder_manager.add_folder("Orig")  # id 1
 
@@ -63,7 +65,7 @@ def test_edit_folder_within_app_success_updates_title(test_folder_manager:Folder
     assert updated.title == "New Title"
 
 
-def test_edit_folder_within_app_nonexistent_returns_none(test_folder_manager:FolderManager):
+def test_edit_folder_within_app_nonexistent_returns_none(test_folder_manager: FolderManager):
     # arrange - no folders
 
     # act
@@ -73,7 +75,9 @@ def test_edit_folder_within_app_nonexistent_returns_none(test_folder_manager:Fol
     assert result is None
 
 
-def test_edit_folders_within_app_batch_updates_and_skips_missing(test_folder_manager:FolderManager):
+def test_edit_folders_within_app_batch_updates_and_skips_missing(
+    test_folder_manager: FolderManager,
+):
     # arrange
     test_folder_manager.add_folder("A")  # id 1
     test_folder_manager.add_folder("B")  # id 2
@@ -87,9 +91,9 @@ def test_edit_folders_within_app_batch_updates_and_skips_missing(test_folder_man
     assert test_folder_manager.get_folder(99) is None
 
 
-def test_edit_folder_within_app_non_str_raises_error(test_folder_manager:FolderManager):
+def test_edit_folder_within_app_non_str_raises_error(test_folder_manager: FolderManager):
     # arrange
-    f=test_folder_manager.add_folder("one")  # id 1
+    f = test_folder_manager.add_folder("one")  # id 1
 
     # act / assert
     with pytest.raises(ValueError) as e:
@@ -97,7 +101,7 @@ def test_edit_folder_within_app_non_str_raises_error(test_folder_manager:FolderM
     assert FolderManagerConstants.ERR_ADD_FOLDER_NON_STR == e.value.args[0]
 
 
-def test_edit_folder_within_app_empty_str_raises_error(test_folder_manager:FolderManager):
+def test_edit_folder_within_app_empty_str_raises_error(test_folder_manager: FolderManager):
     # arrange
     f = test_folder_manager.add_folder("one")  # id 1
 
@@ -107,7 +111,7 @@ def test_edit_folder_within_app_empty_str_raises_error(test_folder_manager:Folde
     assert FolderManagerConstants.ERR_EMPTY_FOLDER == e.value.args[0]
 
 
-def test_remove_folder_within_app_success(test_folder_manager:FolderManager):
+def test_remove_folder_within_app_success(test_folder_manager: FolderManager):
     # arrange
     test_folder_manager.add_folder("one")  # id 1
     test_folder_manager.add_folder("two")  # id 2
@@ -121,7 +125,7 @@ def test_remove_folder_within_app_success(test_folder_manager:FolderManager):
     assert 1 not in remaining_ids
 
 
-def test_remove_folder_within_app_nonexistent_id_no_change(test_folder_manager:FolderManager):
+def test_remove_folder_within_app_nonexistent_id_no_change(test_folder_manager: FolderManager):
     # arrange
     test_folder_manager.add_folder("only")  # id 1
 
@@ -133,11 +137,11 @@ def test_remove_folder_within_app_nonexistent_id_no_change(test_folder_manager:F
     assert test_folder_manager.folders[0].title == "only"
 
 
-def test_remove_folders_within_app_success_and_skips_missing(test_folder_manager:FolderManager):
+def test_remove_folders_within_app_success_and_skips_missing(test_folder_manager: FolderManager):
     # arrange
-    test_folder_manager.add_folder("one")   # id 1
-    test_folder_manager.add_folder("two")   # id 2
-    test_folder_manager.add_folder("three") # id 3
+    test_folder_manager.add_folder("one")  # id 1
+    test_folder_manager.add_folder("two")  # id 2
+    test_folder_manager.add_folder("three")  # id 3
 
     # act
     test_folder_manager.remove_folders_within_app([1, 3, 99])
@@ -147,7 +151,7 @@ def test_remove_folders_within_app_success_and_skips_missing(test_folder_manager
     assert remaining_titles == ["two"]
 
 
-def test_remove_folders_within_app_on_empty_manager_is_noop(test_folder_manager:FolderManager):
+def test_remove_folders_within_app_on_empty_manager_is_noop(test_folder_manager: FolderManager):
     # arrange - manager starts empty
 
     # act (should not raise)
@@ -157,7 +161,7 @@ def test_remove_folders_within_app_on_empty_manager_is_noop(test_folder_manager:
     assert test_folder_manager.folders == []
 
 
-def test_does_any_any_folder_exist_true_and_false(test_folder_manager:FolderManager):
+def test_does_any_any_folder_exist_true_and_false(test_folder_manager: FolderManager):
     # arrange
     test_folder_manager.add_folder("exists")  # id 1
 
@@ -167,7 +171,7 @@ def test_does_any_any_folder_exist_true_and_false(test_folder_manager:FolderMana
     assert test_folder_manager.does_folder_exist(999) is False
 
 
-def test_get_folders_works_and_if_folder_do_not_exist_it_skips(test_folder_manager:FolderManager):
+def test_get_folders_works_and_if_folder_do_not_exist_it_skips(test_folder_manager: FolderManager):
     # arrange
     test_folder_manager.add_folder("x")  # id 1
     test_folder_manager.add_folder("y")  # id 2
@@ -176,13 +180,15 @@ def test_get_folders_works_and_if_folder_do_not_exist_it_skips(test_folder_manag
     assert isinstance(test_folder_manager.get_folders(), list)
     assert test_folder_manager.get_folder(99) is None
 
-def test_get_folder_work(test_folder_manager:FolderManager):
+
+def test_get_folder_work(test_folder_manager: FolderManager):
     # arrange
     test_folder_manager.add_folder("x")  # id 1
     test_folder_manager.add_folder("y")  # id 2
 
     # act / assert
     assert test_folder_manager.get_folder(2).title == "y"
+
 
 """
 def test_search_for_folders_using_title_prefix_case_insensitive_and_trimming(test_folder_manager:FolderManager):
