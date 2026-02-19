@@ -1,6 +1,6 @@
 CREATE TABLE folder (
     -- SERIAL is the PostgreSQL type for an auto-incrementing integer primary key
-    id SERIAL PRIMARY KEY, 
+    id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL
 );
 
@@ -23,5 +23,5 @@ CREATE TABLE public.todo_item (
 
 -- public.todo_item foreign keys
 
-ALTER TABLE public.todo_item 
+ALTER TABLE public.todo_item
 ADD CONSTRAINT todo_item_folder_id_fkey FOREIGN KEY (folder_id) REFERENCES public.folder(id) ON DELETE CASCADE;

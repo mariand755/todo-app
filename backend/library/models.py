@@ -1,8 +1,9 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-import sqlalchemy as sa
 
+import sqlalchemy as sa
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 # database config
 DB_USER = os.getenv("POSTGRES_USER", "postgres")
@@ -17,14 +18,11 @@ except Exception:
     # Fallback to an in-memory sqlite DB when engine creation fails (useful for tests / missing drivers)
     engine = create_engine("sqlite:///:memory:", echo=False)
 
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
-Base.metadata.bind = engine
+
+Base: DeclarativeMeta = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
@@ -32,22 +30,22 @@ def get_db():
         yield db
     finally:
         db.close()
-    
+
+
 class Folder(Base):
     __tablename__ = "folder"
-    
+
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String, nullable=False)
     is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
+
 
 class TodoItem(Base):
     __tablename__ = "todo_item"
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String, nullable=False)
-    folder_id = sa.Column(sa.Integer, sa.ForeignKey('folder.id'), nullable=False)
+    folder_id = sa.Column(sa.Integer, sa.ForeignKey("folder.id"), nullable=False)
     is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
     completed = sa.Column(sa.Boolean, default=False, nullable=False)
-    position = sa.Column(sa.Integer, default= -1, nullable=False)
-
-
+    position = sa.Column(sa.Integer, default=-1, nullable=False)

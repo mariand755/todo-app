@@ -24,17 +24,17 @@ const NewFolderForm = ({ onNewFolder }) => {
     return (
         <>
             {/* Keep elements directly inside the li.add-folder so current CSS applies */}
-            <SlInput 
-                id="new-folder-input" 
-                type="text" 
-                placeholder="Add New Folder" 
-                value={title} 
+            <SlInput
+                id="new-folder-input"
+                type="text"
+                placeholder="Add New Folder"
+                value={title}
                 onSlInput={(e) => setTitle(e.target.value)}
                 onKeyUp={handleKeyPress}
                 size="medium"
             />
-            <SlButton 
-                id="add-folder-btn" 
+            <SlButton
+                id="add-folder-btn"
                 variant="primary"
                 onClick={handleSubmit}
                 size="medium"

@@ -3,12 +3,41 @@ name = "app"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "colorist==1.8.6",
     "fastapi[standard]>=0.118.0",
     "psycopg2-binary>=2.9.11",
-    "pytest>=9.0.2",
     "sqlalchemy>=2.0.44",
     "uvicorn>=0.37.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.4.0",
+    "pytest-cov>=5.0.0",
+    "mypy>=1.8.0",
+    "pre-commit>=4.5.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --maxfail=1 -m 'not integration' -W error"
+markers = [
+  "unit: fast tests that do not require external services",
+  "integration: tests that require external services like Postgres",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]

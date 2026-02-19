@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback} from 'react';
 import update from 'immutability-helper'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { makeAPICall } from './useApi'; 
+import { makeAPICall } from './useApi';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import LandingContent from './components/LandingContent';
-import './styles.css'; 
+import './styles.css';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/');
@@ -25,7 +25,7 @@ function App() {
             if (data) {
                 const folders = await data.json();
                 setFolders(folders);
-                // The original script.js had commented-out logic to load the first folder's items, 
+                // The original script.js had commented-out logic to load the first folder's items,
                 // but let's just initialize state here.
                 if (folders.length > 0) {
                     // setActiveFolderId(folders[0].id);
@@ -114,7 +114,7 @@ function App() {
         const rawApiResponse = await makeAPICall("PUT", `/folders/${folderId}`, { title: newTitle });
         if (rawApiResponse) {
             const updatedFolder = await rawApiResponse.json();
-            setFolders(prevFolders => 
+            setFolders(prevFolders =>
                 prevFolders.map(folder => {
                     if (folder.id === folderId) {
                         return updatedFolder;
@@ -159,7 +159,7 @@ function App() {
         const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/items/${itemId}/toggle`);
         if (rawApiResponse) {
             const updatedItem = await rawApiResponse.json();
-            setItems(prevItems => 
+            setItems(prevItems =>
                 prevItems.map(item => {
                     if (item.id === itemId) {
                         return updatedItem;
@@ -181,7 +181,7 @@ function App() {
         const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/items/${itemId}`, { title: newTitle });
         if (rawApiResponse) {
             const updatedItem = await rawApiResponse.json();
-            setItems(prevItems => 
+            setItems(prevItems =>
                 prevItems.map(item => {
                     if (item.id === itemId) {
                         return updatedItem;
@@ -232,11 +232,11 @@ function App() {
     // Determine the title to display (compare IDs as strings to avoid type mismatch)
     const activeFolder = folders.find(f => String(f.id) === String(activeFolderId));
     const currentTitle = activeFolder ? activeFolder.title : "";
-    
+
     // Drag and drop handler
     const moveToDoItem = useCallback((dragIndex, hoverIndex) => {
       setItems((prevItems) => {
-        const updatedItems = update(prevItems, { 
+        const updatedItems = update(prevItems, {
           $splice: [
             [dragIndex, 1],
             [hoverIndex, 0, prevItems[dragIndex]],
@@ -244,7 +244,7 @@ function App() {
         })
         const updatedIds = updatedItems.map(item => item.id);
         handleReorderItems(updatedIds);
-        return updatedItems;                    
+        return updatedItems;
       }
       )
     }, [])
@@ -252,22 +252,22 @@ function App() {
     // Render the main app layout
     return (
         <div id="app-container">
-            <Sidebar 
-                folders={folders} 
-                activeFolderId={activeFolderId} 
+            <Sidebar
+                folders={folders}
+                activeFolderId={activeFolderId}
                 onFolderClick={loadFolderItems}
                 onNewFolder={handleNewFolder}
                 onEditFolder={handleEditFolder}
                 onHomeClick={handleHomeClick}
             />
-        <DndProvider backend={HTML5Backend}>    
+        <DndProvider backend={HTML5Backend}>
 
-            {activeFolderId ? <MainContent  
-                currentFolderTitle={currentTitle} 
+            {activeFolderId ? <MainContent
+                currentFolderTitle={currentTitle}
                 items={items}
                 currentFolderId={activeFolderId}
                 onEditFolder={handleEditFolder}
-                onDeleteFolder={handleDeleteFolder}  
+                onDeleteFolder={handleDeleteFolder}
                 onAddTodo={handleAddTodo}
                 onToggleTodo={onToggleTodo}
                 onDeleteToDoItem={handleDeleteToDoItem}

@@ -4,7 +4,7 @@ export async function makeAPICall(http_method, api_path, payload=null){
     const url = `${apiURL}${api_path}`
     const method = http_method.toUpperCase()
     if (method == 'GET'){
-        try { 
+        try {
             const result = await fetch(url)
             return result
         } catch(ex){
@@ -12,9 +12,9 @@ export async function makeAPICall(http_method, api_path, payload=null){
             return null
         }
     }
-    try { 
+    try {
         const result = await fetch(url, {
-            method: method, 
+            method: method,
             body: JSON.stringify(payload),
             headers: {
                 'Content-Type': 'application/json'

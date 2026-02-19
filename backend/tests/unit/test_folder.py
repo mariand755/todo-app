@@ -1,5 +1,7 @@
-from library.folder import Folder, FolderConstants 
 import pytest
+
+from library.folder import Folder, FolderConstants
+
 
 # Fixture
 @pytest.fixture
@@ -9,6 +11,7 @@ def test_folder():
 
     t_f = Folder(dummy_id, dummy_title)
     return t_f
+
 
 # happy path first
 def test_add_new_items_to_folder_success(test_folder):
@@ -23,6 +26,7 @@ def test_add_new_items_to_folder_success(test_folder):
     actual = len(test_folder.items)
     assert expected == actual
 
+
 # error handling
 def test_add_new_items_to_folder_non_array_input_throws_exception(test_folder):
     # arrange
@@ -31,8 +35,9 @@ def test_add_new_items_to_folder_non_array_input_throws_exception(test_folder):
     # act / assert
     with pytest.raises(ValueError) as err:
         test_folder.add_new_items_to_folder(items_not_array)
-    assert FolderConstants.ERR_ITEMS_NOT_ARRAY ==  err.value.args[0]
-    
+    assert FolderConstants.ERR_ITEMS_NOT_ARRAY == err.value.args[0]
+
+
 # edge case
 def test_add_new_items_to_folder_empty_array_adds_no_items(test_folder):
     # arrange
@@ -46,38 +51,40 @@ def test_add_new_items_to_folder_empty_array_adds_no_items(test_folder):
     actual = len(test_folder.items)
     assert expected == actual
 
+
 # happy path
 def test_add_new_item_to_folder_success(test_folder):
-    #arrange
+    # arrange
     test_item = "test_item1"
 
-    #act
+    # act
     test_folder.add_new_item_to_folder(test_item)
-    #assert
+    # assert
     excepted = 1
     actual = len(test_folder.items)
     assert excepted == actual
 
+
 # error handling
 def test_add_new_item_to_folder_non_str_inputs_raises_error(test_folder):
-    #arrange
+    # arrange
     non_str_input = ()
 
-    #act /assert
+    # act /assert
     with pytest.raises(ValueError) as err:
         test_folder.add_new_item_to_folder(non_str_input)
     assert FolderConstants.ERR_NON_STR_INPUT == err.value.args[0]
-  
+
+
 # edge case
 def test_add_new_item_to_folder_empty_str_inputs_raises_error(test_folder):
-    #arrange
+    # arrange
     empty_str_input = ""
 
-    #act /assert
+    # act /assert
     with pytest.raises(ValueError) as err:
         test_folder.add_new_item_to_folder(empty_str_input)
     assert FolderConstants.ERR_EMPTY_STR_INPUT == err.value.args[0]
-
 
 
 def test_remove_item_within_folder_success(test_folder):
@@ -109,9 +116,9 @@ def test_remove_item_within_folder_nonexistent_id_no_change(test_folder):
 
 def test_remove_items_within_folder_success(test_folder):
     # arrange
-    test_folder.add_new_item_to_folder("one")   # id 1
-    test_folder.add_new_item_to_folder("two")   # id 2
-    test_folder.add_new_item_to_folder("three") # id 3
+    test_folder.add_new_item_to_folder("one")  # id 1
+    test_folder.add_new_item_to_folder("two")  # id 2
+    test_folder.add_new_item_to_folder("three")  # id 3
 
     # act
     test_folder.remove_items_within_folder([1, 3])
@@ -187,7 +194,8 @@ def test_get_items_and_get_item_are_in_listformat(test_folder):
     # assert
     assert isinstance(items, list)
 
-def test_get_items_and_get_item_num_in_folder(test_folder:Folder):
+
+def test_get_items_and_get_item_num_in_folder(test_folder: Folder):
     # arrange
     test_folder.add_new_item_to_folder("x")  # id 1
     test_folder.add_new_item_to_folder("y")  # id 2
@@ -199,7 +207,7 @@ def test_get_items_and_get_item_num_in_folder(test_folder:Folder):
     assert len(items) == 2
 
 
-def test__get_item_not_empty(test_folder:Folder):
+def test__get_item_not_empty(test_folder: Folder):
     # arrange
     test_folder.add_new_item_to_folder("x")  # id 1
     test_folder.add_new_item_to_folder("y")  # id 2
@@ -210,7 +218,8 @@ def test__get_item_not_empty(test_folder:Folder):
     # assert
     assert item is not None and item.title == "y"
 
-def test_get_item_none_existing_item_fails_silently(test_folder:Folder):
+
+def test_get_item_none_existing_item_fails_silently(test_folder: Folder):
     # arrange
     test_folder.add_new_item_to_folder("x")  # id 1
     test_folder.add_new_item_to_folder("y")  # id 2
@@ -220,6 +229,7 @@ def test_get_item_none_existing_item_fails_silently(test_folder:Folder):
 
     # assert
     assert missing is None
+
 
 """
 def test_search_for_item_in_folder_and_none(test_folder):

@@ -1,7 +1,4 @@
-import importlib
-from types import SimpleNamespace
 import sqlalchemy as sa
-import pytest
 
 import library.models as models
 
@@ -40,6 +37,7 @@ def test_get_db_generator_closes_session(monkeypatch):
     class DummySession:
         def __init__(self):
             self.closed = False
+
         def close(self):
             self.closed = True
 
@@ -56,6 +54,7 @@ def test_get_db_generator_closes_session(monkeypatch):
 
     # ASSERT - the dummy session was closed
     assert session.closed is True
+
 
 """
 def test_engine_falls_back_to_sqlite_when_create_engine_raises(monkeypatch):

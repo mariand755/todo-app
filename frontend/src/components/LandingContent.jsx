@@ -21,7 +21,7 @@ const LandingContent = () => {
                     <p className="hero-description">
                         A simple, intuitive way to manage your to-do lists. Create folders, add items, and track your progress.
                     </p>
-                    
+
                 </div>
                 <div className="hero-icon">
                     <span className="icon-large">📋</span>
