@@ -40,3 +40,4 @@ ignore = ["B008"]
 python_version = "3.12"
 strict = false
 ignore_missing_imports = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]

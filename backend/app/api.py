@@ -1,3 +1,5 @@
+from typing import Sequence, cast
+
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,13 +7,12 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from library.folder_manager import FolderManager
 from library.models import Folder as FolderModel
 from library.models import TodoItem as TodoItemModel
 from library.models import get_db
 
 app = FastAPI()
-folder_manager = FolderManager()
+
 origins = ["http://localhost:3000"]
 
 app.add_middleware(
@@ -122,7 +123,7 @@ class ItemResponse(BaseModel):
 
 
 class ItemArrayResponse(BaseModel):
-    items: list[ItemResponse]
+    items: Sequence[ItemResponse]
 
 
 @app.post("/folders/{folder_id}/items", response_model=ItemResponse)
@@ -265,21 +266,20 @@ async def item_order(folder_id: int, update_item_order: UpdateItemOrder, db_sess
     folder = db_session.get(FolderModel, folder_id)
     if folder is None:
         raise HTTPException(status_code=404, detail="Folder not found")
-    item = (
+    items = (
         db_session.query(TodoItemModel)
         .filter(
-            TodoItemModel.folder_id.in_(update_item_order.itemOrder_id) == folder_id,
+            TodoItemModel.folder_id == folder_id,
+            TodoItemModel.id.in_(update_item_order.itemOrder_id),
         )
         .all()
     )
-    for i in item:
-        index = update_item_order.itemOrder_id.index(i.id)
-        i.position = index
-    db_session.add_all(item)
+    for item in items:
+        item_id = cast(int, item.id)
+        index = update_item_order.itemOrder_id.index(item_id)
+        item.position = index
+    db_session.add_all(items)
     db_session.commit()
 
-    def item_pos(i):
-        return i.position
-
-    item = sorted(item, key=item_pos)
-    return ItemArrayResponse(items=item)
+    items_sorted = sorted(items, key=lambda x: cast(int, x.position))
+    return ItemArrayResponse(items=[ItemResponse.model_validate(x) for x in items_sorted])
