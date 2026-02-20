@@ -41,3 +41,7 @@ curl -X POST http://localhost:8000/folders/1/items/1/undo | jq
 
 # stopping the server
  docker-compose down
+
+#Fun code/test coverage report (run in container)
+uv run pytest --cov=. --cov-report=term-missing
+uv run pytest --cov=app --cov=library --cov=commandline_interface --cov-report=term-missing
