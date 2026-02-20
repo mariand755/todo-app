@@ -1,0 +1,97 @@
+name: Nightly Backend
+
+on:
+  schedule:
+    # Runs at 06:00 UTC every day (≈ 1am ET / 2am ET depending on DST) - adjust as needed (cron: "0 6 * * 1" for weekly)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-backend
+  cancel-in-progress: true
+
+jobs:
+  backend-quality-and-audit:
+    name: Backend quality + dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: ./backend/
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('backend/uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Install dependencies (including dev tools)
+        run: uv sync --frozen --group dev
+
+      # -------- QUALITY GATES --------
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Format check (ruff)
+        run: uv run ruff format --check .
+
+      - name: Type check (mypy)
+        run: uv run mypy app library commandline_interface
+
+      - name: Run tests + coverage
+        run: uv run pytest --cov=app --cov=library --cov-report=term-missing --cov-fail-under=85
+
+      # -------- SECURITY (SCA) --------
+      - name: Dependency audit (pip-audit)
+        run: uv run pip-audit
+
+  docker-build-and-trivy:
+    name: Docker build + Trivy scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Builds your backend image locally (doesn't push)
+      - name: Build backend image (local)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: backend:nightly
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trivy scan (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: backend:nightly
+          format: table
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          exit-code: "1"

@@ -1,7 +1,9 @@
 CREATE TABLE folder (
     -- SERIAL is the PostgreSQL type for an auto-incrementing integer primary key
     id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL
+    title VARCHAR(255) NOT NULL,
+	is_deleted bool DEFAULT false NULL
+
 );
 
 -- public.todo_item definition
