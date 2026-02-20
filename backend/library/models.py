@@ -2,7 +2,7 @@ import os
 
 import sqlalchemy as sa
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 # database config
@@ -30,6 +30,16 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def get_next_item_position(db_session: Session, folder_id: int) -> int:
+    """Return the next position index for a new TodoItem in the folder.
+
+    This counts non-deleted items in the folder and returns that count
+    (so the first item will have position 0).
+    """
+    count = db_session.query(TodoItem).filter(TodoItem.folder_id == folder_id, TodoItem.is_deleted.is_(False)).count()
+    return int(count)
 
 
 class Folder(Base):

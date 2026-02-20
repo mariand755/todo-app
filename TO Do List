@@ -157,7 +157,7 @@ https://shoelace.style/components/radio-button
 
 
 
-Frntend Issues
+Frontend Issues
     - items within folder moves position to the last row after it's edited (fix need to maintain position in list)
     - for accessibility, when opening the item edit menu, the input field should be focused for better user experience 
     - when refreshing the page within a folder, the page should not flash the default welcome text before loading the folders and items 

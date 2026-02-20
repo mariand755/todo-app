@@ -131,7 +131,16 @@ async def create_new_item(folder_id: int, new_item_request: CreateItem, db_sessi
     folder = db_session.query(FolderModel).filter(FolderModel.id == folder_id).first()
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
-    add_new_item = TodoItemModel(title=new_item_request.title, folder_id=folder_id)
+    # Determine next position within the folder. If no items exist, start at 0.
+    existing_items = (
+        db_session.query(TodoItemModel)
+        .filter(TodoItemModel.folder_id == folder_id, TodoItemModel.is_deleted.is_(False))
+        .order_by(TodoItemModel.position)
+        .all()
+    )
+    next_position = len(existing_items)
+
+    add_new_item = TodoItemModel(title=new_item_request.title, folder_id=folder_id, position=next_position)
     db_session.add(add_new_item)
     db_session.commit()
     return add_new_item

@@ -504,7 +504,8 @@ def test_create_item_default_values(test_client: TestClient, testing_db_session:
     assert create_item_response.status_code == 200
     res_json = create_item_response.json()
     assert not res_json["completed"]
-    assert res_json["position"] == -1
+    # New items should be assigned a sequential position starting at 0
+    assert res_json["position"] == 0
 
 
 # GET /folders/{folder_id}/items/{item_id} - Get specific item within folder

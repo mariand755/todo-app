@@ -65,7 +65,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "colorist", specifier = "==1.8.6" },
+    { name = "colorist", specifier = "==1.8.12" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.118.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "python-multipart", specifier = ">=0.0.22" },
@@ -210,11 +210,11 @@ wheels = [
 
 [[package]]
 name = "colorist"
-version = "1.8.6"
+version = "1.8.12"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/76/04/7eb24f76675df8ba53d8c001134c4c825fe6ff524436704876999d44b096/colorist-1.8.6.tar.gz", hash = "sha256:128e60b53466e6df14f951ae20a5dda51bb1e7a806cd4ff5390d659f1488ab8a", size = 22234, upload-time = "2025-09-01T20:45:46.228Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ea/9d/4ec39bbd727c4fdad9b8d676841178b8cb69ffa5697dc27a2852e5bedff1/colorist-1.8.12.tar.gz", hash = "sha256:b8512dd8df8c4ce30f6faa833ddc8ec4c3ccb2e517223d187af50e199dd8104c", size = 19813, upload-time = "2026-02-12T01:08:43.662Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/cc/de6e7d409ab2f23e0cdeba229de5b8d0f8f4acb6531664f5f5af85ee53af/colorist-1.8.6-py3-none-any.whl", hash = "sha256:c39ab020445caf7ad5998216cc61c7cea007e22de7d2adf08c17ef044013841d", size = 40331, upload-time = "2025-09-01T20:45:44.668Z" },
+    { url = "https://files.pythonhosted.org/packages/44/b3/f3b4170ecf4d169dd0495a44e6735b76c41ac0f4c6b19ebca2e75103f250/colorist-1.8.12-py3-none-any.whl", hash = "sha256:5f26296c4eb351cebff70cb64f2ea35e6b67db7bff7af43e25455e01c9d46f02", size = 46473, upload-time = "2026-02-12T01:08:42.071Z" },
 ]
 
 [[package]]
