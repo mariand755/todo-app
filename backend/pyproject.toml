@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "colorist==1.8.6",
+    "colorist==1.8.12",
     "fastapi[standard]>=0.118.0",
 
     # Explicit overrides to avoid known vulnerable transitive versions
