@@ -52,7 +52,7 @@ jobs:
         run: docker run --rm --init --pull=never backend:test
 
       - name: Trivy scan (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           image-ref: backend:test
           format: table
@@ -74,7 +74,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Trivy scan runtime (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           image-ref: backend:runtime
           format: table
