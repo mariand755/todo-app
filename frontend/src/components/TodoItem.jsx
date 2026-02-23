@@ -112,8 +112,12 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem, moveToDoIte
                             >
                                     <SlIcon slot="trigger" name="three-dots-vertical"></SlIcon>
                                     <SlMenu style={{ maxWidth: '200px' }}>
-                                        <SlMenuItem value="edit" onClick={() => setOpenDialog(true)}>Edit</SlMenuItem>
-                                        <SlDivider/>
+                                        {!item.completed && (
+                                            <>
+                                                <SlMenuItem value="edit" onClick={() => setOpenDialog(true)}>Edit</SlMenuItem>
+                                                <SlDivider/>
+                                            </>
+                                        )}
                                         <SlMenuItem value="delete" onClick={() => setDeleteDialog(true)}>Delete</SlMenuItem>
                                     </SlMenu>
                                 </SlDropdown>
