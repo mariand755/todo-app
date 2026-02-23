@@ -1,44 +1,12 @@
-import uuid
-
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from library.models import Folder, TodoItem
-
-
-def seed_db_with_test_folder(
-    testing_db_session: Session,
-    random_title: str = f"test_{uuid.uuid4()}",
-    is_folder_deleted: bool = False,
-) -> Folder:
-    folder = Folder(title=random_title, is_deleted=is_folder_deleted)
-    testing_db_session.add(folder)
-    testing_db_session.flush()
-    return folder
-
-
-def create_test_payload(num: int) -> list[dict]:
-    return [{"title": f"test_{uuid.uuid4()}"} for i in range(num)]
-
-
-def seed_db_with_test_item(
-    testing_db_session: Session,
-    folder: Folder,
-    random_title: str = f"test_{uuid.uuid4()}",
-    is_item_deleted: bool = False,
-    completed: bool = False,
-    position: int = -1,
-) -> TodoItem:
-    item = TodoItem(
-        folder_id=folder.id,
-        title=random_title,
-        is_deleted=is_item_deleted,
-        completed=completed,
-        position=position,
-    )
-    testing_db_session.add(item)
-    testing_db_session.flush()
-    return item
+# Re-export helpers from the shared helpers module to keep existing tests working
+from tests.helpers import (
+    create_test_payload,
+    seed_db_with_test_folder,
+    seed_db_with_test_item,
+)
 
 
 def test_get_default_empty_folders_success(test_client: TestClient):

@@ -198,8 +198,8 @@ function App() {
         console.log('Reordering items:', itemIds);
         const rawApiResponse = await makeAPICall("PUT", `/folders/${activeFolderId}/item_order`, { itemOrder_id: itemIds });
         if (rawApiResponse) {
-            const reorderedItems = await rawApiResponse.json();
-            setItems(reorderedItems);
+            const response = await rawApiResponse.json();
+            setItems(response.items);
         }
     };
 
@@ -247,7 +247,7 @@ function App() {
         return updatedItems;
       }
       )
-    }, [])
+    }, [activeFolderId])
 
     // Render the main app layout
     return (

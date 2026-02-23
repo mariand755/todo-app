@@ -160,7 +160,8 @@ https://shoelace.style/components/radio-button
 Frontend Issues
     - items within folder moves position to the last row after it's edited (fix need to maintain position in list) - done
     - prevent completed items from being edited, so hide the edit field but show delete field as it can still be deleted (also, completed items can still be change back to uncompleted) - done
+    - when items are moved it should be maintained after refreshing the page - done 
     - for accessibility, when opening the item edit menu, the input field should be focused for better user experience 
     - when refreshing the page within a folder, the page should not flash the default welcome text before loading the folders and items 
 
-    - when items are moved it should be maintained after refreshing the page 
+    

@@ -11,6 +11,27 @@ from library.models import Folder as FolderModel
 from library.models import TodoItem as TodoItemModel
 from library.models import get_db
 
+
+def apply_item_order_positions(all_items, item_order_ids: list[int]):
+    """Assign sequential positions to `all_items` based on `item_order_ids`.
+
+    - Items whose id appears in `item_order_ids` receive positions according to that list.
+    - Items not present in the list are assigned positions after the listed items.
+
+    This function mutates the objects in `all_items` in-place and also returns them.
+    """
+    position_map = {item_id: idx for idx, item_id in enumerate(item_order_ids)}
+    next_position = len(item_order_ids)
+    for item in all_items:
+        item_id = cast(int, item.id)
+        if item_id in position_map:
+            item.position = position_map[item_id]
+        else:
+            item.position = next_position
+            next_position += 1
+    return all_items
+
+
 app = FastAPI()
 
 origins = ["http://localhost:3000"]
@@ -275,20 +296,23 @@ async def item_order(folder_id: int, update_item_order: UpdateItemOrder, db_sess
     folder = db_session.get(FolderModel, folder_id)
     if folder is None:
         raise HTTPException(status_code=404, detail="Folder not found")
-    items = (
+
+    # Query ALL non-deleted items in the folder
+    all_items = (
         db_session.query(TodoItemModel)
         .filter(
             TodoItemModel.folder_id == folder_id,
-            TodoItemModel.id.in_(update_item_order.itemOrder_id),
+            TodoItemModel.is_deleted.is_(False),
         )
         .all()
     )
-    for item in items:
-        item_id = cast(int, item.id)
-        index = update_item_order.itemOrder_id.index(item_id)
-        item.position = index
-    db_session.add_all(items)
+
+    # Apply ordering using helper to keep logic testable
+    apply_item_order_positions(all_items, update_item_order.itemOrder_id)
+
+    db_session.add_all(all_items)
     db_session.commit()
 
-    items_sorted = sorted(items, key=lambda x: cast(int, x.position))
+    # Return all items sorted by position
+    items_sorted = sorted(all_items, key=lambda x: cast(int, x.position))
     return ItemArrayResponse(items=[ItemResponse.model_validate(x) for x in items_sorted])
