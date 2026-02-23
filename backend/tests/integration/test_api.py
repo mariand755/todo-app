@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-# Re-export helpers from the shared helpers module to keep existing tests working
+# Export helpers from the shared helpers module
 from tests.helpers import (
     create_test_payload,
     seed_db_with_test_folder,

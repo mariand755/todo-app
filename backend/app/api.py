@@ -11,27 +11,6 @@ from library.models import Folder as FolderModel
 from library.models import TodoItem as TodoItemModel
 from library.models import get_db
 
-
-def apply_item_order_positions(all_items, item_order_ids: list[int]):
-    """Assign sequential positions to `all_items` based on `item_order_ids`.
-
-    - Items whose id appears in `item_order_ids` receive positions according to that list.
-    - Items not present in the list are assigned positions after the listed items.
-
-    This function mutates the objects in `all_items` in-place and also returns them.
-    """
-    position_map = {item_id: idx for idx, item_id in enumerate(item_order_ids)}
-    next_position = len(item_order_ids)
-    for item in all_items:
-        item_id = cast(int, item.id)
-        if item_id in position_map:
-            item.position = position_map[item_id]
-        else:
-            item.position = next_position
-            next_position += 1
-    return all_items
-
-
 app = FastAPI()
 
 origins = ["http://localhost:3000"]
@@ -238,34 +217,6 @@ async def delete_item(folder_id: int, item_id: int, db_session: Session = Depend
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# @app.put("/folders/{folder_id}/undo", response_model=FolderResponse)
-# async def undo_folder(folder_id:int, db_session:Session = Depends(get_db)):
-#     folder = db_session.get(FolderModel, folder_id)
-#     if folder == None:
-#         raise HTTPException(status_code=404, detail="Folder not found")
-#     folder.is_deleted = False
-#     db_session.add(folder)
-#     db_session.commit()
-#     return folder
-
-
-# @app.put("/folders/{folder_id}/items/{item_id}/undo", response_model=ItemResponse)
-# async def undo_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
-#     folder = db_session.get(FolderModel, folder_id)
-#     if folder == None:
-#         raise HTTPException(status_code=404, detail="Folder not found")
-#     item = db_session.query(TodoItemModel).filter(
-#         TodoItemModel.folder_id == folder_id,
-#         TodoItemModel.id == item_id,
-#     ).first()
-#     if item == None:
-#         raise HTTPException(status_code=404, detail="Item not found")
-#     item.is_deleted = False
-#     db_session.add(item)
-#     db_session.commit()
-#     return item
-
-
 @app.put("/folders/{folder_id}/items/{item_id}/toggle", response_model=ItemResponse)
 async def toggle_item(folder_id: int, item_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
@@ -289,6 +240,26 @@ async def toggle_item(folder_id: int, item_id: int, db_session: Session = Depend
 
 class UpdateItemOrder(BaseModel):
     itemOrder_id: list[int] = Field(..., min_length=1)
+
+
+def apply_item_order_positions(all_items, item_order_ids: list[int]):
+    """Assign sequential positions to `all_items` based on `item_order_ids`.
+
+    - Items whose id appears in `item_order_ids` receive positions according to that list.
+    - Items not present in the list are assigned positions after the listed items.
+
+    This function mutates the objects in `all_items` in-place and also returns them.
+    """
+    position_map = {item_id: idx for idx, item_id in enumerate(item_order_ids)}
+    next_position = len(item_order_ids)
+    for item in all_items:
+        item_id = cast(int, item.id)
+        if item_id in position_map:
+            item.position = position_map[item_id]
+        else:
+            item.position = next_position
+            next_position += 1
+    return all_items
 
 
 @app.put("/folders/{folder_id}/item_order", response_model=ItemArrayResponse)

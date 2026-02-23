@@ -36,6 +36,7 @@ Organize tasks into folders, add, edit, delete, and search items efficiently.
 
 - **Testing**:
    Unit tests under `backend/tests/`.
+   Integration tests under `backend/tests/`.
 
 
 ## Project Structure
