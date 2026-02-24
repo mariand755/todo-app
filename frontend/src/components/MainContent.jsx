@@ -68,7 +68,13 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                             onMouseEnter={() => setIsOpen(true)}
                             onMouseLeave={() => setIsOpen(false)}
                         >
-                            <SlIcon slot="trigger" name="three-dots-vertical"></SlIcon>
+                            <SlIcon 
+                                slot="trigger" 
+                                name="three-dots-vertical"
+                                aria-label="Folder options menu"
+                                title="Folder options"
+                                tabIndex="0"
+                            ></SlIcon>
                             <SlMenu style={{ maxWidth: '200px' }}>
                                 <SlMenuItem value="edit" onClick={() => setOpenDialog(true)}>Edit</SlMenuItem>
                                 <SlDivider/>
@@ -80,41 +86,68 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                     }
                 </div>
 
-                <SlDialog label="Edit Folder Name" open={openDialog} onSlAfterHide={() => setOpenDialog(false)}>
-                    <SlButton slot="footer" variant="primary" onClick={(e) =>
-                    {
-                        const inputElement = document.getElementById('edit-folder-input');
-                        handleEdit(inputElement.value);
-                        setOpenDialog(false);
-                    }}>
+                <SlDialog 
+                    label="Edit Folder Name" 
+                    open={openDialog} 
+                    onSlAfterHide={() => setOpenDialog(false)}
+                    aria-labelledby="edit-folder-dialog-title"
+                >
+                    <h2 id="edit-folder-dialog-title" className="sr-only">Edit Folder Name</h2>
+                    <SlInput 
+                        id="edit-folder-input"
+                        aria-label="New folder name"
+                        onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                                handleEdit(e.target.value);
+                                setOpenDialog(false);
+                            } else if (e.key === 'Escape') {
+                                setOpenDialog(false);
+                            }
+                        }}
+                        size="medium" 
+                        value={currentFolderTitle} 
+                        pill
+                    />
+                    <SlButton 
+                        slot="footer" 
+                        variant="primary" 
+                        onClick={(e) => {
+                            const inputElement = document.getElementById('edit-folder-input');
+                            handleEdit(inputElement.value);
+                            setOpenDialog(false);
+                        }}
+                    >
                         OK
                     </SlButton>
-
-                    <SlInput id="edit-folder-input"
-                        onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                            handleEdit(e.target.value);
-                            setOpenDialog(false);}
-                        }}
-                        size="medium" value={currentFolderTitle} pill/>
                 </SlDialog>
 
-                <SlDialog label={`Delete "${currentFolderTitle}"?`} open={deleteDialog} onSlAfterHide={() => setDeleteDialog(false)}>
-                    <SlButton slot="footer" variant="primary" onClick={(e) => { handleDelete(); setDeleteDialog(false); }}>
+                <SlDialog 
+                    label={`Delete "${currentFolderTitle}"?`} 
+                    open={deleteDialog} 
+                    onSlAfterHide={() => setDeleteDialog(false)}
+                    aria-labelledby="delete-folder-dialog-title"
+                >
+                    <h2 id="delete-folder-dialog-title" className="sr-only">Delete folder confirmation</h2>
+                    <SlButton 
+                        slot="footer" 
+                        variant="primary" 
+                        onClick={(e) => { handleDelete(); setDeleteDialog(false); }}
+                    >
                         OK
                     </SlButton>
                 </SlDialog>
 
                 <form className="actions" onSubmit={handleAddTodo}>
+                    <label htmlFor="new-todo-input" className="sr-only">New todo item</label>
                     <input
                         type="text"
                         id="new-todo-input"
                         placeholder="What needs to be added?"
                         value={newTodo}
                         onChange={e => setNewTodo(e.target.value)}
-                        aria-label="New todo"
+                        aria-label="New todo item"
                     />
-                    <button id="add-todo-btn" type="submit">Add Items</button>
+                    <button id="add-todo-btn" type="submit" aria-label="Add items">Add Items</button>
                 </form>
             </header>
 

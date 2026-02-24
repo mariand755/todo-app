@@ -359,6 +359,75 @@ input[type="checkbox"]:checked::after {
     color: white;
 }
 
+/* Screen reader only text */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Sidebar home button styling */
+.sidebar-home-btn {
+    background: none;
+    border: none;
+    color: #ecf0f1;
+    padding: 0 20px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #34495e;
+    padding-bottom: 10px;
+    font-size: 1.5em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s, border-bottom-color 0.2s;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+
+.sidebar-home-btn:hover,
+.sidebar-home-btn:focus {
+    color: #1abc9c;
+    border-bottom-color: #1abc9c;
+}
+
+.sidebar-home-btn:focus {
+    outline: 2px solid #1abc9c;
+    outline-offset: 2px;
+}
+
+/* Focus styles for interactive elements */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[tabindex]:focus {
+    outline: 2px solid #1abc9c;
+    outline-offset: 2px;
+}
+
+/* Focus-visible for better keyboard navigation visibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid #1abc9c;
+    outline-offset: 2px;
+}
+
+/* Folder item keyboard focus */
+.folder-item[role="button"]:focus {
+    outline: 2px solid #1abc9c;
+    outline-offset: -2px;
+}
+
 /* ensure main content can grow and scroll within the fullscreen container */
 #todo-main-content {
     flex: 1 1 auto;

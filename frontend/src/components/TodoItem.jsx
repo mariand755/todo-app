@@ -99,6 +99,7 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem, moveToDoIte
                 type="checkbox"
                 checked={item.completed}
                 onChange={handleToggle}
+                aria-label={`${item.completed ? 'Mark as incomplete' : 'Mark as complete'}: ${item.title}`}
             />
             <span className="todo-text">{item.title}</span>
 
@@ -110,7 +111,13 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem, moveToDoIte
                             onMouseEnter={() => setIsOpen(true)}
                             onMouseLeave={() => setIsOpen(false)}
                             >
-                                    <SlIcon slot="trigger" name="three-dots-vertical"></SlIcon>
+                                    <SlIcon 
+                                        slot="trigger" 
+                                        name="three-dots-vertical"
+                                        aria-label={`Options for: ${item.title}`}
+                                        title="Item options"
+                                        tabIndex="0"
+                                    ></SlIcon>
                                     <SlMenu style={{ maxWidth: '200px' }}>
                                         {!item.completed && (
                                             <>
@@ -126,27 +133,53 @@ const TodoItem = ({item, onToggle, onDeleteToDoItem, onEditToDoItem, moveToDoIte
                             }
                         </div>
 
-                        <SlDialog label="Edit Item Name" open={openDialog} onSlAfterHide={() => setOpenDialog(false)}>
-                            <SlButton slot="footer" variant="primary" onClick={(e) =>
-                            {
-                                const inputElement = document.getElementById(`edit-${item.id}-input`);
-                                handleEdit(inputElement.value);
-                                setOpenDialog(false);
-                            }}>
+                        <SlDialog 
+                            label="Edit Item Name" 
+                            open={openDialog} 
+                            onSlAfterHide={() => setOpenDialog(false)}
+                            aria-labelledby={`edit-item-dialog-title-${item.id}`}
+                        >
+                            <h2 id={`edit-item-dialog-title-${item.id}`} className="sr-only">Edit item name</h2>
+                            <SlInput 
+                                id={`edit-${item.id}-input`}
+                                aria-label="New item name"
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                        handleEdit(e.target.value);
+                                        setOpenDialog(false);
+                                    } else if (e.key === 'Escape') {
+                                        setOpenDialog(false);
+                                    }
+                                }}
+                                size="medium" 
+                                value={item.title} 
+                                pill
+                            />
+                            <SlButton 
+                                slot="footer" 
+                                variant="primary" 
+                                onClick={(e) => {
+                                    const inputElement = document.getElementById(`edit-${item.id}-input`);
+                                    handleEdit(inputElement.value);
+                                    setOpenDialog(false);
+                                }}
+                            >
                                 OK
                             </SlButton>
-
-                            <SlInput id={`edit-${item.id}-input`}
-                                onKeyDown={e => {
-                                if (e.key === 'Enter') {
-                                    handleEdit(e.target.value);
-                                    setOpenDialog(false);}
-                                }}
-                                size="medium" value={item.title} pill/>
                         </SlDialog>
 
-                        <SlDialog label={`Delete "${item.title}"?`} open={deleteDialog} onSlAfterHide={() => setDeleteDialog(false)}>
-                            <SlButton slot="footer" variant="primary" onClick={(e) => { handleDelete(); setDeleteDialog(false); }}>
+                        <SlDialog 
+                            label={`Delete "${item.title}"?`} 
+                            open={deleteDialog} 
+                            onSlAfterHide={() => setDeleteDialog(false)}
+                            aria-labelledby={`delete-item-dialog-title-${item.id}`}
+                        >
+                            <h2 id={`delete-item-dialog-title-${item.id}`} className="sr-only">Delete item confirmation</h2>
+                            <SlButton 
+                                slot="footer" 
+                                variant="primary" 
+                                onClick={(e) => { handleDelete(); setDeleteDialog(false); }}
+                            >
                                 OK
                             </SlButton>
                         </SlDialog>

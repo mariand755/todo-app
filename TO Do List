@@ -161,7 +161,18 @@ Frontend Issues
     - items within folder moves position to the last row after it's edited (fix need to maintain position in list) - done
     - prevent completed items from being edited, so hide the edit field but show delete field as it can still be deleted (also, completed items can still be change back to uncompleted) - done
     - when items are moved it should be maintained after refreshing the page - done 
-    - for accessibility, when opening the item edit menu, the input field should be focused for better user experience 
-    - when refreshing the page within a folder, the page should not flash the default welcome page text before reloading the folders and items 
-
+     - when refreshing the page within a folder, the page should not flash the default welcome page text before reloading the folders and items - done 
+    - for accessibility, when opening the item edit menu, the input field should be focused for better user experience - done
+  
+Accessibility Issues Found: - done
+- Dropdowns not keyboard accessible - Three-dots menus only open on mouse hover, not keyboard
+- Icon-only buttons lack labels - Three-dots triggers have no aria-labels
+- Folders heading is clickable but not keyboard-navigable - Uses onClick instead of being a button
+- No visible focus indicators - Tab navigation not clear visually
+- Checkbox without label - Todo item checkbox has no associated label
+- Folder click only works via mouse - LI element with onClick, not keyboard-accessible
+- No skip-to-content link - No keyboard shortcut to main content
+- Drag-and-drop not keyboard accessible - Items can't be reordered via keyboard
+- Folders heading title needs better semantics - Should be a button, not just clickable text
+- Focus management in dialogs - Not properly managing focus when dialogs open/close
     

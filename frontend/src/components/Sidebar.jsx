@@ -14,9 +14,25 @@ const Sidebar = ({ folders, activeFolderId, onFolderClick, onNewFolder, onEditFo
         }
     ];
 
+    const handleHomeKeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onHomeClick();
+        }
+    };
+
     return (
         <aside id="folder-sidebar">
-            <h2 onClick={onHomeClick}>Folders</h2>
+            <button 
+                id="home-button"
+                className="sidebar-home-btn"
+                onClick={onHomeClick}
+                onKeyDown={handleHomeKeydown}
+                aria-label="Go to home"
+                title="Return to home"
+            >
+                Folders
+            </button>
             <ul id="folder-list">
                 {listItems.map((folder) => (
                     <FolderItem

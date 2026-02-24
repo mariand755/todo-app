@@ -22,6 +22,13 @@ const FolderItem = ({ folder, isActive, onClick, onEdit, onDelete }) => {
         if (onDelete) onDelete(folder.id);
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+        }
+    };
+
     const classes = `folder-item ${isActive ? 'active' : ''}`;
 
     return isEditing ? (
@@ -36,13 +43,24 @@ const FolderItem = ({ folder, isActive, onClick, onEdit, onDelete }) => {
                 if (e.key === 'Enter') {
                     handleEdit(e.target.value);
                     setIsEditing(false);
+                } else if (e.key === 'Escape') {
+                    setIsEditing(false);
                 }
             }}
             className={classes}
             autoFocus
+            aria-label={`Edit folder name: ${folder.title}`}
         />
     ) : (
-        <li className={classes} onClick={handleClick}>
+        <li 
+            className={classes} 
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            role="button"
+            tabIndex="0"
+            aria-pressed={isActive}
+            aria-label={`${folder.title}${isActive ? ' (active)' : ''}`}
+        >
             <span
                 className="folder-name"
                 data-full={folder.title}

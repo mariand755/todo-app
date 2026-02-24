@@ -24,6 +24,7 @@ const NewFolderForm = ({ onNewFolder }) => {
     return (
         <>
             {/* Keep elements directly inside the li.add-folder so current CSS applies */}
+            <label htmlFor="new-folder-input" className="sr-only">Add new folder</label>
             <SlInput
                 id="new-folder-input"
                 type="text"
@@ -32,6 +33,7 @@ const NewFolderForm = ({ onNewFolder }) => {
                 onSlInput={(e) => setTitle(e.target.value)}
                 onKeyUp={handleKeyPress}
                 size="medium"
+                aria-label="New folder name"
             />
             <SlButton
                 id="add-folder-btn"
@@ -39,6 +41,7 @@ const NewFolderForm = ({ onNewFolder }) => {
                 onClick={handleSubmit}
                 size="medium"
                 title="Create folder"
+                aria-label="Create new folder"
             >
                 <SlIcon name="folder-plus" style={{ fontSize: '1.2rem' }} />
             </SlButton>
