@@ -6,6 +6,7 @@ import { makeAPICall } from './useApi';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import LandingContent from './components/LandingContent';
+import LoadingContent from './components/LoadingContent';
 import './styles.css';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
@@ -16,6 +17,7 @@ function App() {
     const [folders, setFolders] = useState([]);
     const [items, setItems] = useState([]);
     const [activeFolderId, setActiveFolderId] = useState(null);
+    const [isInitializing, setIsInitializing] = useState(true);
 
     // Fetch folders on mount
     useEffect(() => {
@@ -59,6 +61,7 @@ function App() {
             const folders = await data.json();
             setItems(folders);
             setActiveFolderId(folderId);
+            setIsInitializing(false); // Done loading on initial mount
             if (pushHistory) {
                 // reflect selection in the URL for deep-linking / sharing
                 const url = `/folders/${encodeURIComponent(folderId)}`;
@@ -86,6 +89,9 @@ function App() {
         const initial = getFolderIdFromURL();
         if (initial) {
             loadFolderItems(initial, false);
+        } else {
+            // no folder in URL, so we're done initializing
+            setIsInitializing(false);
         }
         return () => window.removeEventListener('popstate', onPop);
     }, []); // run once on mount
@@ -261,20 +267,26 @@ function App() {
                 onHomeClick={handleHomeClick}
             />
         <DndProvider backend={HTML5Backend}>
-
-            {activeFolderId ? <MainContent
-                currentFolderTitle={currentTitle}
-                items={items}
-                currentFolderId={activeFolderId}
-                onEditFolder={handleEditFolder}
-                onDeleteFolder={handleDeleteFolder}
-                onAddTodo={handleAddTodo}
-                onToggleTodo={onToggleTodo}
-                onDeleteToDoItem={handleDeleteToDoItem}
-                onEditToDoItem={handleEditToDoItem}
-                moveToDoItem={moveToDoItem}
-            />
-            : <LandingContent/>}
+            <div className="content-wrap" key={isInitializing ? 'loading' : activeFolderId || 'landing'}>
+                {isInitializing ? (
+                    <LoadingContent />
+                ) : activeFolderId ? (
+                    <MainContent
+                        currentFolderTitle={currentTitle}
+                        items={items}
+                        currentFolderId={activeFolderId}
+                        onEditFolder={handleEditFolder}
+                        onDeleteFolder={handleDeleteFolder}
+                        onAddTodo={handleAddTodo}
+                        onToggleTodo={onToggleTodo}
+                        onDeleteToDoItem={handleDeleteToDoItem}
+                        onEditToDoItem={handleEditToDoItem}
+                        moveToDoItem={moveToDoItem}
+                    />
+                ) : (
+                    <LandingContent/>
+                )}
+            </div>
         </DndProvider>
         </div>
     );
