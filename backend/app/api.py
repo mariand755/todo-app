@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from library.models import Folder as FolderModel
 from library.models import TodoItem as TodoItemModel
-from library.models import get_db
+from library.models import ensure_folder_positions, get_db, get_next_folder_position
 
 app = FastAPI()
 
@@ -39,7 +39,15 @@ async def validation_exception_handler(request, exc):
 
 @app.get("/folders")
 async def get_folders(db_session: Session = Depends(get_db)):
-    folders = db_session.query(FolderModel).filter(FolderModel.is_deleted.is_(False)).all()
+    positions_updated = ensure_folder_positions(db_session)
+    if positions_updated:
+        db_session.commit()
+    folders = (
+        db_session.query(FolderModel)
+        .filter(FolderModel.is_deleted.is_(False))
+        .order_by(FolderModel.position, FolderModel.id)
+        .all()
+    )
     return folders
 
 
@@ -55,7 +63,10 @@ class FolderResponse(BaseModel):
 
 @app.post("/folders", response_model=FolderResponse)
 async def create_folder(new_folder_request: CreateFolder, db_session: Session = Depends(get_db)):
-    new_folder = FolderModel(title=new_folder_request.title)
+    positions_updated = ensure_folder_positions(db_session)
+    if positions_updated:
+        db_session.flush()
+    new_folder = FolderModel(title=new_folder_request.title, position=get_next_folder_position(db_session))
     db_session.add(new_folder)
     db_session.commit()
     return new_folder
