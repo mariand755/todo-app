@@ -1,10 +1,8 @@
-// Replaces create_folder_item (part of it) and the click handler
 import React, { useState } from 'react';
 
 const FolderItem = ({ folder, isActive, onClick, onEdit, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
 
-    // Check for the special 'add-folder' item
     if (folder.isInput) {
         return <li className="folder-item add-folder">{folder.content}</li>;
     }

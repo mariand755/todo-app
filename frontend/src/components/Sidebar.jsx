@@ -1,10 +1,9 @@
 import React from 'react';
 import FolderItem from './FolderItem';
-import NewFolderForm from './NewFolderForm'; // Defined below
+import NewFolderForm from './NewFolderForm';
 
 const Sidebar = ({ folders, activeFolderId, onFolderClick, onNewFolder, onEditFolder, onHomeClick }) => {
 
-    // Combine fetched folders with the static 'Add New Folder' input from index.html
     const listItems = [
         ...folders,
         {

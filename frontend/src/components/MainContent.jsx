@@ -12,11 +12,9 @@ import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
 
 const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder, onDeleteFolder,
     onAddTodo, onToggleTodo, onDeleteToDoItem, onEditToDoItem, moveToDoItem}) => {
-    const [isOpen, setIsOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState(false);
 
-    // new local state for the todo input
     const [newTodo, setNewTodo] = useState('');
 
     const handleEdit = (newTitle) => {
@@ -27,7 +25,6 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
         onDeleteFolder(currentFolderId);
     };
 
-    // handle form submit (Enter or click)
     const handleAddTodo = (e) => {
         e.preventDefault();
         const trimmed = newTodo.trim();
@@ -38,7 +35,6 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
         setNewTodo('');
     };
 
-    // Drag and drop handlers
     const renderToDoItem = useCallback((item, index) => {
       return (
         <TodoItem
@@ -53,7 +49,6 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
       )
     }, [])
 
-    // Render the main content area
     return (
         <main id="todo-main-content">
             <header>
@@ -64,17 +59,21 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                        currentFolderId && (
                        <div className="folder-controls">
                         <SlDropdown
-                            open={isOpen}
-                            onMouseEnter={() => setIsOpen(true)}
-                            onMouseLeave={() => setIsOpen(false)}
+                            hoist
                         >
-                            <SlIcon 
-                                slot="trigger" 
-                                name="three-dots-vertical"
+                            <button
+                                type="button"
+                                className="folder-menu-button"
+                                slot="trigger"
                                 aria-label="Folder options menu"
+                                aria-haspopup="menu"
                                 title="Folder options"
-                                tabIndex="0"
-                            ></SlIcon>
+                            >
+                                <SlIcon 
+                                    className="folder-menu-trigger"
+                                    name="three-dots-vertical"
+                                ></SlIcon>
+                            </button>
                             <SlMenu style={{ maxWidth: '200px' }}>
                                 <SlMenuItem value="edit" onClick={() => setOpenDialog(true)}>Edit</SlMenuItem>
                                 <SlDivider/>
@@ -137,7 +136,7 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                     </SlButton>
                 </SlDialog>
 
-                <form className="actions" onSubmit={handleAddTodo}>
+                <form className="actions" onSubmit={handleAddTodo} autoComplete="off">
                     <label htmlFor="new-todo-input" className="sr-only">New todo item</label>
                     <input
                         type="text"
@@ -145,6 +144,10 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
                         placeholder="What needs to be added?"
                         value={newTodo}
                         onChange={e => setNewTodo(e.target.value)}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
                         aria-label="New todo item"
                     />
                     <button id="add-todo-btn" type="submit" aria-label="Add items">Add Items</button>
@@ -152,7 +155,6 @@ const MainContent = ({ currentFolderTitle, currentFolderId, items, onEditFolder,
             </header>
 
             <ul id="todo-list">
-                {/* Dynamically render the list of items based on state */}
                 {items.length === 0 ? (
                     <p>No items in this folder.</p>
                 ) : (

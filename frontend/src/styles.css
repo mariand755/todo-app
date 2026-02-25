@@ -32,24 +32,6 @@ body {
     overflow-y: auto; /* <-- keep sidebar usable when many folders exist */
 }
 
-#folder-sidebar h2 {
-    padding: 0 20px;
-    margin-top: 0;
-    margin-bottom: 30px;
-    border-bottom: 2px solid #34495e;
-    padding-bottom: 10px;
-    font-size: 1.5em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 0.2s, border-bottom-color 0.2s;
-}
-
-/* match hover color to the sidebar add-folder button / active folder teal */
-#folder-sidebar h2:hover {
-    color: #1abc9c;               /* teal - same as active folder and add button */
-    border-bottom-color: #1abc9c;
-}
-
 #folder-list {
     list-style: none;
     padding: 0;
@@ -64,7 +46,7 @@ body {
     padding: 12px 20px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
-    border-left: 5px solid transparent;
+    border-left: none;
     box-sizing: border-box;
     position: relative; /* <-- allow absolute delete button to position correctly */
 }
@@ -75,8 +57,10 @@ body {
 
 .folder-item.active {
     background-color: #1abc9c; /* Primary accent color for selection */
-    color: #fff;
-    border-left: 5px solid #fff;
+    color: #2c3e50;
+    border-left: none;
+    font-weight: 700;
+    letter-spacing: 0.01em;
 }
 
 /* make folder name able to shrink so siblings (like the input) don't force overflow */
@@ -127,27 +111,6 @@ body {
     .folder-name::after {
         display: none;
     }
-}
-
-.edit-folder-btn {
-    font-size: 1.4rem; /* reduced from 2rem for better balance */
-    color: rgb(80, 227, 194);
-}
-
-.item-count {
-    background-color: #34495e;
-    color: #ecf0f1;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    min-width: 10px;
-    text-align: center;
-    flex-shrink: 0; /* avoid shrinking when space is tight */
-}
-
-.folder-item.active .item-count {
-    background-color: #fff;
-    color: #1abc9c;
 }
 
 /* add-folder row specific layout so the input/button behave */
@@ -225,7 +188,63 @@ body {
 /* make the dropdown/menu sit flush to the right */
 .folder-header sl-dropdown {
     flex: 0 0 auto;
-    margin-left: 12px;
+    margin-left: 8px;
+}
+
+.folder-controls {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+}
+
+.folder-menu-button,
+.todo-item-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 2px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.folder-menu-button:hover,
+.todo-item-menu-button:hover {
+    background-color: rgba(26, 188, 156, 0.12);
+}
+
+.folder-menu-button:focus-visible,
+.todo-item-menu-button:focus-visible {
+    outline: 2px solid #1abc9c;
+    outline-offset: 2px;
+}
+
+.folder-menu-trigger,
+.todo-item-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: #4f555d;
+    opacity: 0.9;
+    transition: color 0.2s;
+}
+
+.folder-menu-trigger::part(svg),
+.todo-item-menu-trigger::part(svg) {
+    width: 14px;
+    height: 14px;
+}
+
+.folder-menu-button:hover .folder-menu-trigger,
+.todo-item-menu-button:hover .todo-item-menu-trigger {
+    color: #1abc9c;
 }
 
 /* Actions row (add todo input + button) — keep consistent sizing */
@@ -271,7 +290,7 @@ body {
 #todo-list {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 12px 0 0;
     flex-grow: 1;
     overflow-y: auto; /* Scroll for long lists */
 }
@@ -286,6 +305,12 @@ body {
     border-left: 5px solid #e74c3c; /* A color to draw attention */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: box-shadow 0.2s;
+    width: 100%;
+    position: relative;
+}
+
+.todo-item.menu-open {
+    z-index: 20;
 }
 
 .todo-item:hover {
@@ -301,11 +326,61 @@ body {
     flex-grow: 1;
     margin-left: 10px;
     font-size: 1.1em;
+    min-width: 0;
+    padding-right: 22px;
 }
 
 .todo-item.complete .todo-text {
     text-decoration: line-through;
     color: #7f8c8d;
+}
+
+/* Todo item actions container - align to the right edge */
+.todo-item-actions {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Keep dropdown trigger anchored to the end of each row */
+.todo-item-dropdown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.todo-item-dropdown::part(panel) {
+    z-index: 21;
+}
+
+/* Remove double border/focus ring artifact in dropdown menu items */
+.todo-item-dropdown sl-menu,
+.folder-controls sl-menu {
+    --sl-focus-ring-width: 0;
+}
+
+.todo-item-dropdown sl-menu-item,
+.folder-controls sl-menu-item {
+    --sl-focus-ring-width: 0;
+}
+
+.todo-item-dropdown sl-menu-item::part(base),
+.folder-controls sl-menu-item::part(base) {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.todo-item-dropdown sl-menu-item:focus,
+.todo-item-dropdown sl-menu-item:focus-visible,
+.folder-controls sl-menu-item:focus,
+.folder-controls sl-menu-item:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* Checkbox (Flat Style) */
@@ -340,25 +415,6 @@ input[type="checkbox"]:checked::after {
     font-weight: bold;
 }
 
-/* Delete Button */
-.delete-btn {
-    background: none;
-    border: none;
-    color: #e74c3c;
-    cursor: pointer;
-    font-size: 0.9em;
-    margin-left: 15px;
-    padding: 5px 10px;
-    border-radius: 4px;
-    transition: background-color 0.2s, color 0.2s;
-    font-weight: 600;
-}
-
-.delete-btn:hover {
-    background-color: #e74c3c;
-    color: white;
-}
-
 /* Screen reader only text */
 .sr-only {
     position: absolute;
@@ -376,6 +432,7 @@ input[type="checkbox"]:checked::after {
 .sidebar-home-btn {
     background: none;
     border: none;
+    border-radius: 0;
     color: #ecf0f1;
     padding: 0 20px;
     margin-top: 0;
@@ -391,15 +448,21 @@ input[type="checkbox"]:checked::after {
     font-family: inherit;
 }
 
-.sidebar-home-btn:hover,
-.sidebar-home-btn:focus {
+.sidebar-home-btn:hover {
     color: #1abc9c;
-    border-bottom-color: #1abc9c;
+    border-bottom-color: #34495e;
 }
 
 .sidebar-home-btn:focus {
-    outline: 2px solid #1abc9c;
-    outline-offset: 2px;
+    color: inherit;
+    border-bottom-color: #34495e;
+    outline: none;
+}
+
+.sidebar-home-btn:focus-visible {
+    color: #1abc9c;
+    border-bottom-color: #34495e;
+    outline: none;
 }
 
 /* Focus styles for interactive elements */
@@ -420,6 +483,15 @@ textarea:focus-visible,
 [tabindex]:focus-visible {
     outline: 2px solid #1abc9c;
     outline-offset: 2px;
+}
+
+/* Avoid global tabindex focus ring on Shoelace menu internals */
+sl-menu-item:focus,
+sl-menu-item:focus-visible,
+sl-menu:focus,
+sl-menu:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* Folder item keyboard focus */
@@ -495,8 +567,10 @@ textarea:focus-visible,
 
     .folder-item.active {
         background-color: #1abc9c;
-        color: #fff;
+        color: #2c3e50;
         border-left: none;
+        font-weight: 700;
+        letter-spacing: 0.01em;
     }
 
     /* ensure add-folder sits full-width below chips and input grows */
@@ -566,11 +640,11 @@ textarea:focus-visible,
         margin: 0 auto;
     }
     #folder-sidebar {
-        height: calc(100vh - 40px);
+        height: 100vh;
         overflow-y: auto;
     }
     #todo-main-content {
-        height: calc(100vh - 40px);
+        height: 100vh;
         overflow-y: auto;
     }
 }

@@ -1,4 +1,3 @@
-// Replaces input_new_folder_title() and enter_new_folder_tiltle_option()
 import React, { useState } from 'react';
 import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
 import SlInput from '@shoelace-style/shoelace/dist/react/input/index.js';
@@ -11,7 +10,7 @@ const NewFolderForm = ({ onNewFolder }) => {
     const handleSubmit = () => {
         if (title.trim()) {
             onNewFolder(title.trim());
-            setTitle(''); // Clear input after submission
+            setTitle('');
         }
     };
 
@@ -23,7 +22,6 @@ const NewFolderForm = ({ onNewFolder }) => {
 
     return (
         <>
-            {/* Keep elements directly inside the li.add-folder so current CSS applies */}
             <label htmlFor="new-folder-input" className="sr-only">Add new folder</label>
             <SlInput
                 id="new-folder-input"
@@ -33,6 +31,10 @@ const NewFolderForm = ({ onNewFolder }) => {
                 onSlInput={(e) => setTitle(e.target.value)}
                 onKeyUp={handleKeyPress}
                 size="medium"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellCheck={false}
                 aria-label="New folder name"
             />
             <SlButton
