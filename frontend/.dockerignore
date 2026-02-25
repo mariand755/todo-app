@@ -1,4 +1,4 @@
-# Include any files or directories that you don't want to be copied to your
+# Any files or directories that we don't want to be copied to the
 # container here (e.g., local build artifacts, temporary files, etc.).
 #
 # For more help, visit the .dockerignore file reference guide at

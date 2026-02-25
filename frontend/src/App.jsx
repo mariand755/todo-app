@@ -26,9 +26,7 @@ function App() {
             const data = await makeAPICall("GET", "/folders");
             if (data) {
                 const folders = await data.json();
-                setFolders(folders);
-                // The original script.js had commented-out logic to load the first folder's items,
-                // but let's just initialize state here.
+                setFolders(folders); 
                 if (folders.length > 0) {
                     // setActiveFolderId(folders[0].id);
                     // loadFolderItems(data[0].id);
@@ -55,7 +53,7 @@ function App() {
     // Logic for loading items, now optionally controls history push
     const loadFolderItems = async (folderId, pushHistory = true) => {
         if (!folderId) return;
-        if (folderId === activeFolderId) return; // No need to reload the same folder
+        if (folderId === activeFolderId) return; // no-op if clicking the already active folder
         const data = await makeAPICall("GET", `/folders/${folderId}/items/`);
         if (data) {
             const folders = await data.json();
@@ -90,7 +88,7 @@ function App() {
         if (initial) {
             loadFolderItems(initial, false);
         } else {
-            // no folder in URL, so we're done initializing
+            // no folder in URL -> show home/landing
             setIsInitializing(false);
         }
         return () => window.removeEventListener('popstate', onPop);
