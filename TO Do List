@@ -146,8 +146,9 @@ Frontend Issues
     - screenshot of todo field showing late items text added when hovering over the field with the mouse cursor - done
     - screenshot of sidebar showing vertical sidebar not optimized - done
     - when folder title is edited, and refresh the page, the folder moves to the end of the list instead of maintaining its position in the sidebar - done
+    - help with the DB persistence issue so you can drop the restart workaround (docker issue with volume persistence) - done
     - optimize UI for mobile view (responsive design) 
-    - help with the DB persistence issue so you can drop the restart workaround
+    - pinning of folders to the top of the list (eg for important folders)
   
 Accessibility Issues Found: - done
 - Dropdowns not keyboard accessible - Three-dots menus only open on mouse hover, not keyboard
@@ -183,4 +184,3 @@ Accessibility Issues Found: - done
         - implement load balancing for high availability
         - implement monitoring and alerting for system health and performance
 
-- docker db issue 
