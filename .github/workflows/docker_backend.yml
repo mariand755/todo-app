@@ -6,14 +6,14 @@ on:
     paths:
       - "backend/**"
       - "docker-compose.yaml"
-      - ".github/workflows/docker_backend.yml"
+      - ".github/workflows/**"
 
   push:
     branches: [main]
     paths:
       - "backend/**"
       - "docker-compose.yaml"
-      - ".github/workflows/docker_backend.yml"
+      - ".github/workflows/**"
 
   workflow_dispatch:
 
