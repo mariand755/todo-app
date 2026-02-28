@@ -1,16 +1,74 @@
-# React + Vite
+# Frontend (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Docker-first quick start
 
-Currently, two official plugins are available:
+From repo root:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```sh
+docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend
+docker run --rm todo-app-frontend-test npm run test
+```
 
-## React Compiler
+Run dev stack with compose:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```sh
+docker-compose up --build frontend
+```
 
-## Expanding the ESLint configuration
+## Local development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```sh
+npm install
+npm run dev
+```
+
+## Quality scripts
+
+```sh
+npm run lint
+npm run format:check
+npm run typecheck
+```
+
+Notes:
+
+- This frontend is JavaScript-based, so `ruff` and `mypy` are **backend-only** tools.
+- Frontend equivalents are `eslint` and `prettier`.
+- `typecheck` is currently an ESLint strict run (`--max-warnings=0`).
+
+## Tests
+
+Run all tests:
+
+```sh
+npm run test
+```
+
+Run coverage:
+
+```sh
+npm run coverage
+```
+
+Run slices:
+
+```sh
+npm run test -- --run src/test/integration
+npm run test -- --run src/test/unit
+```
+
+## Docker-first test runs (from frontend folder)
+
+```sh
+docker build -f Dockerfile -t todo-app-frontend-test .
+docker run --rm todo-app-frontend-test npm run test
+```
+
+## Test architecture
+
+- `src/test/setup.js`: central test setup/mocks
+- `src/test/unit/api`: API helper unit tests
+- `src/test/unit/components`: component unit tests
+- `src/test/integration`: app flow integration tests
+
+CI workflow: `.github/workflows/docker_frontend.yml`

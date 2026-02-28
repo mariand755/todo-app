@@ -229,31 +229,3 @@ def test_get_item_none_existing_item_fails_silently(test_folder: Folder):
 
     # assert
     assert missing is None
-
-
-"""
-def test_search_for_item_in_folder_and_none(test_folder):
-    # arrange
-    test_folder.add_new_item_to_folder("first")  # id 1
-    test_folder.add_new_item_to_folder("second") # id 2
-
-    # act / assert
-    assert test_folder.search_for_item_in_folder(2).title == "second"
-    assert test_folder.search_for_item_in_folder(99) is None
-
-
-def test_search_for_items_using_title_prefix_case_insensitive(test_folder):
-    # arrange
-    # Note: search uses prefix matching (startswith) and should be case-insensitive and trimmed
-    test_folder.add_new_item_to_folder("Alpha One")
-    test_folder.add_new_item_to_folder("Alpine")
-    test_folder.add_new_item_to_folder("beta")
-
-    # act
-    results = test_folder.search_for_items_using_title("  al ")
-
-    # assert - should find the two "Al" matches
-    titles = [r.title for r in results]
-    assert "Alpha One" in titles and "Alpine" in titles
-    assert len(titles) == 2
-"""

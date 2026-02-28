@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from library.models import Folder as FolderModel
 from library.models import TodoItem as TodoItemModel
-from library.models import get_db
+from library.models import ensure_folder_positions, get_db, get_next_folder_position
 
 app = FastAPI()
 
@@ -39,7 +39,15 @@ async def validation_exception_handler(request, exc):
 
 @app.get("/folders")
 async def get_folders(db_session: Session = Depends(get_db)):
-    folders = db_session.query(FolderModel).filter(FolderModel.is_deleted.is_(False)).all()
+    positions_updated = ensure_folder_positions(db_session)
+    if positions_updated:
+        db_session.commit()
+    folders = (
+        db_session.query(FolderModel)
+        .filter(FolderModel.is_deleted.is_(False))
+        .order_by(FolderModel.position, FolderModel.id)
+        .all()
+    )
     return folders
 
 
@@ -55,7 +63,10 @@ class FolderResponse(BaseModel):
 
 @app.post("/folders", response_model=FolderResponse)
 async def create_folder(new_folder_request: CreateFolder, db_session: Session = Depends(get_db)):
-    new_folder = FolderModel(title=new_folder_request.title)
+    positions_updated = ensure_folder_positions(db_session)
+    if positions_updated:
+        db_session.flush()
+    new_folder = FolderModel(title=new_folder_request.title, position=get_next_folder_position(db_session))
     db_session.add(new_folder)
     db_session.commit()
     return new_folder
@@ -131,7 +142,16 @@ async def create_new_item(folder_id: int, new_item_request: CreateItem, db_sessi
     folder = db_session.query(FolderModel).filter(FolderModel.id == folder_id).first()
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
-    add_new_item = TodoItemModel(title=new_item_request.title, folder_id=folder_id)
+    # Determine next position within the folder. If no items exist, start at 0.
+    existing_items = (
+        db_session.query(TodoItemModel)
+        .filter(TodoItemModel.folder_id == folder_id, TodoItemModel.is_deleted.is_(False))
+        .order_by(TodoItemModel.position)
+        .all()
+    )
+    next_position = len(existing_items)
+
+    add_new_item = TodoItemModel(title=new_item_request.title, folder_id=folder_id, position=next_position)
     db_session.add(add_new_item)
     db_session.commit()
     return add_new_item
@@ -208,34 +228,6 @@ async def delete_item(folder_id: int, item_id: int, db_session: Session = Depend
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# @app.put("/folders/{folder_id}/undo", response_model=FolderResponse)
-# async def undo_folder(folder_id:int, db_session:Session = Depends(get_db)):
-#     folder = db_session.get(FolderModel, folder_id)
-#     if folder == None:
-#         raise HTTPException(status_code=404, detail="Folder not found")
-#     folder.is_deleted = False
-#     db_session.add(folder)
-#     db_session.commit()
-#     return folder
-
-
-# @app.put("/folders/{folder_id}/items/{item_id}/undo", response_model=ItemResponse)
-# async def undo_item(folder_id:int, item_id:int, db_session:Session = Depends(get_db)):
-#     folder = db_session.get(FolderModel, folder_id)
-#     if folder == None:
-#         raise HTTPException(status_code=404, detail="Folder not found")
-#     item = db_session.query(TodoItemModel).filter(
-#         TodoItemModel.folder_id == folder_id,
-#         TodoItemModel.id == item_id,
-#     ).first()
-#     if item == None:
-#         raise HTTPException(status_code=404, detail="Item not found")
-#     item.is_deleted = False
-#     db_session.add(item)
-#     db_session.commit()
-#     return item
-
-
 @app.put("/folders/{folder_id}/items/{item_id}/toggle", response_model=ItemResponse)
 async def toggle_item(folder_id: int, item_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
@@ -261,25 +253,48 @@ class UpdateItemOrder(BaseModel):
     itemOrder_id: list[int] = Field(..., min_length=1)
 
 
+def apply_item_order_positions(all_items, item_order_ids: list[int]):
+    """Assign sequential positions to `all_items` based on `item_order_ids`.
+
+    - Items whose id appears in `item_order_ids` receive positions according to that list.
+    - Items not present in the list are assigned positions after the listed items.
+
+    This function mutates the objects in `all_items` in-place and also returns them.
+    """
+    position_map = {item_id: idx for idx, item_id in enumerate(item_order_ids)}
+    next_position = len(item_order_ids)
+    for item in all_items:
+        item_id = cast(int, item.id)
+        if item_id in position_map:
+            item.position = position_map[item_id]
+        else:
+            item.position = next_position
+            next_position += 1
+    return all_items
+
+
 @app.put("/folders/{folder_id}/item_order", response_model=ItemArrayResponse)
 async def item_order(folder_id: int, update_item_order: UpdateItemOrder, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
     if folder is None:
         raise HTTPException(status_code=404, detail="Folder not found")
-    items = (
+
+    # Query ALL non-deleted items in the folder
+    all_items = (
         db_session.query(TodoItemModel)
         .filter(
             TodoItemModel.folder_id == folder_id,
-            TodoItemModel.id.in_(update_item_order.itemOrder_id),
+            TodoItemModel.is_deleted.is_(False),
         )
         .all()
     )
-    for item in items:
-        item_id = cast(int, item.id)
-        index = update_item_order.itemOrder_id.index(item_id)
-        item.position = index
-    db_session.add_all(items)
+
+    # Apply ordering using helper to keep logic testable
+    apply_item_order_positions(all_items, update_item_order.itemOrder_id)
+
+    db_session.add_all(all_items)
     db_session.commit()
 
-    items_sorted = sorted(items, key=lambda x: cast(int, x.position))
+    # Return all items sorted by position
+    items_sorted = sorted(all_items, key=lambda x: cast(int, x.position))
     return ItemArrayResponse(items=[ItemResponse.model_validate(x) for x in items_sorted])

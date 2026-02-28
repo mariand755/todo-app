@@ -1,44 +1,14 @@
-import uuid
-
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from library.models import Folder, TodoItem
+from library import models
 
-
-def seed_db_with_test_folder(
-    testing_db_session: Session,
-    random_title: str = f"test_{uuid.uuid4()}",
-    is_folder_deleted: bool = False,
-) -> Folder:
-    folder = Folder(title=random_title, is_deleted=is_folder_deleted)
-    testing_db_session.add(folder)
-    testing_db_session.flush()
-    return folder
-
-
-def create_test_payload(num: int) -> list[dict]:
-    return [{"title": f"test_{uuid.uuid4()}"} for i in range(num)]
-
-
-def seed_db_with_test_item(
-    testing_db_session: Session,
-    folder: Folder,
-    random_title: str = f"test_{uuid.uuid4()}",
-    is_item_deleted: bool = False,
-    completed: bool = False,
-    position: int = -1,
-) -> TodoItem:
-    item = TodoItem(
-        folder_id=folder.id,
-        title=random_title,
-        is_deleted=is_item_deleted,
-        completed=completed,
-        position=position,
-    )
-    testing_db_session.add(item)
-    testing_db_session.flush()
-    return item
+# Export helpers from the shared helpers module
+from tests.helpers import (
+    create_test_payload,
+    seed_db_with_test_folder,
+    seed_db_with_test_item,
+)
 
 
 def test_get_default_empty_folders_success(test_client: TestClient):
@@ -80,6 +50,55 @@ def test_create_folder_success(test_client: TestClient):
     assert response.status_code == 200
     res_json = response.json()
     assert res_json["title"] == test_payload[0]["title"]
+
+
+def test_edit_folder_keeps_sidebar_order_on_refresh(test_client: TestClient):
+    first = test_client.post("/folders", json={"title": "first"}).json()
+    second = test_client.post("/folders", json={"title": "second"}).json()
+    third = test_client.post("/folders", json={"title": "third"}).json()
+
+    update_response = test_client.put(f"/folders/{second['id']}", json={"title": "second_edited"})
+    assert update_response.status_code == 200
+
+    folders_response = test_client.get("/folders")
+    assert folders_response.status_code == 200
+    ids_in_order = [folder["id"] for folder in folders_response.json()]
+    assert ids_in_order == [first["id"], second["id"], third["id"]]
+
+
+def test_get_folders_backfills_legacy_positions(test_client: TestClient, testing_db_session: Session):
+    positioned = models.Folder(title="positioned", position=3)
+    legacy_a = models.Folder(title="legacy_a", position=-1)
+    legacy_b = models.Folder(title="legacy_b", position=-1)
+    testing_db_session.add_all([positioned, legacy_a, legacy_b])
+    testing_db_session.commit()
+
+    response = test_client.get("/folders")
+    assert response.status_code == 200
+    ids_in_order = [folder["id"] for folder in response.json()]
+    assert ids_in_order == [positioned.id, legacy_a.id, legacy_b.id]
+
+    refreshed = testing_db_session.query(models.Folder).order_by(models.Folder.id).all()
+    positions_by_id = {folder.id: folder.position for folder in refreshed}
+    assert positions_by_id[positioned.id] == 3
+    assert positions_by_id[legacy_a.id] == 4
+    assert positions_by_id[legacy_b.id] == 5
+
+
+def test_create_folder_after_legacy_backfill_appends_to_order(test_client: TestClient, testing_db_session: Session):
+    legacy_first = models.Folder(title="legacy_first", position=-1)
+    legacy_second = models.Folder(title="legacy_second", position=-1)
+    testing_db_session.add_all([legacy_first, legacy_second])
+    testing_db_session.commit()
+
+    create_response = test_client.post("/folders", json={"title": "new_after_backfill"})
+    assert create_response.status_code == 200
+    created_id = create_response.json()["id"]
+
+    folders_response = test_client.get("/folders")
+    assert folders_response.status_code == 200
+    ids_in_order = [folder["id"] for folder in folders_response.json()]
+    assert ids_in_order == [legacy_first.id, legacy_second.id, created_id]
 
 
 def test_create_folders_bad_input_success(test_client: TestClient):
@@ -504,7 +523,8 @@ def test_create_item_default_values(test_client: TestClient, testing_db_session:
     assert create_item_response.status_code == 200
     res_json = create_item_response.json()
     assert not res_json["completed"]
-    assert res_json["position"] == -1
+    # New items should be assigned a sequential position starting at 0
+    assert res_json["position"] == 0
 
 
 # GET /folders/{folder_id}/items/{item_id} - Get specific item within folder

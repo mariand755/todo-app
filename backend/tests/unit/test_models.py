@@ -54,28 +54,3 @@ def test_get_db_generator_closes_session(monkeypatch):
 
     # ASSERT - the dummy session was closed
     assert session.closed is True
-
-
-"""
-def test_engine_falls_back_to_sqlite_when_create_engine_raises(monkeypatch):
-    # ARRANGE - monkeypatch sqlalchemy.create_engine to raise during module import
-    import importlib, sys
-
-    orig_create_engine = sa.create_engine
-
-    def raise_create_engine(*args, **kwargs):
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr(sa, "create_engine", raise_create_engine)
-
-    # Reload the module to exercise the try/except branch
-    with pytest.raises(RuntimeError) as e:
-        importlib.reload(models)
-
-    # ASSERT - engine should be sqlite in-memory due to fallback
-    assert "sqlite" in models.engine.url.drivername or models.engine.url.get_backend_name() == "sqlite"
-
-    # cleanup - restore original create_engine and reload models to normal state
-    monkeypatch.setattr(sa, "create_engine", orig_create_engine)
-    importlib.reload(models)
-"""
