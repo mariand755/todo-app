@@ -56,8 +56,22 @@ jobs:
       - name: Run all frontend tests in container
         run: docker run --rm --init --pull=never frontend:test npm run test
 
+      - name: Run frontend coverage in container
+        run: docker run --rm --init --pull=never frontend:test npm run coverage
+
       - name: Run frontend integration tests in container
         run: docker run --rm --init --pull=never frontend:test npm run test -- --run src/test/integration
 
       - name: Run frontend unit tests in container
         run: docker run --rm --init --pull=never frontend:test npm run test -- --run src/test/unit
+
+      - name: Trivy scan (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.34.0
+        with:
+          image-ref: frontend:test
+          format: table
+          ignore-unfixed: true
+          vuln-type: library
+          skip-dirs: /usr/local/lib/node_modules/npm
+          severity: HIGH,CRITICAL
+          exit-code: "1"
