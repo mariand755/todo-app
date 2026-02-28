@@ -57,7 +57,7 @@ jobs:
         run: uv run mypy app library commandline_interface
 
       - name: Run tests + coverage
-        run: uv run pytest --cov=app --cov=library --cov-report=term-missing --cov-fail-under=85
+        run: uv run pytest -q -o addopts='' --cov=app --cov=library --cov-report=term-missing --cov-fail-under=85
 
       # -------- SECURITY (SCA) --------
       - name: Dependency audit (pip-audit)
