@@ -51,6 +51,12 @@ jobs:
       - name: Run tests in container
         run: docker run --rm --init --pull=never backend:test
 
+      - name: Run integration tests in container
+        run: docker run --rm --init --pull=never backend:test uv run pytest -q -o addopts='' -m integration
+
+      - name: Run unit tests in container
+        run: docker run --rm --init --pull=never backend:test uv run pytest -q -o addopts='' -m unit
+
       - name: Trivy scan (fail on HIGH/CRITICAL)
         uses: aquasecurity/trivy-action@0.34.0
         with:

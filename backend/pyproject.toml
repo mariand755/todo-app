@@ -33,6 +33,8 @@ addopts = "-q --maxfail=1 -m 'not integration' -W error"
 markers = [
   "unit: fast tests that do not require external services",
   "integration: tests that require external services like Postgres",
+  "contract: API contract and request/response behavior tests",
+  "persistence: data persistence, ordering, and consistency tests",
 ]
 
 [tool.ruff]

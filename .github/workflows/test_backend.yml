@@ -1,10 +1,19 @@
-name: Test Backend
+name: Quality Checks
 
 on:
   pull_request:
     branches: [ main ]
     paths:
       - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/test_backend.yml'
+
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/test_backend.yml'
 
   workflow_dispatch:
 
@@ -53,3 +62,43 @@ jobs:
 
     - name: Run tests + coverage
       run: uv run pytest --cov=app --cov=library --cov-report=term-missing --cov-fail-under=85
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: ./frontend/
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Type check
+      run: npm run typecheck
+
+    - name: Format check
+      run: npm run format:check
+
+    - name: Run all tests
+      run: npm run test
+
+    - name: Run integration tests
+      run: npm run test -- --run src/test/integration
+
+    - name: Run unit tests
+      run: npm run test -- --run src/test/unit

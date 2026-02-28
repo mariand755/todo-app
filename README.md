@@ -114,6 +114,49 @@ Or run the full stack with Docker Compose (if configured):
 docker-compose up --build
 ```
 
+## QA & CI Commands
+
+### Backend (Docker-first)
+
+Build backend test image:
+```sh
+docker build -f backend/Dockerfile --target test -t todo-app-backend-test ./backend
+```
+
+Run all backend tests:
+```sh
+docker run --rm todo-app-backend-test uv run pytest -q -o addopts=''
+```
+
+Run backend slices:
+```sh
+docker run --rm todo-app-backend-test uv run pytest -q -o addopts='' -m integration
+docker run --rm todo-app-backend-test uv run pytest -q -o addopts='' -m unit
+```
+
+### Frontend (Docker-first)
+
+Build frontend test image:
+```sh
+docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend
+```
+
+Run all frontend tests:
+```sh
+docker run --rm todo-app-frontend-test npm run test
+```
+
+Run frontend slices:
+```sh
+docker run --rm todo-app-frontend-test npm run test -- --run src/test/integration
+docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
+```
+
+### CI Workflows
+
+- Backend Docker CI: `.github/workflows/docker_backend.yml`
+- Frontend Docker CI: `.github/workflows/docker_frontend.yml`
+
 ## Features Overview
 - Follow the interactive prompts to manage folders and todo items from the CLI.
 - Or use the React frontend for a graphical experience.

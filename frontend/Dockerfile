@@ -8,7 +8,7 @@ ARG NODE_VERSION=24.11-bookworm
 FROM node:${NODE_VERSION}
 
 # Use production node environment by default.
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 
 WORKDIR /usr/src/app
@@ -31,4 +31,4 @@ COPY . .
 EXPOSE 3000
 
 # Run the application.
-CMD npm start
+CMD ["npm", "start"]

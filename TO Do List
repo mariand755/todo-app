@@ -147,7 +147,6 @@ Frontend Issues
     - screenshot of sidebar showing vertical sidebar not optimized - done
     - when folder title is edited, and refresh the page, the folder moves to the end of the list instead of maintaining its position in the sidebar - done
     - help with the DB persistence issue so you can drop the restart workaround (docker issue with volume persistence) - done
-    - optimize UI for mobile view (responsive design) 
     - pinning of folders to the top of the list (eg for important folders)
   
 Accessibility Issues Found: - done
@@ -167,6 +166,7 @@ Accessibility Issues Found: - done
         - add automation testing (unit tests, integration tests, end-to-end tests)
         - integrate into Ci/CD pipeline for automated testing (eg GitHub Actions, Jenkins)
         - deploy to cloud platform (eg AWS, Heroku) for public access and scalability
+        - 
 
 - Frontend Enhancements
         - implement a more modern and responsive UI using a frontend framework (eg React, Vue, Angular)
@@ -183,4 +183,66 @@ Accessibility Issues Found: - done
         - implement caching for improved performance
         - implement load balancing for high availability
         - implement monitoring and alerting for system health and performance
+
+
+Optimize UI for mobile view (responsive design) 
+   - Do the mobile redesign in a separate, scoped pass (layout-first, then spacing, then controls) 
+   - on mobile  the sidebar to be hidden when a folder is selected
+   - and displayed in full view sidebar (hide list screen) when the Folder name is selected in the header of the list screen
+   - indicate on the sidebar with an icon when the folder has items
+
+Set up and configure health checks for the application components
+    - Set up health checks for the backend API
+    - Set up health checks for the frontend application
+    -Set up health checks for the database - done
+    - Configure Docker Compose to use the health checks
+    - Test the health checks to ensure they are working correctly
+
+
+Agent - ideation
+I want you to look at my todolist task list and create github issues.
+I want you create proper tags if they don't exist.
+- bug: Issues related to bugs in the code.
+- enhancement: Issues related to new features or improvements.
+- housekeeping: chores to improve maintainance of code (doesn't necessarily add functionality)
+And create any additional tags as necessary (ask me for confirmation).
+After confirming, go ahead and give me a quick list of all the issues that you'll created, along with a list of tags
+After I confirm, create the issues in github. Ask me what you need to make this happen.
+
+
+Search items by title in folder UI
+Deep-link to specific folder route/state
+Mobile sidebar behavior redesign
+Folder item-count indicator icon in sidebar
+Dark mode toggle
+Pin folders to top
+Remaining accessibility improvements (epic)
+Optimize large folder/item datasets
+Add E2E tests and CI pipeline automation
+Add API/frontend/db health checks + Docker Compose wiring
+Due dates and reminders for todo items
+App logging for debugging/observability
+User authentication/authorization (epic)
+
+TD-001 Search items by title in folder UI - out of scope
+TD-002 Deep-link to specific folder route/state
+TD-003 Mobile sidebar behavior redesign
+TD-007 Remaining accessibility improvements [EPIC]
+TD-009 Add E2E tests and CI pipeline automation
+TD-010 Add API/frontend/db health checks + Docker Compose wiring
+TD-008 Optimize large folder/item datasets
+TD-005 Dark mode toggle
+TD-006 Pin folders to top
+TD-011 Due dates and reminders for todo items
+TD-012 App logging for debugging/observability
+TD-004 User authentication/authorization [EPIC]
+
+If this priority order looks right, I’ll prepare these 7 first for GitHub issue creation (labels + issue bodies), then we can batch the remaining ones in Phase 2.
+
+Next steps:
+Ask copilot for a step by step workflow for the following:
+- Repo target (owner/repo)
+- Access method: gh CLI already authenticated on your machine, or a GitHub token/pat configured for API use
+- confirm with permissions with copilot
+- project board to associate the issues(tracking and metrics) with in github
 
