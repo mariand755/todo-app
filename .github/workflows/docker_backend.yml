@@ -62,6 +62,7 @@ jobs:
         with:
           image-ref: backend:test
           format: table
+          output: trivy-backend-test-pr.txt
           ignore-unfixed: true
           vuln-type: os,library
           severity: HIGH,CRITICAL
@@ -84,7 +85,19 @@ jobs:
         with:
           image-ref: backend:runtime
           format: table
+          output: trivy-backend-runtime-pr.txt
           ignore-unfixed: true
           vuln-type: os,library
           severity: HIGH,CRITICAL
           exit-code: "1"
+
+      - name: Upload Trivy backend artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-backend-pr
+          path: |
+            trivy-backend-test-pr.txt
+            trivy-backend-runtime-pr.txt
+          retention-days: 14
+          if-no-files-found: warn

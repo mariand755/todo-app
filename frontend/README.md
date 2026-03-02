@@ -2,6 +2,8 @@
 
 ## Docker-first quick start
 
+Detailed Docker/deployment notes: `../docs/frontend-docker.md`
+
 From repo root:
 
 ```sh

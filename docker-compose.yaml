@@ -30,6 +30,15 @@ services:
     ports:
       - "3000:3000"
     command: npx vite --host --port 3000
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
   db:
     image: postgres:18-alpine
     restart: always
@@ -46,7 +55,6 @@ services:
 
     ports:
       - 5432:5432
-
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres", "-d", "postgres" ]
       interval: 10s

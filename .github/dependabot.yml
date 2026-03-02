@@ -4,7 +4,10 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
     groups:
       dev-dependencies:
         patterns:
@@ -13,8 +16,47 @@ updates:
           - "mypy"
           - "pre-commit"
 
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    groups:
+      test-and-lint:
+        patterns:
+          - "vitest*"
+          - "@testing-library/*"
+          - "eslint*"
+          - "prettier"
+          - "@vitejs/*"
+          - "vite"
+
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "monthly"
+      day: "wednesday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "monthly"
+      day: "wednesday"
+      time: "06:30"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+      day: "thursday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2

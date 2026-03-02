@@ -70,8 +70,18 @@ jobs:
         with:
           image-ref: frontend:test
           format: table
+          output: trivy-frontend-pr.txt
           ignore-unfixed: true
           vuln-type: library
           skip-dirs: /usr/local/lib/node_modules/npm
           severity: HIGH,CRITICAL
           exit-code: "1"
+
+      - name: Upload Trivy frontend artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-frontend-pr
+          path: trivy-frontend-pr.txt
+          retention-days: 14
+          if-no-files-found: warn

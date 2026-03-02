@@ -51,6 +51,15 @@ jobs:
       - name: Run coverage
         run: npm run coverage
 
+      - name: Upload frontend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-nightly
+          path: frontend/coverage
+          retention-days: 30
+          if-no-files-found: warn
+
       - name: Dependency audit (npm audit)
         run: npm audit --audit-level=high
 
@@ -81,8 +90,18 @@ jobs:
         with:
           image-ref: frontend:nightly
           format: table
+          output: trivy-frontend-nightly.txt
           ignore-unfixed: true
           vuln-type: library
           skip-dirs: /usr/local/lib/node_modules/npm
           severity: HIGH,CRITICAL
           exit-code: "1"
+
+      - name: Upload Trivy frontend artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-frontend-nightly
+          path: trivy-frontend-nightly.txt
+          retention-days: 30
+          if-no-files-found: warn

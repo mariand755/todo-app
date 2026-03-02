@@ -157,6 +157,11 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
 - Backend Docker CI: `.github/workflows/docker_backend.yml`
 - Frontend Docker CI: `.github/workflows/docker_frontend.yml`
 
+### CI Governance and Docs
+
+- CI policy (triage, SLOs, flaky cleanup): `docs/ci-governance.md`
+- Frontend Docker guide: `docs/frontend-docker.md`
+
 ## Features Overview
 - Follow the interactive prompts to manage folders and todo items from the CLI.
 - Or use the React frontend for a graphical experience.
@@ -194,9 +199,6 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
    - Enter `exit`
    - Or stop `docker-compose` / close the frontend tab.
 
-
-## License
-This project is for learning purposes and does not have a formal license.
 
 ---
 

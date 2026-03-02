@@ -1,0 +1,43 @@
+name: Compose Health
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "docker-compose.yaml"
+      - ".github/workflows/compose_health.yml"
+
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "docker-compose.yaml"
+      - ".github/workflows/compose_health.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compose-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build and wait for healthy services
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Show compose status
+        if: always()
+        run: docker compose ps
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v

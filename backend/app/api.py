@@ -37,6 +37,11 @@ async def validation_exception_handler(request, exc):
     )
 
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+
 @app.get("/folders")
 async def get_folders(db_session: Session = Depends(get_db)):
     positions_updated = ensure_folder_positions(db_session)
