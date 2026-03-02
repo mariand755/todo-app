@@ -38,6 +38,10 @@ jobs:
         if: always()
         run: docker compose ps
 
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose logs --no-color api frontend db
+
       - name: Teardown
         if: always()
         run: docker compose down -v
