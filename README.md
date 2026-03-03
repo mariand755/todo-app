@@ -1,7 +1,5 @@
 # Todo-App
-A simple To-Do List project with a Python backend (CLI + library) and a React frontend.
-
-Organize tasks into folders, add, edit, delete, and search items efficiently.
+A Docker-first To-Do app with a Python FastAPI backend (plus CLI/library) and a React frontend, supporting folder/item CRUD and ordering, with CI-enforced quality and health checks.
 
 **Contents overview:**
 - `backend/`:
@@ -32,7 +30,7 @@ Organize tasks into folders, add, edit, delete, and search items efficiently.
    Interactive prompts and command aliases for quick navigation.
 
 - **Dev & Deployment**:
-   Dockerfiles for `backend` and `frontend`; `docker-compose.yaml` to run services locally.
+   Dockerfiles for `backend` and `frontend`; `docker-compose.yaml` to run services locally with health checks.
 
 - **Testing**:
    Unit tests under `backend/tests/`.
@@ -111,7 +109,7 @@ npm run dev
 
 Or run the full stack with Docker Compose (if configured):
 ```sh
-docker-compose up --build
+docker compose up --build --wait
 ```
 
 ## QA & CI Commands
@@ -156,6 +154,7 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
 
 - Backend Docker CI: `.github/workflows/docker_backend.yml`
 - Frontend Docker CI: `.github/workflows/docker_frontend.yml`
+- Compose Health CI: `.github/workflows/compose_health.yml`
 
 ### CI Governance and Docs
 
@@ -197,7 +196,7 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
 
 5. Exit the CLI:
    - Enter `exit`
-   - Or stop `docker-compose` / close the frontend tab.
+   - Or stop `docker compose` / close the frontend tab.
 
 
 ---

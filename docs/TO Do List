@@ -90,7 +90,7 @@ Issues
     - handle only existing ids for edit & delete (fix)
 
 
-Nice to have
+Optional Enhancements
     - remove text (Welcome to our first
     ToDo_App) before item list (done)
     - Add text "ID" to returned title (done)
@@ -122,13 +122,13 @@ Nice to have
 
 
 Business Logic Changes
--  We will have to change the bus logic so that the "title" of items can not be updated when marked completed. (done)
--  We will have to change the bus logic so that the deleted items can not be changed to marked completed or change back to uncompleted. (done)
--  We will have to change the bus logic so that the deleted folder can not be have items within it changed to be marked completed or change back to uncompleted.(done)
-- We will have to change the bus logic so that an update with an empty list does not return a 200 when using put api.(done)
+- Enforce business logic: prevent title updates for completed items. (done)
+- Enforce business logic: prevent toggling completion state for deleted items. (done)
+- Enforce business logic: prevent toggling completion state for items in deleted folders. (done)
+- Enforce business logic: reject empty-list updates for PUT operations instead of returning 200. (done)
 
 
-  - comments in code to learn what the functions and methods are doing
+    - Add explanatory comments for functions and methods where needed
 https://shoelace.style/components/radio-button
 
 
@@ -163,7 +163,7 @@ Frontend Issues
     - screenshot of todo field showing late items text added when hovering over the field with the mouse cursor - done
     - screenshot of sidebar showing vertical sidebar not optimized - done
     - when folder title is edited, and refresh the page, the folder moves to the end of the list instead of maintaining its position in the sidebar - done
-    - help with the DB persistence issue so you can drop the restart workaround (docker issue with volume persistence) - done
+    - Resolve DB persistence issue to remove restart workaround (Docker volume persistence) - done
     - pinning of folders to the top of the list (eg for important folders)
   
 
@@ -200,17 +200,15 @@ Optimize UI for mobile view (responsive design)
 
 
 
-
-
 Agent - ideation
-I want you to look at my todolist task list and create github issues.
-I want you create proper tags if they don't exist.
+- Convert the todo task list into GitHub issues.
+- Create required labels if they do not exist.
 - bug: Issues related to bugs in the code.
 - enhancement: Issues related to new features or improvements.
 - housekeeping: chores to improve maintainance of code (doesn't necessarily add functionality)
-And create any additional tags as necessary (ask me for confirmation).
-After confirming, go ahead and give me a quick list of all the issues that you'll created, along with a list of tags
-After I confirm, create the issues in github. Ask me what you need to make this happen.
+- Propose any additional labels and require confirmation before creating them.
+- Provide a draft list of issues and labels for review.
+- After approval, create the GitHub issues and list required access/prerequisites.
 
 
 TD-001 Search items by title in folder UI - out of scope
@@ -228,8 +226,9 @@ TD-004 User authentication/authorization [EPIC]
 
 
 Next steps:
-Opencode agent setup and configuration
-Ask copilot for a step by step workflow for the following:
+Opencode agent setup and configuration - a tool that would tone down the cognitive load of managing tasks in a todo list & tradeoff is on more layer of abstraction(details)
+
+Copilot step-by-step workflow requirements:
 - Repo target (owner/repo)
 - Access method: gh CLI already authenticated on your machine, or a GitHub token/pat configured for API use
 - confirm with permissions with copilot

@@ -30,14 +30,14 @@ repos:
       - id: frontend-eslint
         name: frontend-eslint
         language: system
-        entry: npm --prefix frontend run lint
+        entry: bash -c 'docker image inspect todo-app-frontend-test >/dev/null 2>&1 || docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend; docker run --rm -v "$PWD/frontend:/usr/src/app" -w /usr/src/app todo-app-frontend-test npm run lint'
         pass_filenames: false
         files: ^frontend/.*\.(js|jsx)$
 
       - id: frontend-format-check
         name: frontend-format-check
         language: system
-        entry: npm --prefix frontend run format:check
+        entry: bash -c 'docker image inspect todo-app-frontend-test >/dev/null 2>&1 || docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend; docker run --rm -v "$PWD/frontend:/usr/src/app" -w /usr/src/app todo-app-frontend-test npm run format:check'
         pass_filenames: false
         files: ^frontend/
 
