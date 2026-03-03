@@ -132,7 +132,24 @@ Business Logic Changes
 https://shoelace.style/components/radio-button
 
 
+Set up and configure health checks for the application components
+    - Set up health checks for the backend API - done
+    - Set up health checks for the frontend application - done
+    -Set up health checks for the database - done
+    - Configure Docker Compose to use the health checks - done
+    - Test the health checks to ensure they are working correctly - done
 
+Accessibility Issues Found: - done
+- Dropdowns not keyboard accessible - Three-dots menus only open on mouse hover, not keyboard
+- Icon-only buttons lack labels - Three-dots triggers have no aria-labels
+- Folders heading is clickable but not keyboard-navigable - Uses onClick instead of being a button
+- No visible focus indicators - Tab navigation not clear visually
+- Checkbox without label - Todo item checkbox has no associated label
+- Folder click only works via mouse - LI element with onClick, not keyboard-accessible
+- No skip-to-content link - No keyboard shortcut to main content
+- Drag-and-drop not keyboard accessible - Items can't be reordered via keyboard
+- Folders heading title needs better semantics - Should be a button, not just clickable text
+- Focus management in dialogs - Not properly managing focus when dialogs open/close
 
 Frontend Issues
     - items within folder moves position to the last row after it's edited (fix need to maintain position in list) - done
@@ -149,18 +166,6 @@ Frontend Issues
     - help with the DB persistence issue so you can drop the restart workaround (docker issue with volume persistence) - done
     - pinning of folders to the top of the list (eg for important folders)
   
-Accessibility Issues Found: - done
-- Dropdowns not keyboard accessible - Three-dots menus only open on mouse hover, not keyboard
-- Icon-only buttons lack labels - Three-dots triggers have no aria-labels
-- Folders heading is clickable but not keyboard-navigable - Uses onClick instead of being a button
-- No visible focus indicators - Tab navigation not clear visually
-- Checkbox without label - Todo item checkbox has no associated label
-- Folder click only works via mouse - LI element with onClick, not keyboard-accessible
-- No skip-to-content link - No keyboard shortcut to main content
-- Drag-and-drop not keyboard accessible - Items can't be reordered via keyboard
-- Folders heading title needs better semantics - Should be a button, not just clickable text
-- Focus management in dialogs - Not properly managing focus when dialogs open/close
-
 
  - Automation and Integration
         - add automation testing (unit tests, integration tests, end-to-end tests)
@@ -178,7 +183,7 @@ Accessibility Issues Found: - done
 - Advanced Features
         - integrate with third-party services (eg calendar apps, notifications services)
         - implement due dates and reminders for todo items
-        - implement logging for better debugging and tracking
+        - implement logging for better debugging and tracking - done
 
 - System Design (Scalability, Performance, Reliability) - Digram and design the system architecture for scalability, performance, and reliability
         - implement a microservices architecture for better scalability and maintainability
@@ -194,12 +199,7 @@ Optimize UI for mobile view (responsive design)
    - indicate on the sidebar with an icon when the folder has items
 
 
-Set up and configure health checks for the application components
-    - Set up health checks for the backend API - done
-    - Set up health checks for the frontend application - done
-    -Set up health checks for the database - done
-    - Configure Docker Compose to use the health checks - done
-    - Test the health checks to ensure they are working correctly - done
+
 
 
 Agent - ideation

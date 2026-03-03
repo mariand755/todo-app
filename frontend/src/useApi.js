@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 const apiURL = "http://localhost:8000";
 
 export async function makeAPICall(http_method, api_path, payload = null) {
@@ -8,7 +10,7 @@ export async function makeAPICall(http_method, api_path, payload = null) {
       const result = await fetch(url);
       return result;
     } catch (ex) {
-      console.log(ex);
+      logger.error("GET request failed", { url, error: ex });
       return null;
     }
   }
@@ -22,7 +24,7 @@ export async function makeAPICall(http_method, api_path, payload = null) {
     });
     return result;
   } catch (ex) {
-    console.log(ex);
+    logger.error("Request failed", { method, url, error: ex });
     return null;
   }
 }

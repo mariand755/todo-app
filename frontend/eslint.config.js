@@ -23,6 +23,7 @@ export default defineConfig([
       },
     },
     rules: {
+      "no-console": "error",
       "no-unused-vars": [
         "error",
         {
@@ -34,6 +35,12 @@ export default defineConfig([
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/preserve-manual-memoization": "off",
       "react-hooks/refs": "off",
+    },
+  },
+  {
+    files: ["src/logger.js"],
+    rules: {
+      "no-console": "off",
     },
   },
 ]);

@@ -1,3 +1,4 @@
+import logging
 import os
 
 import sqlalchemy as sa
@@ -10,12 +11,16 @@ DB_USER = os.getenv("POSTGRES_USER", "postgres")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
 DB_HOST = os.getenv("POSTGRES_HOST", "db")
 DB_NAME = os.getenv("POSTGRES_DB", "postgres")
+SQL_ECHO = os.getenv("SQL_ECHO", "false").strip().lower() in {"1", "true", "yes", "on"}
+
+logger = logging.getLogger("todo_app.models")
 
 # Database engine
 try:
-    engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}", echo=True)
+    engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}", echo=SQL_ECHO)
 except Exception:
     # Fallback to an in-memory sqlite DB when engine creation fails (useful for tests / missing drivers)
+    logger.warning("Falling back to sqlite in-memory engine")
     engine = create_engine("sqlite:///:memory:", echo=False)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

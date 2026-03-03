@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
 import LandingContent from "./components/LandingContent";
 import LoadingContent from "./components/LoadingContent";
+import { logger } from "./logger";
 import "./styles.css";
 import "@shoelace-style/shoelace/dist/themes/light.css";
 import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js";
@@ -226,7 +227,7 @@ function App() {
   // handle ordering of items
   const handleReorderItems = async (itemIds) => {
     if (!activeFolderId) return;
-    console.log("Reordering items:", itemIds);
+    logger.debug("Reordering items", { itemIds, activeFolderId });
     const rawApiResponse = await makeAPICall(
       "PUT",
       `/folders/${activeFolderId}/item_order`,
@@ -261,7 +262,10 @@ function App() {
         });
       } catch (e) {
         // silent fail — UI will show empty title fallback
-        console.info("Failed to fetch folder metadata", e);
+        logger.info("Failed to fetch folder metadata", {
+          activeFolderId,
+          error: e,
+        });
       }
     })();
     return () => {
