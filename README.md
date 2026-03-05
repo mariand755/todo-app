@@ -112,6 +112,8 @@ Or run the full stack with Docker Compose (if configured):
 docker compose up --build --wait
 ```
 
+- Full reset if local state gets stuck (destructive): `docker compose down -v && docker compose up -d --build --wait`
+
 ## QA & CI Commands
 
 ### Backend (Docker-first)

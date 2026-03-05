@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -35,9 +36,19 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             item.add_marker(pytest.mark.unit)
 
 
+def _create_test_engine():
+    # CI can provide TEST_DATABASE_URL to run integration tests against Postgres.
+    database_url = os.getenv("TEST_DATABASE_URL", "").strip()
+
+    if database_url:
+        return create_engine(database_url, pool_pre_ping=True)
+
+    return create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+
+
 @pytest.fixture(scope="function")
 def db_engine():
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    engine = _create_test_engine()
     Base.metadata.create_all(engine)
     yield engine
     Base.metadata.drop_all(engine)
@@ -48,6 +59,12 @@ def db_engine():
 def testing_db_session(db_engine):
     connection: Connection = db_engine.connect()
     transaction = connection.begin()
+
+    # Keep tests deterministic when the target Postgres DB already has data.
+    if db_engine.dialect.name != "sqlite":
+        for table in reversed(Base.metadata.sorted_tables):
+            connection.execute(table.delete())
+
     session = Session(bind=connection)
     session.begin_nested()
 

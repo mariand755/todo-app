@@ -3,27 +3,67 @@ name: Compose Health
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - "docker-compose.yaml"
-      - ".github/workflows/compose_health.yml"
 
   push:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - "docker-compose.yaml"
-      - ".github/workflows/compose_health.yml"
 
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: compose-health-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  detect-relevant-changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      should_run: ${{ steps.filter.outputs.should_run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect compose-relevant changes
+        id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+
+          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only "$base" "$head" > changed_files.txt
+
+          if grep -E -q '^(backend/|frontend/|docker-compose\.yaml|\.github/workflows/compose_health\.yml)' changed_files.txt; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   compose-health:
+    needs: detect-relevant-changes
+    if: needs.detect-relevant-changes.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -33,6 +73,77 @@ jobs:
 
       - name: Build and wait for healthy services
         run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Run compose runtime API and DB smoke checks
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.error
+          import urllib.request
+
+          BASE_URL = "http://127.0.0.1:8000"
+
+          def request(path, method="GET", data=None, expected_status=200):
+            url = f"{BASE_URL}{path}"
+            headers = {}
+            body = None
+            if data is not None:
+              body = json.dumps(data).encode("utf-8")
+              headers["Content-Type"] = "application/json"
+
+            req = urllib.request.Request(url, data=body, headers=headers, method=method)
+            try:
+              with urllib.request.urlopen(req, timeout=15) as response:
+                status = response.status
+                payload = response.read().decode("utf-8")
+            except urllib.error.HTTPError as exc:
+              payload = exc.read().decode("utf-8", errors="replace")
+              raise AssertionError(
+                f"{method} {path} expected {expected_status}, got {exc.code}. body={payload}"
+              ) from exc
+
+            if status != expected_status:
+              raise AssertionError(f"{method} {path} expected {expected_status}, got {status}. body={payload}")
+
+            if not payload:
+              return None
+
+            try:
+              return json.loads(payload)
+            except json.JSONDecodeError:
+              return payload
+
+          health = request("/health")
+          assert isinstance(health, dict) and health.get("status") == "ok", f"Unexpected /health response: {health}"
+
+          folders = request("/folders")
+          assert isinstance(folders, list), f"Unexpected /folders response type: {type(folders)}"
+
+          folder = request("/folders", method="POST", data={"title": "ci_compose_smoke_folder"})
+          folder_id = folder["id"]
+
+          fetched_folder = request(f"/folders/{folder_id}")
+          assert fetched_folder["id"] == folder_id, f"Folder lookup mismatch: {fetched_folder}"
+
+          item = request(f"/folders/{folder_id}/items", method="POST", data={"title": "ci_compose_smoke_item"})
+          item_id = item["id"]
+          assert item["folder_id"] == folder_id, f"Item created in wrong folder: {item}"
+
+          toggled = request(f"/folders/{folder_id}/items/{item_id}/toggle", method="PUT")
+          assert toggled.get("completed") is True, f"Toggle did not complete item: {toggled}"
+
+          ordered = request(
+            f"/folders/{folder_id}/item_order",
+            method="PUT",
+            data={"itemOrder_id": [item_id]},
+          )
+          assert isinstance(ordered, dict) and "items" in ordered and ordered["items"], f"Bad item_order response: {ordered}"
+
+          request(f"/folders/{folder_id}/items/{item_id}", method="DELETE", expected_status=204)
+          request(f"/folders/{folder_id}", method="DELETE", expected_status=204)
+
+          print("Compose runtime API+DB smoke checks passed.")
+          PY
 
       - name: Show compose status
         if: always()

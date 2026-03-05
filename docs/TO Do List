@@ -229,13 +229,77 @@ Next steps:
 Opencode agent setup and configuration - a tool that would tone down the cognitive load of managing tasks in a todo list & tradeoff is on more layer of abstraction(details)
 
 Copilot step-by-step workflow requirements:
+- ai agent to create issues and tags (equvilient)
+- skills required for the ai agent (equvient)
+- skillsmp.com
 - Repo target (owner/repo)
 - Access method: gh CLI already authenticated on your machine, or a GitHub token/pat configured for API use
 - confirm with permissions with copilot
 - github copilot setup and configuration
 - project board to associate the issues(tracking and metrics) with in github
-- ai agent to create issues and tags (equvilient)
-- skills required for the ai agent (equvient)
-- skillsmp.com
 
+
+- look at the repo and give me a suggest of what agents and subagent it can have 
+- for show me each role define a coorlaborative and coordinative skills btw them where necessary / never make assumetions/ what to avoid/what not to do 
+    - who will be an overseer/delegator/orcastrator/be able to provide suggestions to user on how to handle issues/task
+    - who will be a lead
+    - who implementor 
+
+
+QA Agent could:
+- Detect flaky tests and auto-create github tickets for investigation
+- Suggest missing tests based on code changes and test coverage
+- Generate test skeletons for new endpoints
+- Identify untested API routes
+- Compare OpenAPI spec to test coverage
+- Flag endpoints with no negative test coverage 
+- Propose additional security cases
+- Deterministic fallbacks
+- Full audit logs
+- Explainable decisions
+- No auto-merge without human override
+- No hallucinated reasoning
+- Guardrails around security analysis
+
+Skill: PR “Merge Confidence” / Merge Confidence Reporter
+When a PR is opened, produce a merge confidence report and 
+a clear next-step recommendation (approve / request changes / block), 
+based on risk, test results, coverage, and security signal
+
+Skill: Test Failure Analyzer
+When a test fails, analyze the failure logs and 
+code changes to determine the likely cause of the failure and 
+suggest potential fixes or next steps for the developer to investigate.
+
+Skill: Security Severity Evaluator
+When a new security vulnerability is reported, 
+evaluate the severity of the vulnerability based on factors such as exploitability, 
+impact, and affected components, and provide a clear severity rating (e.g., low, medium, high) 
+along with recommended actions for remediation.
+
+Skill: Coverage Impact Analyzer
+When a code change is made, analyze the impact of the change on test coverage and
+provide a report on how the change affects overall coverage, including any areas of the codebase that may now be under-tested, and suggest additional tests that could be added to maintain or improve coverage.
+
+Skill: Agent Decision Engine    
+When multiple signals (e.g., merge confidence, test failures, security severity, coverage impact) are present for a PR or code change,
+analyze all available data to make a holistic recommendation on whether to approve, request changes, or block the PR, and provide a clear rationale for the recommendation based on the combined analysis of all signals    
+
+Skill: Issue Triage Assistant
+When a new issue is created, analyze the issue description, labels, and related code to suggest appropriate labels (e.g., bug, enhancement, housekeeping) and assign the issue to the most relevant team member based on expertise and workload.        
+
+Skill: Code Review Comment Generator
+When a PR is opened or updated, analyze the code changes and generate relevant code review comments based on best practices, potential bugs, security issues, and style guidelines, to assist reviewers in providing thorough and consistent feedback.  
+
+Skill: PR Risk Assessor
+When a PR is opened, assess the risk level of the changes based on factors such as the size of the change, the complexity of the code, the number of files affected, and the presence of any high-risk patterns (e.g., use of eval, direct database access), and provide a risk rating (e.g., low, medium, high) along with recommendations for additional scrutiny or testing if needed.   
+
+
+Skill: Smart PR Consistent Comment Formatter
+When a PR is opened or updated, analyze the code changes and generate relevant code review comments based on best practices, potential bugs, security issues, and style guidelines, to assist reviewers in providing thorough and consistent feedback. The comments should be specific to the code changes and provide actionable feedback for the developer to improve the quality of the code.    
+
+
+Phase 5.1 QA Architecture
+- E2E/Playwright/MCP architecture questions and answer log moved to `docs/e2e-playwright-qa-architecture.md`.
+- Keep this TO Do List focused on feature delivery and AI agent work items.
 
