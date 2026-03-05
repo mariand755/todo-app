@@ -7,7 +7,7 @@
 ## Architecture & Why
 
 - Frontend (Vite + React) communicates with backend over REST at `http://localhost:8000` using `frontend/src/useApi.js`.
-- Backend is a single FastAPI service that uses SQLAlchemy for persistence. The DB config prefers Postgres (env-driven) but falls back to an in-memory SQLite engine when Postgres/psycopg2 isn't available — useful for tests and local dev without Docker.
+- Backend is a single FastAPI service that uses SQLAlchemy for persistence. The DB config is Postgres-first (env-driven) and falls back to an in-memory SQLite engine only if Postgres engine creation fails (for example, missing DB driver).
 - The codebase also contains a standalone CLI that uses in-memory classes (`Folder`, `TodoItem`) in `backend/library/` for interactive usage; this is intentionally separate from the FastAPI/DB path.
 - Docker-first health checks are enabled for DB, API, and frontend via `docker-compose.yaml`, with backend health endpoint support in `backend/app/api.py` and image-level API health check in `backend/Dockerfile`.
 
@@ -15,11 +15,17 @@
 
 - Soft deletes: records are not removed; they use `is_deleted` flags (see `backend/library/models.py`). Many API endpoints filter for `is_deleted == False`.
 - Dual models: There are SQLAlchemy models in `models.py` and plain-Python classes in `folder.py`/`todo_item.py`. They share names (`Folder`, `TodoItem`) but serve different purposes (DB vs in-memory CLI). Be explicit which you import/modify.
-- API response models use Pydantic with `Config.from_attributes = True` (see `backend/app/api.py`), so endpoints often return ORM objects directly.
+- API response models use Pydantic v2 config (`model_config = ConfigDict(from_attributes=True)`) in `backend/app/api.py`, so endpoints often return ORM objects directly.
 - Item ordering: `TodoItem.position` tracks order; the API implements an `item_order` endpoint that accepts `itemOrder_id: list[int]` and reassigns positions.
 - Validation: there's a custom `RequestValidationError` handler in `backend/app/api.py` that reformats validation errors — preserve its shape if altering request validation.
 
 ## Common tasks & exact commands
+
+### Why Docker-first (and when local is OK)
+
+- Prefer Docker-first for verification and delivery work because CI and health checks run in containers.
+- Use local `uv` commands for quick backend iteration or debugging loops when container startup overhead slows feedback.
+- Before merge, re-run relevant Docker-based checks if your changes touch API startup, DB wiring, ports, env vars, or Compose dependencies.
 
 - Run everything with Docker Compose (recommended):
 
@@ -31,9 +37,10 @@ docker compose up --build --wait
 
 ```bash
 cd backend
-pip install -r requirements.txt   # or use pyproject-based env
-# run with uvicorn (module path is `app.api`)
-uvicorn app.api:app --reload --host 0.0.0.0 --port 8000
+# preferred: sync from pyproject/uv.lock
+uv sync --frozen --group dev
+# run local API (module path is `app.api`)
+uv run fastapi dev app/api.py --host 0.0.0.0 --port 8000
 ```
 
 - Run Docker-first backend tests:
@@ -85,7 +92,7 @@ npm run dev
 
 ## Tests
 
-- Pytest tests live under `backend/tests/` and exercise both library helpers and API behavior. Tests often rely on the SQLite fallback, so changes to engine creation or `get_db()` can break tests.
+- Pytest tests live under `backend/tests/` and exercise both library helpers and API behavior. The shared fixtures default to an in-memory SQLite engine (or `TEST_DATABASE_URL` when provided), so changes to DB session wiring, dependency overrides, or model metadata can break tests.
 
 ## Suggested AI agent behavior
 
