@@ -33,17 +33,17 @@
       "template": "Start the full todo-app stack with Docker Compose:\n\ndocker compose up --build --wait\n\nWait for all services (db, api, frontend) to become healthy before confirming success."
     },
     "down": {
-      "description": "Stop and remove all containers",
-      "template": "Stop the todo-app stack and remove containers, networks, and volumes:\n\ndocker compose down\n\nConfirm all containers have been stopped and removed."
+      "description": "Stop and remove stack containers and networks",
+      "template": "Stop the todo-app stack and remove containers and networks:\n\ndocker compose down\n\nConfirm all containers have been stopped and removed."
     },
     "lint": {
       "description": "Lint backend and frontend via Docker",
-      "template": "Run linters for both services using Docker:\n\nBackend: docker run --rm todo-app-backend-test ruff check .\nFrontend: docker run --rm todo-app-frontend-test npm run lint\n\nReport any issues found."
+      "template": "Run linters for both services using Docker:\n\nBackend: docker run --rm todo-app-backend-test uv run ruff check .\nFrontend: docker run --rm todo-app-frontend-test npm run lint\n\nReport any issues found."
     }
   },
   "formatter": {
     "ruff": {
-      "command": ["docker", "run", "--rm", "-v", "${workspaceFolder}/backend:/app", "todo-app-backend-test", "ruff", "format", "$FILE"],
+      "command": ["docker", "run", "--rm", "-v", "${workspaceFolder}/backend:/app", "todo-app-backend-test", "uv", "run", "ruff", "format", "$FILE"],
       "extensions": [".py"]
     },
     "prettier": {

@@ -77,6 +77,14 @@ Behave like a careful terminal operator, not an autonomous workflow engine.
 - If pre-commit hooks modify files, stop and ask whether to re-stage and retry commit.
 - If push is rejected (for example, non-fast-forward), present options and wait for explicit user choice.
 
+### Hook Auto-Fix Recovery Pattern
+
+When a commit fails because hooks auto-fix files:
+1. Show which files were modified by hooks.
+2. Propose re-staging the same user-approved file scope.
+3. Re-run the same `git commit` command (not `--amend`) only after explicit confirmation.
+4. If commit succeeds and user requested push, continue to push permission flow.
+
 ### File Scope Discipline
 
 - Stage only files the user requested.
@@ -128,6 +136,20 @@ Require explicit confirmation before any history-altering or destructive command
 - `git clean -fd`
 - `git push --force` / `git push --force-with-lease`
 
+## Pre-Push Divergence Guard
+
+Before any push attempt, perform and report upstream status checks (with explicit user confirmation for each command):
+1. `git fetch origin <current-branch>`
+2. `git status -sb`
+
+Push behavior by status:
+- `ahead N, behind 0`: push may proceed (still requires push permission).
+- `ahead N, behind M` or `behind M`: do not push yet; present options and wait for explicit choice.
+
+Preferred recovery options when behind/diverged:
+1. Safe default: `git pull --rebase origin <current-branch>`
+2. Alternative (history rewrite): `git push --force-with-lease` only with explicit confirmation and warning.
+
 ## Operational Guidelines
 
 ### Before Executing Commands
@@ -144,6 +166,8 @@ Require explicit confirmation before any history-altering or destructive command
 - Present command outputs in clearly labeled code blocks.
 - Summarize what each command accomplished in plain language.
 - If multiple steps are requested, provide a checkpoint summary after each command.
+- For completed command summaries, use `Executed <command>` phrasing.
+- Avoid `Ran <command>` phrasing in summaries.
 
 ### Error Handling
 - If a git command returns an error, do not silently retry. Explain the error and propose a fix.

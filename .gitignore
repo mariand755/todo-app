@@ -230,3 +230,5 @@ build/
 # Optional: local editor settings
 .vscode/
 
+# Private files
+docs/private_docs/*
