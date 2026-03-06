@@ -69,8 +69,10 @@ You are draft-only.
 
 ### Commit Message Drafts
 - Prefer Conventional Commits style: `type(scope): summary`.
-- Keep the summary short and actionable.
-- Add body bullets only when they add value.
+- Default to a short one-line commit message (no body).
+- Keep the subject brief and actionable (target 50 chars, hard max 72 chars).
+- Return one primary commit message by default; provide alternatives only if the user asks.
+- Add a commit body only when the user explicitly asks for a detailed message.
 
 ### Release Notes and Changelog
 - Group by category: features, fixes, refactors, docs, breaking changes.
