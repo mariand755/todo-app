@@ -1,0 +1,122 @@
+name: Subtask
+description: Implementation slice under a Story/Case.
+title: "TD-### <implementation task title>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for Subtasks.
+
+        Contract reminders:
+        - Subtask requires a parent Story/Case.
+        - Subtasks are leaf work items (no child issues).
+        - Effort must be XS/S/M.
+
+  - type: input
+    id: parent_story
+    attributes:
+      label: Parent Story/Case reference
+      description: Required. Provide Story TD ID and/or GitHub issue link.
+      placeholder: "TD-009 Story/Case or https://github.com/<owner>/<repo>/issues/<id>"
+    validations:
+      required: true
+
+  - type: textarea
+    id: done_condition
+    attributes:
+      label: Done condition
+      description: Define what must be true for this subtask to be done.
+      placeholder: |
+        - [ ] Implementation requirement 1
+        - [ ] Implementation requirement 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_steps
+    attributes:
+      label: Implementation checklist
+      description: Add concrete execution steps.
+      placeholder: |
+        - [ ] Step 1
+        - [ ] Step 2
+        - [ ] Step 3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort
+      options:
+        - XS
+        - S
+        - M
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Usually inherit from parent unless this slice is cross-component.
+      options:
+        - inherit-from-parent
+        - backend
+        - frontend
+        - cli
+        - database
+        - qa
+        - ci-cd
+        - security
+        - docs
+        - mobile
+        - infra
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - inherit-from-parent
+        - Now
+        - Next
+        - Later
+        - Hold
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Prefer inherit unless triage explicitly overrides.
+      options:
+        - inherit-from-parent
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: code_impact
+    attributes:
+      label: Code impact
+      description: Mark one option.
+      options:
+        - label: Code-impacting subtask (PR link required before Review/Done).
+        - label: Non-code subtask (document rationale before closure).
+
+  - type: checkboxes
+    id: contract_ack
+    attributes:
+      label: Contract acknowledgment
+      options:
+        - label: I provided a parent Story/Case reference.
+          required: true
+        - label: I included done condition and implementation checklist.
+          required: true

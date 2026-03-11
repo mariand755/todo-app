@@ -1,0 +1,133 @@
+name: Task
+description: Technical, operational, or admin work item.
+title: "TD-### <technical or operational task title>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for Tasks.
+
+        Contract reminders:
+        - Product-delivery tasks require a parent (`Epic` or `Story/Case`).
+        - Standalone tasks are allowed only for operational/platform/admin work with explicit rationale.
+
+  - type: dropdown
+    id: task_classification
+    attributes:
+      label: Task classification
+      options:
+        - product-delivery
+        - operational-platform-admin
+    validations:
+      required: true
+
+  - type: input
+    id: parent_reference
+    attributes:
+      label: Parent reference
+      description: Required for product-delivery tasks.
+      placeholder: "https://github.com/<owner>/<repo>/issues/<id>"
+    validations:
+      required: false
+
+  - type: textarea
+    id: standalone_rationale
+    attributes:
+      label: Standalone rationale
+      description: Required only for standalone operational/platform/admin tasks.
+      placeholder: Explain why this task is standalone and include owner approval note.
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope_statement
+    attributes:
+      label: Scope statement
+      description: Why is this task needed?
+      placeholder: Describe the outcome and value.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_or_done
+    attributes:
+      label: Acceptance/done condition
+      description: Define measurable completion criteria.
+      placeholder: |
+        - [ ] Outcome 1
+        - [ ] Outcome 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - backend
+        - frontend
+        - cli
+        - database
+        - qa
+        - ci-cd
+        - security
+        - docs
+        - mobile
+        - infra
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort
+      options:
+        - XS
+        - S
+        - M
+        - L
+        - XL
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - Now
+        - Next
+        - Later
+        - Hold
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P3
+        - P2
+        - P1
+        - P0
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: code_impact
+    attributes:
+      label: Code impact
+      options:
+        - label: Code-impacting task (PR link required before Review/Done).
+        - label: Non-code task (closure rationale required if no PR).
+
+  - type: checkboxes
+    id: contract_ack
+    attributes:
+      label: Contract acknowledgment
+      options:
+        - label: I provided either a valid parent reference or a standalone operational rationale.
+          required: true
+        - label: I included a measurable done condition.
+          required: true
