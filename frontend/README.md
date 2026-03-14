@@ -59,6 +59,14 @@ npm run test -- --run src/test/integration
 npm run test -- --run src/test/unit
 ```
 
+Testing policy, ID conventions, and governance:
+
+- ../docs/testing-governance.md
+
+Local frontend test notes:
+
+- src/test/README.md
+
 ## Docker-first test runs (from frontend folder)
 
 ```sh
@@ -72,5 +80,11 @@ docker run --rm todo-app-frontend-test npm run test
 - `src/test/unit/api`: API helper unit tests
 - `src/test/unit/components`: component unit tests
 - `src/test/integration`: app flow integration tests
+
+## Test ID tooling
+
+- `../scripts/rewrite_frontend_test_ids.py`: rebuilds frontend `@FUT## |` and `@FINT## |` title prefixes.
+- `../scripts/fix_frontend_it_callbacks.py`: legacy recovery helper for older rewrites that truncated `it(...)` callback signatures.
+- `../scripts/rewrite_test_id_markers.py`: backend companion script for `BUT##` and `BINT##` pytest markers.
 
 CI workflow: `.github/workflows/docker_frontend.yml`

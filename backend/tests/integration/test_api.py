@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -11,12 +12,14 @@ from tests.helpers import (
 )
 
 
+@pytest.mark.BINT01
 def test_get_default_empty_folders_success(test_client: TestClient):
     response = test_client.get("folders")
     assert response.status_code == 200
     assert response.json() == []
 
 
+@pytest.mark.BINT02
 def test_get_active_folders_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -29,6 +32,7 @@ def test_get_active_folders_success(test_client: TestClient, testing_db_session:
     assert res_json[0]["title"] == folder.title
 
 
+@pytest.mark.BINT03
 def test_get_deleted_folders_not_in_response(test_client: TestClient, testing_db_session: Session):
     # arrange
     seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -41,6 +45,7 @@ def test_get_deleted_folders_not_in_response(test_client: TestClient, testing_db
     assert response.json() == []
 
 
+@pytest.mark.BINT04
 def test_create_folder_success(test_client: TestClient):
     # arrange
     test_payload = create_test_payload(1)
@@ -52,6 +57,7 @@ def test_create_folder_success(test_client: TestClient):
     assert res_json["title"] == test_payload[0]["title"]
 
 
+@pytest.mark.BINT05
 def test_edit_folder_keeps_sidebar_order_on_refresh(test_client: TestClient):
     first = test_client.post("/folders", json={"title": "first"}).json()
     second = test_client.post("/folders", json={"title": "second"}).json()
@@ -66,6 +72,68 @@ def test_edit_folder_keeps_sidebar_order_on_refresh(test_client: TestClient):
     assert ids_in_order == [first["id"], second["id"], third["id"]]
 
 
+@pytest.mark.BINT06
+def test_pin_folder_moves_it_to_top_and_marks_state(test_client: TestClient):
+    first = test_client.post("/folders", json={"title": "first"}).json()
+    second = test_client.post("/folders", json={"title": "second"}).json()
+    third = test_client.post("/folders", json={"title": "third"}).json()
+
+    pin_response = test_client.put(f"/folders/{second['id']}/pin", json={"is_pinned": True})
+    assert pin_response.status_code == 200
+    assert pin_response.json()["is_pinned"] is True
+
+    folders_response = test_client.get("/folders")
+    assert folders_response.status_code == 200
+    ids_in_order = [folder["id"] for folder in folders_response.json()]
+    assert ids_in_order == [second["id"], first["id"], third["id"]]
+
+
+@pytest.mark.BINT07
+def test_unpin_folder_restores_order_within_unpinned_group(test_client: TestClient):
+    first = test_client.post("/folders", json={"title": "first"}).json()
+    second = test_client.post("/folders", json={"title": "second"}).json()
+    third = test_client.post("/folders", json={"title": "third"}).json()
+
+    pin_response = test_client.put(f"/folders/{second['id']}/pin", json={"is_pinned": True})
+    assert pin_response.status_code == 200
+    unpin_response = test_client.put(f"/folders/{second['id']}/pin", json={"is_pinned": False})
+    assert unpin_response.status_code == 200
+    assert unpin_response.json()["is_pinned"] is False
+
+    folders_response = test_client.get("/folders")
+    assert folders_response.status_code == 200
+    ids_in_order = [folder["id"] for folder in folders_response.json()]
+    assert ids_in_order == [first["id"], second["id"], third["id"]]
+
+
+@pytest.mark.BINT08
+def test_pin_state_persists_after_folder_rename_and_refresh(test_client: TestClient):
+    first = test_client.post("/folders", json={"title": "first"}).json()
+    second = test_client.post("/folders", json={"title": "second"}).json()
+
+    pin_response = test_client.put(f"/folders/{first['id']}/pin", json={"is_pinned": True})
+    assert pin_response.status_code == 200
+    rename_response = test_client.put(f"/folders/{first['id']}", json={"title": "first-renamed"})
+    assert rename_response.status_code == 200
+    assert rename_response.json()["is_pinned"] is True
+
+    folders_response = test_client.get("/folders")
+    assert folders_response.status_code == 200
+    refreshed = folders_response.json()
+    ids_in_order = [folder["id"] for folder in refreshed]
+    assert ids_in_order == [first["id"], second["id"]]
+    assert refreshed[0]["title"] == "first-renamed"
+    assert refreshed[0]["is_pinned"] is True
+
+
+@pytest.mark.BINT09
+def test_pin_non_existing_folder_returns_not_found(test_client: TestClient):
+    response = test_client.put("/folders/9999/pin", json={"is_pinned": True})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Folder not found"}
+
+
+@pytest.mark.BINT10
 def test_get_folders_backfills_legacy_positions(test_client: TestClient, testing_db_session: Session):
     positioned = models.Folder(title="positioned", position=3)
     legacy_a = models.Folder(title="legacy_a", position=-1)
@@ -85,6 +153,7 @@ def test_get_folders_backfills_legacy_positions(test_client: TestClient, testing
     assert positions_by_id[legacy_b.id] == 5
 
 
+@pytest.mark.BINT11
 def test_create_folder_after_legacy_backfill_appends_to_order(test_client: TestClient, testing_db_session: Session):
     legacy_first = models.Folder(title="legacy_first", position=-1)
     legacy_second = models.Folder(title="legacy_second", position=-1)
@@ -101,6 +170,7 @@ def test_create_folder_after_legacy_backfill_appends_to_order(test_client: TestC
     assert ids_in_order == [legacy_first.id, legacy_second.id, created_id]
 
 
+@pytest.mark.BINT12
 def test_create_folders_bad_input_success(test_client: TestClient):
     # arrange
     bad_payload = []
@@ -110,6 +180,7 @@ def test_create_folders_bad_input_success(test_client: TestClient):
     assert response.status_code == 400
 
 
+@pytest.mark.BINT13
 def test_get_single_folder_id_exist_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     seed_folder = seed_db_with_test_folder(testing_db_session)
@@ -121,6 +192,7 @@ def test_get_single_folder_id_exist_success(test_client: TestClient, testing_db_
     assert res_json["title"] == seed_folder.title
 
 
+@pytest.mark.BINT14
 def test_get_folder_id_not_found(test_client: TestClient):
     # arrange
     none_existing_folder = 3
@@ -130,6 +202,7 @@ def test_get_folder_id_not_found(test_client: TestClient):
     assert response.status_code == 404
 
 
+@pytest.mark.BINT15
 def test_get_existing_folder_is_deleted(test_client: TestClient, testing_db_session: Session):
     # arrange
     seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -139,6 +212,7 @@ def test_get_existing_folder_is_deleted(test_client: TestClient, testing_db_sess
     assert response.status_code == 404
 
 
+@pytest.mark.BINT16
 def test_get_anydata_instead_of_int(test_client: TestClient):
     # arrange
     bad_data = "this"
@@ -148,6 +222,7 @@ def test_get_anydata_instead_of_int(test_client: TestClient):
     assert response.status_code == 400
 
 
+@pytest.mark.BINT17
 def test_update_folder_title(test_client: TestClient, testing_db_session: Session):
     # arrange
     seed_folder = seed_db_with_test_folder(testing_db_session)
@@ -160,6 +235,7 @@ def test_update_folder_title(test_client: TestClient, testing_db_session: Sessio
     assert res_json["title"] == new_folder_title[0]["title"]
 
 
+@pytest.mark.BINT18
 def test_update_folder_with_same_title(test_client: TestClient, testing_db_session: Session):
     # arrange
     seed_folder = seed_db_with_test_folder(testing_db_session)
@@ -174,6 +250,7 @@ def test_update_folder_with_same_title(test_client: TestClient, testing_db_sessi
     assert res_json["title"] == seed_folder.title
 
 
+@pytest.mark.BINT19
 def test_updated_folder_is_deleted(test_client: TestClient, testing_db_session: Session):
     # arrange
     # seed the db with data, delete the data = set is_deleted to True
@@ -192,6 +269,7 @@ def test_updated_folder_is_deleted(test_client: TestClient, testing_db_session: 
 # use payload for a diff folder
 # update the folder of the seeded data (using put api call)
 # check the json response of the the updated folder is not found
+@pytest.mark.BINT20
 def test_non_existing_updated_folder(test_client: TestClient):
     # arrange
     res_payload = {"title": "None Existing Folder"}
@@ -207,6 +285,7 @@ def test_non_existing_updated_folder(test_client: TestClient):
 # dont need to seed data
 # do need a mock url (on the id)
 # verify the status code
+@pytest.mark.BINT21
 def test_put_api_endpoint_without_int_id(test_client: TestClient):
     # arrange
     manipulated_endpoint = {"title": "None Existing Folder"}
@@ -216,6 +295,7 @@ def test_put_api_endpoint_without_int_id(test_client: TestClient):
     assert endpoint_without_int_id.status_code == 400
 
 
+@pytest.mark.BINT22
 def test_delete_existing_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     # seed db to have an existing folder
@@ -228,6 +308,7 @@ def test_delete_existing_folder(test_client: TestClient, testing_db_session: Ses
     assert deleted_folder.status_code == 204
 
 
+@pytest.mark.BINT23
 def test_delete_already_deleted_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     # seed data will have it set to is_deleted true
@@ -244,6 +325,7 @@ def test_delete_already_deleted_folder(test_client: TestClient, testing_db_sessi
     assert res_json == {"detail": "Folder not found"}
 
 
+@pytest.mark.BINT24
 def test_delete_nonexisting_folder(test_client: TestClient):
     # arrange
     # folder do not exist so no need for seed data
@@ -261,6 +343,7 @@ def test_delete_nonexisting_folder(test_client: TestClient):
 
 
 # send an invalid delete endpoint
+@pytest.mark.BINT25
 def test_invalid_delete_endpoint(test_client: TestClient):
     # arrange
     # create a variable for a manipulate the invalid endpoint
@@ -274,6 +357,7 @@ def test_invalid_delete_endpoint(test_client: TestClient):
 
 
 # create item within folder
+@pytest.mark.BINT26
 def test_get_item_within_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     # seed the db with item
@@ -291,6 +375,7 @@ def test_get_item_within_folder(test_client: TestClient, testing_db_session: Ses
 
 
 # create multiple items (3)
+@pytest.mark.BINT27
 def test_get_multiple_items_within_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     # seed folder data
@@ -321,6 +406,7 @@ def test_get_multiple_items_within_folder(test_client: TestClient, testing_db_se
 # call the api to created the muliple items
 # verify the response json status code
 # verify the len of items to get #
+@pytest.mark.BINT28
 def test_get_num_of_items_in_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     # seed folder data
@@ -344,6 +430,7 @@ def test_get_num_of_items_in_folder(test_client: TestClient, testing_db_session:
 # do not seed with items data
 # call the items api
 # verify response status code 200
+@pytest.mark.BINT29
 def test_get_empty_folder_returns_successfully(test_client: TestClient, testing_db_session: Session):
     # arrange
     # seed folder data
@@ -361,6 +448,7 @@ def test_get_empty_folder_returns_successfully(test_client: TestClient, testing_
 # verify in folder returns 404
 # call a non existing folder with items api call
 # check response returns 404
+@pytest.mark.BINT30
 def test_get_non_existing_folder_with_items_api(test_client: TestClient):
     # arrange
     non_existing_folder = 3
@@ -378,6 +466,7 @@ def test_get_non_existing_folder_with_items_api(test_client: TestClient):
 # call the is_deleted on the seeded folder
 # call the items api on the deleted seed folder
 # verify the response returns 404
+@pytest.mark.BINT31
 def test_get_existing_folder_with_items_isdeleted(test_client: TestClient, testing_db_session: Session):
     # arrange
     seed_folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -392,6 +481,7 @@ def test_get_existing_folder_with_items_isdeleted(test_client: TestClient, testi
 # verify invalid api call returns 400
 # create invalid folder id type
 # verify the response returns 400
+@pytest.mark.BINT32
 def test_get_invalid_api_call(test_client: TestClient):
     # arrange
     invalid_folder_id = "pops"
@@ -410,6 +500,7 @@ def test_get_invalid_api_call(test_client: TestClient):
 # call the create item api
 # verify response status code 200
 # verify response contains item details
+@pytest.mark.BINT33
 def test_create_item_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -429,6 +520,7 @@ def test_create_item_success(test_client: TestClient, testing_db_session: Sessio
 # call the create item api multiple times
 # verify response status code 200 for each
 # verify each response contains correct item details
+@pytest.mark.BINT34
 def test_create_multiple_items_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -450,6 +542,7 @@ def test_create_multiple_items_success(test_client: TestClient, testing_db_sessi
 # create item payload
 # call the create item api with non-existing folder id
 # verify response status code 404
+@pytest.mark.BINT35
 def test_create_item_in_nonexisting_folder(test_client: TestClient):
     # arrange
     non_existing_folder = 999
@@ -467,6 +560,7 @@ def test_create_item_in_nonexisting_folder(test_client: TestClient):
 # create item payload
 # call the create item api with deleted folder id
 # verify response status code 404
+@pytest.mark.BINT36
 def test_create_item_in_deleted_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -484,6 +578,7 @@ def test_create_item_in_deleted_folder(test_client: TestClient, testing_db_sessi
 # create empty/invalid item payload
 # call the create item api with bad payload
 # verify response status code 400
+@pytest.mark.BINT37
 def test_create_item_bad_input(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -498,6 +593,7 @@ def test_create_item_bad_input(test_client: TestClient, testing_db_session: Sess
 # create item payload
 # call the create item api with invalid folder id type
 # verify response status code 400
+@pytest.mark.BINT38
 def test_create_item_invalid_folder_id_type(test_client: TestClient):
     # arrange
     invalid_folder_id = "invalid"
@@ -513,6 +609,7 @@ def test_create_item_invalid_folder_id_type(test_client: TestClient):
 # create item payload
 # call the create item api
 # verify response contains correct default values (completed=False, position=-1)
+@pytest.mark.BINT39
 def test_create_item_default_values(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -535,6 +632,7 @@ def test_create_item_default_values(test_client: TestClient, testing_db_session:
 # call the get item api with folder_id and item_id
 # verify response status code 200
 # verify response contains correct item details
+@pytest.mark.BINT40
 def test_get_item_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -553,6 +651,7 @@ def test_get_item_success(test_client: TestClient, testing_db_session: Session):
 # seed db with folder and item
 # call the get item api
 # verify response contains all required fields
+@pytest.mark.BINT41
 def test_get_item_response_model(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -573,6 +672,7 @@ def test_get_item_response_model(test_client: TestClient, testing_db_session: Se
 # seed db with folder but no item
 # call the get item api with non-existing item_id
 # verify response status code 404
+@pytest.mark.BINT42
 def test_get_nonexisting_item(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -589,6 +689,7 @@ def test_get_nonexisting_item(test_client: TestClient, testing_db_session: Sessi
 # do not seed folder
 # call the get item api with non-existing folder_id
 # verify response status code 404
+@pytest.mark.BINT43
 def test_get_item_from_nonexisting_folder(test_client: TestClient):
     # arrange
     non_existing_folder_id = 999
@@ -606,6 +707,7 @@ def test_get_item_from_nonexisting_folder(test_client: TestClient):
 # seed db with item
 # call the get item api with deleted folder_id
 # verify response status code 404
+@pytest.mark.BINT44
 def test_get_item_from_deleted_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -622,6 +724,7 @@ def test_get_item_from_deleted_folder(test_client: TestClient, testing_db_sessio
 # create invalid folder_id type
 # call the get item api with invalid folder_id
 # verify response status code 400
+@pytest.mark.BINT45
 def test_get_item_invalid_folder_id_type(test_client: TestClient):
     # arrange
     invalid_folder_id = "invalid"
@@ -637,6 +740,7 @@ def test_get_item_invalid_folder_id_type(test_client: TestClient):
 # create invalid item_id type
 # call the get item api with invalid item_id
 # verify response status code 400
+@pytest.mark.BINT46
 def test_get_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -651,6 +755,7 @@ def test_get_item_invalid_item_id_type(test_client: TestClient, testing_db_sessi
 # seed db with two folders and items in each
 # call the get item api with folder_id and item_id from different folders
 # verify response status code 404
+@pytest.mark.BINT47
 def test_get_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder1 = seed_db_with_test_folder(testing_db_session)
@@ -673,6 +778,7 @@ def test_get_item_from_wrong_folder(test_client: TestClient, testing_db_session:
 # call the update item api
 # verify response status code 200
 # verify response contains updated item details
+@pytest.mark.BINT48
 def test_update_item_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -694,6 +800,7 @@ def test_update_item_success(test_client: TestClient, testing_db_session: Sessio
 # call the update item api
 # verify response status code 200
 # verify response title matches
+@pytest.mark.BINT49
 def test_update_item_same_title(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -712,6 +819,7 @@ def test_update_item_same_title(test_client: TestClient, testing_db_session: Ses
 # create update payload
 # call the update item api with non-existing item_id
 # verify response status code 404
+@pytest.mark.BINT50
 def test_update_nonexisting_item(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -730,6 +838,7 @@ def test_update_nonexisting_item(test_client: TestClient, testing_db_session: Se
 # create update payload
 # call the update item api with non-existing folder_id
 # verify response status code 404
+@pytest.mark.BINT51
 def test_update_item_in_nonexisting_folder(test_client: TestClient):
     # arrange
     non_existing_folder_id = 999
@@ -749,6 +858,7 @@ def test_update_item_in_nonexisting_folder(test_client: TestClient):
 # create update payload
 # call the update item api
 # verify response status code 404
+@pytest.mark.BINT52
 def test_update_item_in_deleted_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -767,6 +877,7 @@ def test_update_item_in_deleted_folder(test_client: TestClient, testing_db_sessi
 # create update payload
 # call the update item api
 # verify response status code 404
+@pytest.mark.BINT53
 def test_update_deleted_item(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -785,6 +896,7 @@ def test_update_deleted_item(test_client: TestClient, testing_db_session: Sessio
 # create empty/invalid update payload
 # call the update item api with bad payload
 # verify response status code 400
+@pytest.mark.BINT54
 def test_update_item_bad_input(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -800,6 +912,7 @@ def test_update_item_bad_input(test_client: TestClient, testing_db_session: Sess
 # create update payload
 # call the update item api with invalid folder_id type
 # verify response status code 400
+@pytest.mark.BINT55
 def test_update_item_invalid_folder_id_type(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -817,6 +930,7 @@ def test_update_item_invalid_folder_id_type(test_client: TestClient, testing_db_
 # create update payload
 # call the update item api with invalid item_id type
 # verify response status code 400
+@pytest.mark.BINT56
 def test_update_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -833,6 +947,7 @@ def test_update_item_invalid_item_id_type(test_client: TestClient, testing_db_se
 # create update payload
 # call the update item api with folder_id and item_id from different folders
 # verify response status code 404
+@pytest.mark.BINT57
 def test_update_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder1 = seed_db_with_test_folder(testing_db_session)
@@ -852,6 +967,7 @@ def test_update_item_from_wrong_folder(test_client: TestClient, testing_db_sessi
 # create update payload with only title
 # call the update item api
 # verify completed and position fields are preserved
+@pytest.mark.BINT58
 def test_update_item_preserves_other_fields(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -872,6 +988,7 @@ def test_update_item_preserves_other_fields(test_client: TestClient, testing_db_
 # create updated payload
 # call the update item api
 # verify response status code 403 and detail content
+@pytest.mark.BINT59
 def test_update_completed_item_unsuccessful(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -892,6 +1009,7 @@ def test_update_completed_item_unsuccessful(test_client: TestClient, testing_db_
 # seed db with folder and item
 # call the delete item api
 # verify response status code 204
+@pytest.mark.BINT60
 def test_delete_item_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -906,6 +1024,7 @@ def test_delete_item_success(test_client: TestClient, testing_db_session: Sessio
 # seed db with folder but no item
 # call the delete item api with non-existing item_id
 # verify response status code 404
+@pytest.mark.BINT61
 def test_delete_nonexisting_item(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -922,6 +1041,7 @@ def test_delete_nonexisting_item(test_client: TestClient, testing_db_session: Se
 # do not seed folder
 # call the delete item api with non-existing folder_id
 # verify response status code 404
+@pytest.mark.BINT62
 def test_delete_item_from_nonexisting_folder(test_client: TestClient):
     # arrange
     non_existing_folder_id = 999
@@ -938,6 +1058,7 @@ def test_delete_item_from_nonexisting_folder(test_client: TestClient):
 # seed db with deleted folder and item
 # call the delete item api
 # verify response status code 404
+@pytest.mark.BINT63
 def test_delete_item_from_deleted_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -954,6 +1075,7 @@ def test_delete_item_from_deleted_folder(test_client: TestClient, testing_db_ses
 # seed db with folder and deleted item
 # call the delete item api
 # verify response status code 404
+@pytest.mark.BINT64
 def test_delete_already_deleted_item(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -967,6 +1089,7 @@ def test_delete_already_deleted_item(test_client: TestClient, testing_db_session
 
 
 # verify delete item with invalid folder_id type returns 400
+@pytest.mark.BINT65
 def test_delete_item_invalid_folder_id_type(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -979,6 +1102,7 @@ def test_delete_item_invalid_folder_id_type(test_client: TestClient, testing_db_
 
 
 # verify delete item with invalid item_id type returns 400
+@pytest.mark.BINT66
 def test_delete_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -993,6 +1117,7 @@ def test_delete_item_invalid_item_id_type(test_client: TestClient, testing_db_se
 # seed db with two folders and item in one
 # call the delete api on the other folder with that item id
 # verify response status code 404
+@pytest.mark.BINT67
 def test_delete_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder1 = seed_db_with_test_folder(testing_db_session)
@@ -1014,6 +1139,7 @@ def test_delete_item_from_wrong_folder(test_client: TestClient, testing_db_sessi
 # call the toggle item api
 # verify response status code 200
 # verify completed field changed to True
+@pytest.mark.BINT68
 def test_toggle_item_incomplete_to_complete(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1032,6 +1158,7 @@ def test_toggle_item_incomplete_to_complete(test_client: TestClient, testing_db_
 # call the toggle item api
 # verify response status code 200
 # verify completed field changed to False
+@pytest.mark.BINT69
 def test_toggle_item_complete_to_incomplete(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1049,6 +1176,7 @@ def test_toggle_item_complete_to_incomplete(test_client: TestClient, testing_db_
 # seed db with folder and item with specific values
 # call the toggle item api
 # verify title, folder_id, position fields are preserved
+@pytest.mark.BINT70
 def test_toggle_item_preserves_other_fields(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1069,6 +1197,7 @@ def test_toggle_item_preserves_other_fields(test_client: TestClient, testing_db_
 # seed db with folder but no item
 # call the toggle item api with non-existing item_id
 # verify response status code 404
+@pytest.mark.BINT71
 def test_toggle_nonexisting_item(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1085,6 +1214,7 @@ def test_toggle_nonexisting_item(test_client: TestClient, testing_db_session: Se
 # do not seed folder
 # call the toggle item api with non-existing folder_id
 # verify response status code 404
+@pytest.mark.BINT72
 def test_toggle_item_in_nonexisting_folder(test_client: TestClient):
     # arrange
     non_existing_folder_id = 999
@@ -1102,6 +1232,7 @@ def test_toggle_item_in_nonexisting_folder(test_client: TestClient):
 # seed db with deleted folder and item
 # call the toggle item api
 # verify response status code 404 & detail = folder not found
+@pytest.mark.BINT73
 def test_toggle_item_in_deleted_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session, is_folder_deleted=True)
@@ -1119,6 +1250,7 @@ def test_toggle_item_in_deleted_folder(test_client: TestClient, testing_db_sessi
 # seed db with folder and deleted item
 # call the toggle item api
 # verify response status code 404 & detail = item not found
+@pytest.mark.BINT74
 def test_toggle_deleted_item(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1135,6 +1267,7 @@ def test_toggle_deleted_item(test_client: TestClient, testing_db_session: Sessio
 # create invalid folder_id type
 # call the toggle item api with invalid folder_id
 # verify response status code 400
+@pytest.mark.BINT75
 def test_toggle_item_invalid_folder_id_type(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1151,6 +1284,7 @@ def test_toggle_item_invalid_folder_id_type(test_client: TestClient, testing_db_
 # create invalid item_id type
 # call the toggle item api with invalid item_id
 # verify response status code 400
+@pytest.mark.BINT76
 def test_toggle_item_invalid_item_id_type(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1165,6 +1299,7 @@ def test_toggle_item_invalid_item_id_type(test_client: TestClient, testing_db_se
 # seed db with two folders and item in one
 # call the toggle api on the other folder with that item id
 # verify response status code 404
+@pytest.mark.BINT77
 def test_toggle_item_from_wrong_folder(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder1 = seed_db_with_test_folder(testing_db_session)
@@ -1187,6 +1322,7 @@ def test_toggle_item_from_wrong_folder(test_client: TestClient, testing_db_sessi
 # call the item order api
 # verify response status code 200
 # verify items are returned in new order
+@pytest.mark.BINT78
 def test_update_item_order_success(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1214,6 +1350,7 @@ def test_update_item_order_success(test_client: TestClient, testing_db_session: 
 # create payload with reordered item ids
 # call the item order api
 # verify items are in correct order
+@pytest.mark.BINT79
 def test_update_item_order_two_items(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1237,6 +1374,7 @@ def test_update_item_order_two_items(test_client: TestClient, testing_db_session
 # create payload with same order as current
 # call the item order api
 # verify response status code 200
+@pytest.mark.BINT80
 def test_update_item_order_same_order(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1260,6 +1398,7 @@ def test_update_item_order_same_order(test_client: TestClient, testing_db_sessio
 # create payload with item ids
 # call the item order api with non-existing folder_id
 # verify response status code 404
+@pytest.mark.BINT81
 def test_update_item_order_nonexisting_folder(test_client: TestClient):
     # arrange
     non_existing_folder_id = 999
@@ -1277,6 +1416,7 @@ def test_update_item_order_nonexisting_folder(test_client: TestClient):
 # create payload with item ids
 # call the item order api with invalid folder_id
 # verify response status code 400
+@pytest.mark.BINT82
 def test_update_item_order_invalid_folder_id_type(test_client: TestClient):
     # arrange
     invalid_folder_id = "invalid"
@@ -1292,6 +1432,7 @@ def test_update_item_order_invalid_folder_id_type(test_client: TestClient):
 # create empty/invalid payload
 # call the item order api with bad payload
 # verify response status code 400
+@pytest.mark.BINT83
 def test_update_item_order_bad_payload(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1307,6 +1448,7 @@ def test_update_item_order_bad_payload(test_client: TestClient, testing_db_sessi
 # create payload with empty item list
 # call the item order api
 # verify response status code 400
+@pytest.mark.BINT84
 def test_update_item_order_empty_list(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)
@@ -1323,6 +1465,7 @@ def test_update_item_order_empty_list(test_client: TestClient, testing_db_sessio
 # create payload with reordered ids
 # call the item order api
 # verify item titles and other properties are preserved
+@pytest.mark.BINT85
 def test_update_item_order_preserves_item_data(test_client: TestClient, testing_db_session: Session):
     # arrange
     folder = seed_db_with_test_folder(testing_db_session)

@@ -13,10 +13,19 @@ vi.mock("@/useApi", () => ({
 }));
 
 vi.mock("@/components/Sidebar", () => ({
-  default: ({ onFolderClick, onHomeClick }) => (
+  default: ({
+    folders = [],
+    onFolderClick,
+    onHomeClick,
+    onToggleFolderPin,
+  }) => (
     <div>
+      <div data-testid="sidebar-order">
+        {folders.map((f) => f.title).join("|")}
+      </div>
       <button onClick={() => onFolderClick(1)}>Select Folder 1</button>
       <button onClick={() => onFolderClick(2)}>Select Folder 2</button>
+      <button onClick={() => onToggleFolderPin?.(2, true)}>Pin Folder 2</button>
       <button onClick={onHomeClick}>Home</button>
     </div>
   ),
@@ -78,7 +87,7 @@ describe("App", () => {
     window.history.pushState({}, "", "/");
   });
 
-  it("loads folders on mount and shows landing content by default", async () => {
+  it("@FINT01 | loads folders on mount and shows landing content by default", async () => {
     makeAPICall.mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]));
 
     render(<App />);
@@ -90,7 +99,7 @@ describe("App", () => {
     expect(await screen.findByText("Landing Screen")).toBeInTheDocument();
   });
 
-  it("loads folder items when selecting a folder and shows main content", async () => {
+  it("@FINT02 | loads folder items when selecting a folder and shows main content", async () => {
     makeAPICall
       .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
       .mockResolvedValueOnce(
@@ -109,7 +118,7 @@ describe("App", () => {
     expect(await screen.findByText("Main: Work")).toBeInTheDocument();
   });
 
-  it("loads folder from initial deep link URL", async () => {
+  it("@FINT03 | loads folder from initial deep link URL", async () => {
     window.history.pushState({}, "", "/folders/2");
 
     makeAPICall
@@ -127,7 +136,35 @@ describe("App", () => {
     expect(await screen.findByText("Main: Deep Linked")).toBeInTheDocument();
   });
 
-  it("returns to landing content when Home is clicked", async () => {
+  it("@FINT04 | updates folder title immediately after edit for deep-linked folder IDs", async () => {
+    window.history.pushState({}, "", "/folders/2");
+
+    makeAPICall
+      .mockResolvedValueOnce(mockResponse([{ id: 2, title: "Deep Linked" }]))
+      .mockResolvedValueOnce(
+        mockResponse([{ id: 20, title: "From URL", completed: false }]),
+      )
+      .mockResolvedValueOnce(
+        mockResponse({ id: 2, title: "Deep Linked Renamed" }),
+      );
+
+    render(<App />);
+
+    expect(await screen.findByText("Main: Deep Linked")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Edit Folder"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith("PUT", "/folders/2", {
+        title: "Renamed Folder",
+      });
+    });
+
+    expect(
+      await screen.findByText("Main: Deep Linked Renamed"),
+    ).toBeInTheDocument();
+  });
+
+  it("@FINT05 | returns to landing content when Home is clicked", async () => {
     makeAPICall
       .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
       .mockResolvedValueOnce(
@@ -145,7 +182,7 @@ describe("App", () => {
     expect(await screen.findByText("Landing Screen")).toBeInTheDocument();
   });
 
-  it("fetches folder metadata when active folder is missing in local folder list", async () => {
+  it("@FINT06 | fetches folder metadata when active folder is missing in local folder list", async () => {
     window.history.pushState({}, "", "/folders/77");
 
     makeAPICall
@@ -164,7 +201,7 @@ describe("App", () => {
     expect(await screen.findByText("Main: Fetched Folder")).toBeInTheDocument();
   });
 
-  it("handles todo item CRUD actions through MainContent callbacks", async () => {
+  it("@FINT07 | handles todo item CRUD actions through MainContent callbacks", async () => {
     makeAPICall
       .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
       .mockResolvedValueOnce(
@@ -215,7 +252,7 @@ describe("App", () => {
     });
   });
 
-  it("handles folder edit and delete actions through MainContent callbacks", async () => {
+  it("@FINT08 | handles folder edit and delete actions through MainContent callbacks", async () => {
     makeAPICall
       .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
       .mockResolvedValueOnce(
@@ -245,7 +282,46 @@ describe("App", () => {
     expect(await screen.findByText("Landing Screen")).toBeInTheDocument();
   });
 
-  it("reorders items and sends persisted order to item_order endpoint", async () => {
+  it("@FINT09 | pins a folder through API and reorders sidebar with pinned folder first", async () => {
+    makeAPICall
+      .mockResolvedValueOnce(
+        mockResponse([
+          { id: 1, title: "Work", is_pinned: false, position: 0 },
+          { id: 2, title: "Personal", is_pinned: false, position: 1 },
+        ]),
+      )
+      .mockResolvedValueOnce(
+        mockResponse({
+          id: 2,
+          title: "Personal",
+          is_pinned: true,
+          position: 1,
+        }),
+      );
+
+    render(<App />);
+
+    await screen.findByText("Landing Screen");
+    expect(screen.getByTestId("sidebar-order")).toHaveTextContent(
+      "Work|Personal",
+    );
+
+    fireEvent.click(screen.getByText("Pin Folder 2"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith("PUT", "/folders/2/pin", {
+        is_pinned: true,
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("sidebar-order")).toHaveTextContent(
+        "Personal|Work",
+      );
+    });
+  });
+
+  it("@FINT10 | reorders items and sends persisted order to item_order endpoint", async () => {
     makeAPICall
       .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
       .mockResolvedValueOnce(
@@ -277,7 +353,7 @@ describe("App", () => {
     });
   });
 
-  it("reacts to popstate by returning to home state when URL has no folder", async () => {
+  it("@FINT11 | reacts to popstate by returning to home state when URL has no folder", async () => {
     makeAPICall
       .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
       .mockResolvedValueOnce(

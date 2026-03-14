@@ -22,9 +22,17 @@ const TodoItem = ({
   index,
 }) => {
   const ref = useRef(null);
+  const deleteConfirmRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
+
+  React.useEffect(() => {
+    if (!deleteDialog) return;
+    requestAnimationFrame(() => {
+      deleteConfirmRef.current?.focus();
+    });
+  }, [deleteDialog]);
 
   const handleToggle = () => {
     onToggle(item.id);
@@ -186,8 +194,16 @@ const TodoItem = ({
           Delete item confirmation
         </h2>
         <SlButton
+          ref={deleteConfirmRef}
           slot="footer"
           variant="primary"
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleDelete();
+              setDeleteDialog(false);
+            }
+          }}
           onClick={() => {
             handleDelete();
             setDeleteDialog(false);

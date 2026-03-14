@@ -65,6 +65,43 @@ body {
   letter-spacing: 0.01em;
 }
 
+.folder-item.loading-placeholder {
+  cursor: default;
+  pointer-events: none;
+}
+
+.folder-item.loading-placeholder:hover {
+  background-color: transparent;
+}
+
+.folder-skeleton-name {
+  display: block;
+  width: 68%;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(236, 240, 241, 0.28);
+  animation: sidebar-pulse 1.2s ease-in-out infinite;
+}
+
+.folder-skeleton-pin {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(236, 240, 241, 0.2);
+  animation: sidebar-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sidebar-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
 /* make folder name able to shrink so siblings (like the input) don't force overflow */
 .folder-name {
   font-weight: 500;
@@ -74,6 +111,41 @@ body {
   text-overflow: ellipsis; /* show ellipsis */
   white-space: nowrap; /* keep it on one line */
   position: relative; /* ensure ::after positions relative to this element */
+}
+
+.folder-pin-btn {
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: rgba(236, 240, 241, 0.35);
+  opacity: 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  transition:
+    opacity 120ms ease,
+    color 120ms ease;
+}
+
+.folder-item:hover .folder-pin-btn {
+  opacity: 1;
+}
+
+.folder-pin-btn.is-pinned {
+  opacity: 1;
+  color: #1abc9c;
+}
+
+.folder-pin-btn:hover {
+  color: #ecf0f1;
+}
+
+.folder-pin-btn:focus-visible {
+  outline: 2px solid #1abc9c;
+  outline-offset: 2px;
 }
 
 /* tooltip (hidden by default) */

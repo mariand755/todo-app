@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -17,8 +18,21 @@ def _as_posix(path_obj) -> str:
     return Path(str(path_obj)).as_posix()
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    # Register numeric test-id markers so IDs can be used consistently across files.
+    for index in range(1, 200):
+        config.addinivalue_line("markers", f"BUT{index:02d}: backend unit test id marker")
+        config.addinivalue_line("markers", f"BINT{index:02d}: backend integration test id marker")
+
+
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    test_id_pattern = re.compile(r"^(BUT|BINT)\d+$")
+
     for item in items:
+        for marker in item.iter_markers():
+            if test_id_pattern.match(marker.name):
+                item.keywords[marker.name] = True
+
         path = _as_posix(item.fspath)
 
         if "/tests/integration/" in path:

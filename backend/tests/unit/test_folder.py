@@ -3,17 +3,13 @@ import pytest
 from library.folder import Folder, FolderConstants
 
 
-# Fixture
 @pytest.fixture
 def test_folder():
-    dummy_id = 1
-    dummy_title = "folder_test"
-
-    t_f = Folder(dummy_id, dummy_title)
-    return t_f
+    return Folder(1, "folder_test")
 
 
-# happy path first
+# Adding multiple items at once should store all of them in the folder.
+@pytest.mark.BUT01
 def test_add_new_items_to_folder_success(test_folder):
     # arrange
     test_items = ["test_item1", "test_item2", "test_item3"]
@@ -27,7 +23,8 @@ def test_add_new_items_to_folder_success(test_folder):
     assert expected == actual
 
 
-# error handling
+# Passing something that is not a list should be rejected immediately.
+@pytest.mark.BUT02
 def test_add_new_items_to_folder_non_array_input_throws_exception(test_folder):
     # arrange
     items_not_array = {}
@@ -38,7 +35,8 @@ def test_add_new_items_to_folder_non_array_input_throws_exception(test_folder):
     assert FolderConstants.ERR_ITEMS_NOT_ARRAY == err.value.args[0]
 
 
-# edge case
+# An empty list is valid input; it just means nothing gets added to the folder.
+@pytest.mark.BUT03
 def test_add_new_items_to_folder_empty_array_adds_no_items(test_folder):
     # arrange
     test_items_empty_array = []
@@ -52,7 +50,8 @@ def test_add_new_items_to_folder_empty_array_adds_no_items(test_folder):
     assert expected == actual
 
 
-# happy path
+# Adding a single valid string item should increase the item count by one.
+@pytest.mark.BUT04
 def test_add_new_item_to_folder_success(test_folder):
     # arrange
     test_item = "test_item1"
@@ -65,7 +64,8 @@ def test_add_new_item_to_folder_success(test_folder):
     assert excepted == actual
 
 
-# error handling
+# Non-string input (like a tuple) should raise a ValueError with the right message.
+@pytest.mark.BUT05
 def test_add_new_item_to_folder_non_str_inputs_raises_error(test_folder):
     # arrange
     non_str_input = ()
@@ -76,7 +76,8 @@ def test_add_new_item_to_folder_non_str_inputs_raises_error(test_folder):
     assert FolderConstants.ERR_NON_STR_INPUT == err.value.args[0]
 
 
-# edge case
+# An empty string title is not a valid item name and should be rejected.
+@pytest.mark.BUT06
 def test_add_new_item_to_folder_empty_str_inputs_raises_error(test_folder):
     # arrange
     empty_str_input = ""
@@ -87,6 +88,8 @@ def test_add_new_item_to_folder_empty_str_inputs_raises_error(test_folder):
     assert FolderConstants.ERR_EMPTY_STR_INPUT == err.value.args[0]
 
 
+# Removing an item by id should leave all remaining items in place.
+@pytest.mark.BUT07
 def test_remove_item_within_folder_success(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("a")  # id 1
@@ -102,6 +105,8 @@ def test_remove_item_within_folder_success(test_folder):
     assert 2 not in remaining_ids
 
 
+# Removing a non-existent id should not raise and should leave the folder unchanged.
+@pytest.mark.BUT08
 def test_remove_item_within_folder_nonexistent_id_no_change(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("only")  # id 1
@@ -114,6 +119,8 @@ def test_remove_item_within_folder_nonexistent_id_no_change(test_folder):
     assert test_folder.items[0].title == "only"
 
 
+# Bulk removal should drop only the specified ids and leave everything else.
+@pytest.mark.BUT09
 def test_remove_items_within_folder_success(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("one")  # id 1
@@ -128,6 +135,8 @@ def test_remove_items_within_folder_success(test_folder):
     assert remaining_titles == ["two"]
 
 
+# Bulk remove on an empty folder should complete without errors.
+@pytest.mark.BUT10
 def test_remove_items_within_folder_on_empty_folder_is_noop(test_folder):
     # arrange - folder starts empty
 
@@ -138,6 +147,8 @@ def test_remove_items_within_folder_on_empty_folder_is_noop(test_folder):
     assert test_folder.items == []
 
 
+# Editing an item should update its title and return the updated item object.
+@pytest.mark.BUT11
 def test_edit_item_within_folder_success(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("old")  # id 1
@@ -151,6 +162,8 @@ def test_edit_item_within_folder_success(test_folder):
     assert test_folder.get_item(1).title == "new"
 
 
+# Editing an item id that does not exist should return None without raising.
+@pytest.mark.BUT12
 def test_edit_item_within_folder_nonexistent_returns_none(test_folder):
     # arrange - empty folder
 
@@ -161,6 +174,8 @@ def test_edit_item_within_folder_nonexistent_returns_none(test_folder):
     assert result is None
 
 
+# Batch edit should update matching items and silently skip ids that are not found.
+@pytest.mark.BUT13
 def test_edit_items_within_folder_success_and_skips_missing(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("a")  # id 1
@@ -174,6 +189,8 @@ def test_edit_items_within_folder_success_and_skips_missing(test_folder):
     assert test_folder.get_item(2).title == "B"
 
 
+# Existence checks should return the correct boolean for both known and unknown ids.
+@pytest.mark.BUT14
 def test_does_item_exist_true_and_false(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("exists")  # id 1
@@ -183,7 +200,9 @@ def test_does_item_exist_true_and_false(test_folder):
     assert test_folder.does_item_exist(999) is False
 
 
-def test_get_items_and_get_item_are_in_listformat(test_folder):
+# get_items should always return a list type, even when the folder is empty.
+@pytest.mark.BUT15
+def test_get_items_returns_a_list(test_folder):
     # arrange
     test_folder.add_new_item_to_folder("x")  # id 1
     test_folder.add_new_item_to_folder("y")  # id 2
@@ -195,7 +214,9 @@ def test_get_items_and_get_item_are_in_listformat(test_folder):
     assert isinstance(items, list)
 
 
-def test_get_items_and_get_item_num_in_folder(test_folder: Folder):
+# The item count returned should match exactly how many items were added.
+@pytest.mark.BUT16
+def test_get_items_count_matches_what_was_added(test_folder: Folder):
     # arrange
     test_folder.add_new_item_to_folder("x")  # id 1
     test_folder.add_new_item_to_folder("y")  # id 2
@@ -207,7 +228,9 @@ def test_get_items_and_get_item_num_in_folder(test_folder: Folder):
     assert len(items) == 2
 
 
-def test__get_item_not_empty(test_folder: Folder):
+# Fetching by id should return the correct item with the expected title.
+@pytest.mark.BUT17
+def test_get_item_returns_correct_item(test_folder: Folder):
     # arrange
     test_folder.add_new_item_to_folder("x")  # id 1
     test_folder.add_new_item_to_folder("y")  # id 2
@@ -219,7 +242,9 @@ def test__get_item_not_empty(test_folder: Folder):
     assert item is not None and item.title == "y"
 
 
-def test_get_item_none_existing_item_fails_silently(test_folder: Folder):
+# Requesting an item id that does not exist should return None, not raise an exception.
+@pytest.mark.BUT18
+def test_get_item_nonexistent_returns_none(test_folder: Folder):
     # arrange
     test_folder.add_new_item_to_folder("x")  # id 1
     test_folder.add_new_item_to_folder("y")  # id 2

@@ -29,6 +29,24 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base: DeclarativeMeta = declarative_base()
 
 
+def ensure_folder_pin_column() -> None:
+    """Add folder.is_pinned to existing databases created before pinning support."""
+    try:
+        inspector = sa.inspect(engine)
+        if not inspector.has_table("folder"):
+            return
+
+        existing_columns = {column["name"] for column in inspector.get_columns("folder")}
+        if "is_pinned" in existing_columns:
+            return
+
+        with engine.begin() as connection:
+            connection.execute(sa.text("ALTER TABLE folder ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE NOT NULL"))
+        logger.info("Added missing folder.is_pinned column")
+    except Exception:
+        logger.exception("Failed to ensure folder pin column")
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -88,6 +106,7 @@ class Folder(Base):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String, nullable=False)
     is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
+    is_pinned = sa.Column(sa.Boolean, default=False, nullable=False)
     position = sa.Column(sa.Integer, default=-1, nullable=False)
 
 
@@ -100,3 +119,6 @@ class TodoItem(Base):
     is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
     completed = sa.Column(sa.Boolean, default=False, nullable=False)
     position = sa.Column(sa.Integer, default=-1, nullable=False)
+
+
+ensure_folder_pin_column()

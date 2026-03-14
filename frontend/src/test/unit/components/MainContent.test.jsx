@@ -21,14 +21,14 @@ describe("MainContent", () => {
     moveToDoItem: vi.fn(),
   };
 
-  it("renders folder title and todo items", () => {
+  it("@FUT13 | renders folder title and todo items", async () => {
     render(<MainContent {...baseProps} />);
 
     expect(screen.getByRole("heading", { name: "Work" })).toBeInTheDocument();
     expect(screen.getByText("Task 1")).toBeInTheDocument();
   });
 
-  it("adds a todo with trimmed input and clears field", () => {
+  it("@FUT14 | adds a todo with trimmed input and clears field", async () => {
     const onAddTodo = vi.fn();
     render(<MainContent {...baseProps} onAddTodo={onAddTodo} />);
 
@@ -40,7 +40,7 @@ describe("MainContent", () => {
     expect(input).toHaveValue("");
   });
 
-  it("does not add empty todo values", () => {
+  it("@FUT15 | does not add empty todo values", async () => {
     const onAddTodo = vi.fn();
     render(<MainContent {...baseProps} onAddTodo={onAddTodo} />);
 
@@ -51,7 +51,7 @@ describe("MainContent", () => {
     expect(onAddTodo).not.toHaveBeenCalled();
   });
 
-  it("opens edit dialog and submits edited folder title", () => {
+  it("@FUT16 | opens edit dialog and submits edited folder title", async () => {
     const onEditFolder = vi.fn();
     render(<MainContent {...baseProps} onEditFolder={onEditFolder} />);
 
@@ -65,7 +65,7 @@ describe("MainContent", () => {
     expect(onEditFolder).toHaveBeenCalledWith(1, "Updated Work");
   });
 
-  it("opens delete dialog and confirms delete", () => {
+  it("@FUT17 | opens delete dialog and confirms delete", async () => {
     const onDeleteFolder = vi.fn();
     render(<MainContent {...baseProps} onDeleteFolder={onDeleteFolder} />);
 
@@ -73,5 +73,35 @@ describe("MainContent", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "OK" })[0]);
 
     expect(onDeleteFolder).toHaveBeenCalledWith(1);
+  });
+
+  it("@FUT18 | confirms delete when Enter is pressed on the dialog action button", async () => {
+    const onDeleteFolder = vi.fn();
+    render(<MainContent {...baseProps} onDeleteFolder={onDeleteFolder} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    const confirmButton = screen.getAllByRole("button", { name: "OK" })[0];
+    fireEvent.keyDown(confirmButton, { key: "Enter" });
+
+    expect(onDeleteFolder).toHaveBeenCalledWith(1);
+  });
+
+  it("@FUT19 | does not render pin action in the folder menu", async () => {
+    render(<MainContent {...baseProps} />);
+
+    expect(screen.queryByText("Pin")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unpin")).not.toBeInTheDocument();
+  });
+
+  it("@FUT20 | disables folder edit autocomplete hints", async () => {
+    render(<MainContent {...baseProps} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    const editInput = screen.getByLabelText("New folder name");
+
+    expect(editInput).toHaveAttribute("autocomplete", "off");
+    expect(editInput).toHaveAttribute("autocorrect", "off");
+    expect(editInput).toHaveAttribute("autocapitalize", "off");
+    expect(editInput.getAttribute("name")).toContain("folder-edit-title-");
   });
 });

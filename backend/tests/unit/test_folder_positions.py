@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -11,6 +12,8 @@ def _create_memory_session():
     return engine, session
 
 
+# The next position should be one beyond the highest non-deleted, positioned folder row.
+@pytest.mark.BUT35
 def test_get_next_folder_position_with_mixed_rows():
     engine, session = _create_memory_session()
     try:
@@ -25,12 +28,15 @@ def test_get_next_folder_position_with_mixed_rows():
         session.commit()
 
         next_position = models.get_next_folder_position(session)
+        # max non-deleted position with position >= 0 is 2, so next is 3
         assert next_position == 3
     finally:
         session.close()
         engine.dispose()
 
 
+# Rows with position=-1 (legacy) should be assigned positions in ascending id order after existing ones.
+@pytest.mark.BUT36
 def test_ensure_folder_positions_backfills_unpositioned_rows_in_id_order():
     engine, session = _create_memory_session()
     try:
@@ -56,6 +62,8 @@ def test_ensure_folder_positions_backfills_unpositioned_rows_in_id_order():
         engine.dispose()
 
 
+# When all rows already have valid positions, no changes are made and False is returned.
+@pytest.mark.BUT37
 def test_ensure_folder_positions_returns_false_when_no_backfill_needed():
     engine, session = _create_memory_session()
     try:

@@ -6,7 +6,7 @@ describe("makeAPICall", () => {
     vi.stubGlobal("fetch", vi.fn());
   });
 
-  it("calls fetch for GET requests without JSON body/options", async () => {
+  it("@FUT01 | calls fetch for GET requests without JSON body/options", async () => {
     const response = { ok: true };
     fetch.mockResolvedValue(response);
 
@@ -16,7 +16,7 @@ describe("makeAPICall", () => {
     expect(result).toBe(response);
   });
 
-  it("uppercases http method before request", async () => {
+  it("@FUT02 | uppercases http method before request", async () => {
     const response = { ok: true };
     fetch.mockResolvedValue(response);
 
@@ -31,7 +31,7 @@ describe("makeAPICall", () => {
     });
   });
 
-  it("returns null when GET fetch throws", async () => {
+  it("@FUT03 | returns null when GET fetch throws", async () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     fetch.mockRejectedValue(new Error("network error"));
 
@@ -40,7 +40,7 @@ describe("makeAPICall", () => {
     expect(result).toBeNull();
   });
 
-  it("returns null when non-GET fetch throws", async () => {
+  it("@FUT04 | returns null when non-GET fetch throws", async () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     fetch.mockRejectedValue(new Error("network error"));
 

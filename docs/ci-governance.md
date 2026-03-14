@@ -1,5 +1,7 @@
 # CI Governance Policy
 
+Companion test-policy document: testing-governance.md
+
 ## Scope
 This policy defines CI artifact retention, failure triage ownership, SLO targets, and flaky-check cleanup for this repository.
 

@@ -88,7 +88,7 @@ async def get_folders(db_session: Session = Depends(get_db)):
     folders = (
         db_session.query(FolderModel)
         .filter(FolderModel.is_deleted.is_(False))
-        .order_by(FolderModel.position, FolderModel.id)
+        .order_by(FolderModel.is_pinned.desc(), FolderModel.position, FolderModel.id)
         .all()
     )
     return folders
@@ -102,6 +102,7 @@ class FolderResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     title: str
+    is_pinned: bool
 
 
 @app.post("/folders", response_model=FolderResponse)
@@ -133,6 +134,25 @@ async def update_folder(folder_id: int, update_folder_request: UpdateFolder, db_
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.title = update_folder_request.title
+    db_session.add(folder)
+    db_session.commit()
+    return folder
+
+
+class UpdateFolderPin(BaseModel):
+    is_pinned: bool
+
+
+@app.put("/folders/{folder_id}/pin", response_model=FolderResponse)
+async def update_folder_pin(
+    folder_id: int,
+    update_folder_pin_request: UpdateFolderPin,
+    db_session: Session = Depends(get_db),
+):
+    folder = db_session.get(FolderModel, folder_id)
+    if folder is None or folder.is_deleted:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    folder.is_pinned = update_folder_pin_request.is_pinned
     db_session.add(folder)
     db_session.commit()
     return folder

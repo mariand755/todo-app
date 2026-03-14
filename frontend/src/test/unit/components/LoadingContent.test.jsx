@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import LoadingContent from "@/components/LoadingContent";
 
 describe("LoadingContent", () => {
-  it("renders loading message and notepad animation svg", () => {
+  it("@FUT12 | renders loading message and notepad animation svg", async () => {
     const { container } = render(<LoadingContent />);
 
     expect(screen.getByText("Loading your folder...")).toBeInTheDocument();

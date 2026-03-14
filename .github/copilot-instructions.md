@@ -14,6 +14,7 @@
 ## Key patterns & gotchas (do not assume defaults)
 
 - Soft deletes: records are not removed; they use `is_deleted` flags (see `backend/library/models.py`). Many API endpoints filter for `is_deleted == False`.
+- Pin folders: `Folder` has an `is_pinned` boolean column (default `False`). Toggle via `PUT /folders/{id}/pin`. The `GET /folders` response orders pinned folders first, then by `position`.
 - Dual models: There are SQLAlchemy models in `models.py` and plain-Python classes in `folder.py`/`todo_item.py`. They share names (`Folder`, `TodoItem`) but serve different purposes (DB vs in-memory CLI). Be explicit which you import/modify.
 - API response models use Pydantic v2 config (`model_config = ConfigDict(from_attributes=True)`) in `backend/app/api.py`, so endpoints often return ORM objects directly.
 - Item ordering: `TodoItem.position` tracks order; the API implements an `item_order` endpoint that accepts `itemOrder_id: list[int]` and reassigns positions.
@@ -93,6 +94,16 @@ npm run dev
 ## Tests
 
 - Pytest tests live under `backend/tests/` and exercise both library helpers and API behavior. The shared fixtures default to an in-memory SQLite engine (or `TEST_DATABASE_URL` when provided), so changes to DB session wiring, dependency overrides, or model metadata can break tests.
+- Test ID conventions:
+  - Backend unit: `@pytest.mark.BUT##` (sequential across all unit files, BUT01–BUT46)
+  - Backend integration: `@pytest.mark.BINT##` (sequential across all integration files, BINT01–BINT89)
+  - Frontend unit: Vitest test title prefix `@FUT## | ` inside each `it(...)` (FUT01–FUT33)
+  - Frontend integration: Vitest test title prefix `@FINT## | ` inside each `it(...)` (FINT01–FINT11)
+- Test file locations:
+  - Backend unit: `backend/tests/unit/` — test_folder.py, test_folder_manager.py, test_folder_positions.py, test_models.py, test_position_mapping.py, test_positions.py
+  - Backend integration: `backend/tests/integration/` — test_api.py, test_item_order_persistence.py, test_positions_integration.py
+  - Frontend unit: `frontend/src/test/unit/` — api/useApi.unit.test.js, components/*.test.jsx
+  - Frontend integration: `frontend/src/test/integration/` — App.integration.test.jsx
 
 ## Suggested AI agent behavior
 
@@ -102,11 +113,13 @@ npm run dev
 - Keep Compose health checks and dependency conditions intact when changing startup behavior.
 - For frontend changes, call the API at `http://localhost:8000`. Use `frontend/src/useApi.js` as the example for fetch usage and headers.
 - Preserve logging baseline: backend request-id logs and env-controlled verbosity (`LOG_LEVEL`, `SQL_ECHO`), plus frontend logger wrapper usage (avoid raw `console` calls outside `frontend/src/logger.js`).
+- When adding new tests, place a `@pytest.mark.BUT##` or `@pytest.mark.BINT##` decorator (backend) or prefix the frontend Vitest test name with `@FUT## | ` / `@FINT## | `, incrementing from the last used ID in that series.
 
 ## Quick examples to reference
 
 - Re-order items: PUT `/folders/{folder_id}/item_order` with JSON `{ "itemOrder_id": [3,1,2] }` — backend reassigns `position`.
 - Toggle item complete: PUT `/folders/{folder_id}/items/{item_id}/toggle`.
+- Toggle folder pin: PUT `/folders/{folder_id}/pin` with JSON `{ "is_pinned": true }`.
 - Health endpoint: GET `/health`.
 
 ---

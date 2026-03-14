@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -11,7 +12,9 @@ def _create_memory_session():
     return engine, session
 
 
-def test_get_next_item_position_empty_folder():
+# An empty folder should produce position 0 so the first item lands at index zero.
+@pytest.mark.BUT45
+def test_get_next_item_position_returns_zero_for_empty_folder():
     engine, session = _create_memory_session()
     try:
         # create folder
@@ -26,7 +29,9 @@ def test_get_next_item_position_empty_folder():
         engine.dispose()
 
 
-def test_get_next_item_position_after_items():
+# After two items are added, the next available position should be 2.
+@pytest.mark.BUT46
+def test_get_next_item_position_increments_after_each_item():
     engine, session = _create_memory_session()
     try:
         folder = models.Folder(title="f2")
