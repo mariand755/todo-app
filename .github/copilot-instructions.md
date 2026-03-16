@@ -97,8 +97,8 @@ npm run dev
 - Test ID conventions:
   - Backend unit: `@pytest.mark.BUT##` (sequential across all unit files, BUT01–BUT46)
   - Backend integration: `@pytest.mark.BINT##` (sequential across all integration files, BINT01–BINT89)
-  - Frontend unit: Vitest test title prefix `@FUT## | ` inside each `it(...)` (FUT01–FUT33)
-  - Frontend integration: Vitest test title prefix `@FINT## | ` inside each `it(...)` (FINT01–FINT11)
+  - Frontend unit: Vitest test title prefix `@FUT## | ` inside each `it(...)` (FUT01–FUT49)
+  - Frontend integration: Vitest test title prefix `@FINT## | ` inside each `it(...)` (FINT01–FINT17)
 - Test file locations:
   - Backend unit: `backend/tests/unit/` — test_folder.py, test_folder_manager.py, test_folder_positions.py, test_models.py, test_position_mapping.py, test_positions.py
   - Backend integration: `backend/tests/integration/` — test_api.py, test_item_order_persistence.py, test_positions_integration.py

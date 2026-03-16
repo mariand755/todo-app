@@ -90,4 +90,25 @@ describe("Sidebar", () => {
       screen.queryByLabelText("Create new folder"),
     ).not.toBeInTheDocument();
   });
+
+  it("@FUT36 | ignores irrelevant keys on home button", async () => {
+    const onHomeClick = vi.fn();
+
+    render(
+      <Sidebar
+        folders={folders}
+        activeFolderId={null}
+        onFolderClick={vi.fn()}
+        onNewFolder={vi.fn()}
+        onEditFolder={vi.fn()}
+        onHomeClick={onHomeClick}
+      />,
+    );
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "Go to home" }), {
+      key: "Tab",
+    });
+
+    expect(onHomeClick).not.toHaveBeenCalled();
+  });
 });

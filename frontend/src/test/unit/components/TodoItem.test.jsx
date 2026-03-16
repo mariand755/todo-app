@@ -84,4 +84,26 @@ describe("TodoItem", () => {
     ).toBeInTheDocument();
     expect(container.querySelector(".todo-item.complete")).toBeInTheDocument();
   });
+
+  it("@FUT34 | Escape in edit dialog input closes the dialog", async () => {
+    render(<TodoItem {...baseProps} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByLabelText("New item name");
+    fireEvent.keyDown(input, { key: "Escape" });
+
+    expect(
+      screen.queryByRole("dialog", { name: "Edit Item Name" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@FUT35 | OK button in edit dialog submits updated title", async () => {
+    const onEditToDoItem = vi.fn();
+    render(<TodoItem {...baseProps} onEditToDoItem={onEditToDoItem} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+
+    expect(onEditToDoItem).toHaveBeenCalledWith(10, "Write tests");
+  });
 });

@@ -57,6 +57,7 @@ const FolderItem = ({ folder, isActive, onClick, onEdit, onTogglePin }) => {
     <li
       className={classes}
       onClick={handleClick}
+      onDoubleClick={() => setIsEditing(true)}
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex="0"

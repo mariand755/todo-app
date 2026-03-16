@@ -18,6 +18,7 @@ vi.mock("@/components/Sidebar", () => ({
     onFolderClick,
     onHomeClick,
     onToggleFolderPin,
+    onNewFolder,
   }) => (
     <div>
       <div data-testid="sidebar-order">
@@ -26,6 +27,7 @@ vi.mock("@/components/Sidebar", () => ({
       <button onClick={() => onFolderClick(1)}>Select Folder 1</button>
       <button onClick={() => onFolderClick(2)}>Select Folder 2</button>
       <button onClick={() => onToggleFolderPin?.(2, true)}>Pin Folder 2</button>
+      <button onClick={() => onNewFolder?.("Test Folder")}>New Folder</button>
       <button onClick={onHomeClick}>Home</button>
     </div>
   ),
@@ -370,5 +372,158 @@ describe("App", () => {
     window.dispatchEvent(new PopStateEvent("popstate"));
 
     expect(await screen.findByText("Landing Screen")).toBeInTheDocument();
+  });
+
+  it("@FINT12 | null API response for add-todo leaves items unchanged", async () => {
+    makeAPICall
+      .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
+      .mockResolvedValueOnce(
+        mockResponse([{ id: 10, title: "Task", completed: false }]),
+      )
+      .mockResolvedValueOnce(null);
+
+    render(<App />);
+
+    await screen.findByText("Landing Screen");
+    fireEvent.click(screen.getByText("Select Folder 1"));
+    await screen.findByText("Main: Work");
+
+    expect(screen.getByText("Items: 1")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Add Todo"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith("POST", "/folders/1/items/", {
+        title: "Added Task",
+      });
+    });
+
+    expect(screen.getByText("Items: 1")).toBeInTheDocument();
+  });
+
+  it("@FINT13 | null API response for pin-folder leaves sidebar order unchanged", async () => {
+    makeAPICall
+      .mockResolvedValueOnce(
+        mockResponse([
+          { id: 1, title: "Work", is_pinned: false, position: 0 },
+          { id: 2, title: "Personal", is_pinned: false, position: 1 },
+        ]),
+      )
+      .mockResolvedValueOnce(null);
+
+    render(<App />);
+
+    await screen.findByText("Landing Screen");
+    expect(screen.getByTestId("sidebar-order")).toHaveTextContent(
+      "Work|Personal",
+    );
+
+    fireEvent.click(screen.getByText("Pin Folder 2"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith("PUT", "/folders/2/pin", {
+        is_pinned: true,
+      });
+    });
+
+    expect(screen.getByTestId("sidebar-order")).toHaveTextContent(
+      "Work|Personal",
+    );
+  });
+
+  it("@FINT14 | null API response for edit-folder leaves title unchanged", async () => {
+    makeAPICall
+      .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
+      .mockResolvedValueOnce(
+        mockResponse([{ id: 10, title: "Task", completed: false }]),
+      )
+      .mockResolvedValueOnce(null);
+
+    render(<App />);
+
+    await screen.findByText("Landing Screen");
+    fireEvent.click(screen.getByText("Select Folder 1"));
+    await screen.findByText("Main: Work");
+
+    fireEvent.click(screen.getByText("Edit Folder"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith("PUT", "/folders/1", {
+        title: "Renamed Folder",
+      });
+    });
+
+    expect(screen.getByText("Main: Work")).toBeInTheDocument();
+  });
+
+  it("@FINT15 | null API response for delete-folder keeps folder in sidebar", async () => {
+    makeAPICall
+      .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
+      .mockResolvedValueOnce(
+        mockResponse([{ id: 10, title: "Task", completed: false }]),
+      )
+      .mockResolvedValueOnce(null);
+
+    render(<App />);
+
+    await screen.findByText("Landing Screen");
+    fireEvent.click(screen.getByText("Select Folder 1"));
+    await screen.findByText("Main: Work");
+
+    fireEvent.click(screen.getByText("Delete Folder"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith("DELETE", "/folders/1");
+    });
+
+    expect(screen.getByText("Main: Work")).toBeInTheDocument();
+  });
+
+  it("@FINT16 | null API response for new-folder does not update sidebar", async () => {
+    makeAPICall
+      .mockResolvedValueOnce(mockResponse([]))
+      .mockResolvedValueOnce(null);
+
+    render(<App />);
+
+    await screen.findByText("Landing Screen");
+    expect(screen.getByTestId("sidebar-order")).toHaveTextContent("");
+
+    fireEvent.click(screen.getByText("New Folder"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith("POST", "/folders", {
+        title: "Test Folder",
+      });
+    });
+
+    expect(screen.getByTestId("sidebar-order")).toHaveTextContent("");
+  });
+
+  it("@FINT17 | null API response for toggle-todo leaves items unchanged", async () => {
+    makeAPICall
+      .mockResolvedValueOnce(mockResponse([{ id: 1, title: "Work" }]))
+      .mockResolvedValueOnce(
+        mockResponse([{ id: 10, title: "Task", completed: false }]),
+      )
+      .mockResolvedValueOnce(null);
+
+    render(<App />);
+
+    await screen.findByText("Landing Screen");
+    fireEvent.click(screen.getByText("Select Folder 1"));
+    await screen.findByText("Main: Work");
+    expect(screen.getByText("Items: 1")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Toggle Todo"));
+
+    await waitFor(() => {
+      expect(makeAPICall).toHaveBeenCalledWith(
+        "PUT",
+        "/folders/1/items/10/toggle",
+      );
+    });
+
+    expect(screen.getByText("Items: 1")).toBeInTheDocument();
   });
 });

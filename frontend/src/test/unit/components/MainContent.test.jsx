@@ -104,4 +104,49 @@ describe("MainContent", () => {
     expect(editInput).toHaveAttribute("autocapitalize", "off");
     expect(editInput.getAttribute("name")).toContain("folder-edit-title-");
   });
+
+  it("@FUT37 | submitting an empty folder title closes dialog without editing", async () => {
+    const onEditFolder = vi.fn();
+    render(<MainContent {...baseProps} onEditFolder={onEditFolder} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    const editInput = screen.getByLabelText("New folder name");
+    fireEvent.keyDown(editInput, { key: "Enter", target: { value: "   " } });
+
+    expect(onEditFolder).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("dialog", { name: "Edit Folder Name" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@FUT38 | Escape in edit folder dialog input closes the dialog", async () => {
+    const onEditFolder = vi.fn();
+    render(<MainContent {...baseProps} onEditFolder={onEditFolder} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    const editInput = screen.getByLabelText("New folder name");
+    fireEvent.keyDown(editInput, { key: "Escape" });
+
+    expect(onEditFolder).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("dialog", { name: "Edit Folder Name" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@FUT39 | Space on delete confirm button calls onDeleteFolder", async () => {
+    const onDeleteFolder = vi.fn();
+    render(<MainContent {...baseProps} onDeleteFolder={onDeleteFolder} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    const confirmButton = screen.getAllByRole("button", { name: "OK" })[0];
+    fireEvent.keyDown(confirmButton, { key: " " });
+
+    expect(onDeleteFolder).toHaveBeenCalledWith(1);
+  });
+
+  it("@FUT40 | renders empty state message when items list is empty", async () => {
+    render(<MainContent {...baseProps} items={[]} />);
+
+    expect(screen.getByText("No items in this folder.")).toBeInTheDocument();
+  });
 });
