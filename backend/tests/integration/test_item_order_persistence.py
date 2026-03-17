@@ -1,9 +1,11 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.helpers import seed_db_with_test_folder, seed_db_with_test_item
 
 
+@pytest.mark.BINT86
 def test_reorder_persists_on_get(test_client: TestClient, testing_db_session: Session):
     # seed folder and items
     folder = seed_db_with_test_folder(testing_db_session)
@@ -25,6 +27,7 @@ def test_reorder_persists_on_get(test_client: TestClient, testing_db_session: Se
     assert got[3]["id"] == items[2].id and got[3]["position"] == 3
 
 
+@pytest.mark.BINT87
 def test_partial_order_list_appends_missing_items(test_client: TestClient, testing_db_session: Session):
     # seed folder and items
     folder = seed_db_with_test_folder(testing_db_session)

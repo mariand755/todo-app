@@ -1,11 +1,13 @@
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from library.models import Folder
 
 
+@pytest.mark.BINT88
 def test_create_items_assigned_sequential_positions(test_client: TestClient, testing_db_session: Session):
     # create a folder directly in the DB
     folder = Folder(title=f"f_{uuid.uuid4()}")
@@ -25,6 +27,7 @@ def test_create_items_assigned_sequential_positions(test_client: TestClient, tes
     assert created[2]["position"] == 2
 
 
+@pytest.mark.BINT89
 def test_edit_created_item_preserves_position_and_order(test_client: TestClient, testing_db_session: Session):
     # create a folder
     folder = Folder(title=f"f_{uuid.uuid4()}")

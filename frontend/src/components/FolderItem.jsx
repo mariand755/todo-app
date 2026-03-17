@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
+const FolderItem = ({ folder, isActive, onClick, onEdit, onTogglePin }) => {
   const [isEditing, setIsEditing] = useState(false);
 
   if (folder.isInput) {
@@ -13,6 +13,15 @@ const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
 
   const handleEdit = (newTitle) => {
     onEdit(folder.id, newTitle);
+  };
+
+  const isPinned = Boolean(folder.is_pinned);
+
+  const handleTogglePin = (event) => {
+    event.stopPropagation();
+    if (typeof onTogglePin === "function") {
+      onTogglePin(folder.id, !isPinned);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -48,19 +57,29 @@ const FolderItem = ({ folder, isActive, onClick, onEdit }) => {
     <li
       className={classes}
       onClick={handleClick}
+      onDoubleClick={() => setIsEditing(true)}
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex="0"
       aria-pressed={isActive}
-      aria-label={`${folder.title}${isActive ? " (active)" : ""}`}
+      aria-label={`${folder.title}${isPinned ? " (pinned)" : ""}${isActive ? " (active)" : ""}`}
     >
       <span
         className="folder-name"
-        data-full={folder.title}
-        title={folder.title}
+        data-full={isPinned ? "Tap to Unpin" : "Tap to Pin"}
+        title={isPinned ? "Tap to Unpin" : "Tap to Pin"}
       >
         {folder.title}
       </span>
+      <button
+        type="button"
+        className={`folder-pin-btn ${isPinned ? "is-pinned" : ""}`}
+        onClick={handleTogglePin}
+        onKeyDown={(event) => event.stopPropagation()}
+        aria-label={`${isPinned ? "Unpin" : "Pin"} folder ${folder.title}`}
+      >
+        <sl-icon name={isPinned ? "pin-angle-fill" : "pin-angle"} />
+      </button>
     </li>
   );
 };

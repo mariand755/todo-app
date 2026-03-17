@@ -20,7 +20,7 @@ describe("TodoItem", () => {
     moveToDoItem: vi.fn(),
   };
 
-  it("toggles completion when checkbox changes", () => {
+  it("@FUT28 | toggles completion when checkbox changes", async () => {
     const onToggle = vi.fn();
     render(<TodoItem {...baseProps} onToggle={onToggle} />);
 
@@ -30,7 +30,7 @@ describe("TodoItem", () => {
     expect(onToggle).toHaveBeenCalledWith(10);
   });
 
-  it("opens edit dialog and submits updated title via Enter", () => {
+  it("@FUT29 | opens edit dialog and submits updated title via Enter", async () => {
     const onEditToDoItem = vi.fn();
     render(<TodoItem {...baseProps} onEditToDoItem={onEditToDoItem} />);
 
@@ -44,7 +44,7 @@ describe("TodoItem", () => {
     expect(onEditToDoItem).toHaveBeenCalledWith(10, "Updated title");
   });
 
-  it("opens delete dialog and confirms deletion", () => {
+  it("@FUT30 | opens delete dialog and confirms deletion via click", async () => {
     const onDeleteToDoItem = vi.fn();
     render(<TodoItem {...baseProps} onDeleteToDoItem={onDeleteToDoItem} />);
 
@@ -54,7 +54,18 @@ describe("TodoItem", () => {
     expect(onDeleteToDoItem).toHaveBeenCalledWith(10);
   });
 
-  it("does not show edit option for completed item", () => {
+  it("@FUT31 | closes delete dialog and confirms deletion via Enter key", async () => {
+    const onDeleteToDoItem = vi.fn();
+    render(<TodoItem {...baseProps} onDeleteToDoItem={onDeleteToDoItem} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    const confirmButton = screen.getAllByRole("button", { name: "OK" })[0];
+    fireEvent.keyDown(confirmButton, { key: "Enter" });
+
+    expect(onDeleteToDoItem).toHaveBeenCalledWith(10);
+  });
+
+  it("@FUT32 | does not show edit option for completed item", async () => {
     render(<TodoItem {...baseProps} item={{ ...baseItem, completed: true }} />);
 
     expect(
@@ -63,7 +74,7 @@ describe("TodoItem", () => {
     expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
   });
 
-  it("applies complete class and incomplete aria label when item is completed", () => {
+  it("@FUT33 | applies complete class and incomplete aria label when item is completed", async () => {
     const { container } = render(
       <TodoItem {...baseProps} item={{ ...baseItem, completed: true }} />,
     );
@@ -72,5 +83,27 @@ describe("TodoItem", () => {
       screen.getByRole("checkbox", { name: "Mark as incomplete: Write tests" }),
     ).toBeInTheDocument();
     expect(container.querySelector(".todo-item.complete")).toBeInTheDocument();
+  });
+
+  it("@FUT34 | Escape in edit dialog input closes the dialog", async () => {
+    render(<TodoItem {...baseProps} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByLabelText("New item name");
+    fireEvent.keyDown(input, { key: "Escape" });
+
+    expect(
+      screen.queryByRole("dialog", { name: "Edit Item Name" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@FUT35 | OK button in edit dialog submits updated title", async () => {
+    const onEditToDoItem = vi.fn();
+    render(<TodoItem {...baseProps} onEditToDoItem={onEditToDoItem} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+
+    expect(onEditToDoItem).toHaveBeenCalledWith(10, "Write tests");
   });
 });

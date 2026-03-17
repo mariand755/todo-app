@@ -9,7 +9,7 @@ describe("Sidebar", () => {
     { id: 2, title: "Personal" },
   ];
 
-  it("renders home button and folder items", () => {
+  it("@FUT24 | renders home button and folder items", async () => {
     render(
       <Sidebar
         folders={folders}
@@ -32,7 +32,7 @@ describe("Sidebar", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls onHomeClick from button click and keyboard", () => {
+  it("@FUT25 | calls onHomeClick from button click and keyboard", async () => {
     const onHomeClick = vi.fn();
 
     render(
@@ -53,7 +53,7 @@ describe("Sidebar", () => {
     expect(onHomeClick).toHaveBeenCalledTimes(2);
   });
 
-  it("calls onFolderClick when a folder is selected", () => {
+  it("@FUT26 | calls onFolderClick when a folder is selected", async () => {
     const onFolderClick = vi.fn();
 
     render(
@@ -70,5 +70,45 @@ describe("Sidebar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Personal" }));
 
     expect(onFolderClick).toHaveBeenCalledWith(2);
+  });
+
+  it("@FUT27 | shows loading placeholders while folders are loading", async () => {
+    render(
+      <Sidebar
+        folders={[]}
+        isLoading={true}
+        activeFolderId={null}
+        onFolderClick={vi.fn()}
+        onNewFolder={vi.fn()}
+        onEditFolder={vi.fn()}
+        onHomeClick={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByTestId("sidebar-loading-row")).toHaveLength(3);
+    expect(
+      screen.queryByLabelText("Create new folder"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@FUT36 | ignores irrelevant keys on home button", async () => {
+    const onHomeClick = vi.fn();
+
+    render(
+      <Sidebar
+        folders={folders}
+        activeFolderId={null}
+        onFolderClick={vi.fn()}
+        onNewFolder={vi.fn()}
+        onEditFolder={vi.fn()}
+        onHomeClick={onHomeClick}
+      />,
+    );
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "Go to home" }), {
+      key: "Tab",
+    });
+
+    expect(onHomeClick).not.toHaveBeenCalled();
   });
 });

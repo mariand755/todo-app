@@ -1,35 +1,29 @@
-# Backend QA Test Architecture
+# Backend Test Notes
 
-This backend suite follows a testing-pyramid layout aligned with the frontend QA structure.
+Canonical policy lives in ../../docs/testing-governance.md.
 
-## Structure
+Use this file only for local backend test navigation.
 
-- `tests/unit/`
-  - Fast, isolated logic and model-behavior tests.
-- `tests/integration/`
-  - API behavior and persistence/order guarantees through FastAPI + DB fixtures.
-- `tests/helpers.py`
-  - Shared seed/build helpers used by test layers.
-- `tests/conftest.py`
-  - Central marker routing plus shared DB/TestClient fixtures.
+## Layout
 
-## Markers
+- tests/unit
+- tests/integration
+- tests/helpers.py
+- tests/conftest.py
 
-Defined in `pyproject.toml`:
+## Local Commands
 
-- `unit`: fast tests, no external services
-- `integration`: broader tests using database/app wiring
-- `contract`: API behavior and request/response contract checks
-- `persistence`: ordering/state persistence and data consistency checks
+- pytest -q
+- pytest -q -m unit
+- pytest -q -m integration
+- pytest -q -m BUT01
+- pytest -q -m BINT12
 
-## Default behavior
+## Marker Groups
 
-`pytest` defaults to running `not integration` for quick local cycles.
-Run integration layers explicitly when needed.
+Defined in pyproject.toml:
 
-Examples:
-
-- `pytest -q -m unit`
-- `pytest -q -m integration`
-- `pytest -q -m contract`
-- `pytest -q -m persistence`
+- unit
+- integration
+- contract
+- persistence

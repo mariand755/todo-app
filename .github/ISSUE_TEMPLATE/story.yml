@@ -1,0 +1,119 @@
+name: Story/Case
+description: User-facing or workflow-facing outcome under an Epic.
+title: "TD-### <user-value title>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for Story/Case items.
+
+        Contract reminders:
+        - Story/Case requires a parent Epic.
+        - Story/Case should have measurable acceptance criteria.
+        - Effort must be XS/S/M/L (no XL for stories).
+
+  - type: input
+    id: parent_epic
+    attributes:
+      label: Parent Epic reference
+      description: Required. Provide Epic TD ID and/or GitHub issue link.
+      placeholder: "TD-003 or https://github.com/<owner>/<repo>/issues/<id>"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope_statement
+    attributes:
+      label: Scope statement
+      description: What user/workflow outcome is delivered?
+      placeholder: Describe what is different for the user when complete.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Provide measurable criteria.
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Select the primary area or inherit from parent epic.
+      options:
+        - inherit-from-parent
+        - backend
+        - frontend
+        - cli
+        - database
+        - qa
+        - ci-cd
+        - security
+        - docs
+        - mobile
+        - infra
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort
+      options:
+        - XS
+        - S
+        - M
+        - L
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - inherit-from-parent
+        - Now
+        - Next
+        - Later
+        - Hold
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Prefer inherit unless triage explicitly overrides.
+      options:
+        - inherit-from-parent
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependency_notes
+    attributes:
+      label: Dependencies and sequencing notes
+      placeholder: Upstream work, ordering constraints, or blockers.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contract_ack
+    attributes:
+      label: Contract acknowledgment
+      options:
+        - label: I provided a parent Epic reference.
+          required: true
+        - label: I provided measurable acceptance criteria.
+          required: true

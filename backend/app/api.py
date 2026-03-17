@@ -1,15 +1,22 @@
+import logging
+import time
+import uuid
 from typing import Sequence, cast
 
-from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
+from app.logging_config import configure_logging, request_id_context
 from library.models import Folder as FolderModel
 from library.models import TodoItem as TodoItemModel
 from library.models import ensure_folder_positions, get_db, get_next_folder_position
+
+configure_logging()
+logger = logging.getLogger("todo_app.api")
 
 app = FastAPI()
 
@@ -24,6 +31,36 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    request_id = uuid.uuid4().hex[:12]
+    token = request_id_context.set(request_id)
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+        duration_ms = (time.perf_counter() - start) * 1000
+        logger.info(
+            "request_completed method=%s path=%s status=%s duration_ms=%.2f",
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration_ms,
+        )
+        response.headers["X-Request-ID"] = request_id
+        return response
+    except Exception:
+        duration_ms = (time.perf_counter() - start) * 1000
+        logger.exception(
+            "request_failed method=%s path=%s duration_ms=%.2f",
+            request.method,
+            request.url.path,
+            duration_ms,
+        )
+        raise
+    finally:
+        request_id_context.reset(token)
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
     # Custom logic to reformat the errors
@@ -31,10 +68,16 @@ async def validation_exception_handler(request, exc):
     simplified_errors = []
     for error in errors:
         simplified_errors.append({"field": error["loc"][-1], "problem": error["msg"]})
+    logger.warning("validation_error path=%s error_count=%s", request.url.path, len(simplified_errors))
     return JSONResponse(
         status_code=400,
         content={"errors": simplified_errors},
     )
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 
 @app.get("/folders")
@@ -45,7 +88,7 @@ async def get_folders(db_session: Session = Depends(get_db)):
     folders = (
         db_session.query(FolderModel)
         .filter(FolderModel.is_deleted.is_(False))
-        .order_by(FolderModel.position, FolderModel.id)
+        .order_by(FolderModel.is_pinned.desc(), FolderModel.position, FolderModel.id)
         .all()
     )
     return folders
@@ -59,6 +102,7 @@ class FolderResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     title: str
+    is_pinned: bool
 
 
 @app.post("/folders", response_model=FolderResponse)
@@ -90,6 +134,25 @@ async def update_folder(folder_id: int, update_folder_request: UpdateFolder, db_
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.title = update_folder_request.title
+    db_session.add(folder)
+    db_session.commit()
+    return folder
+
+
+class UpdateFolderPin(BaseModel):
+    is_pinned: bool
+
+
+@app.put("/folders/{folder_id}/pin", response_model=FolderResponse)
+async def update_folder_pin(
+    folder_id: int,
+    update_folder_pin_request: UpdateFolderPin,
+    db_session: Session = Depends(get_db),
+):
+    folder = db_session.get(FolderModel, folder_id)
+    if folder is None or folder.is_deleted:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    folder.is_pinned = update_folder_pin_request.is_pinned
     db_session.add(folder)
     db_session.commit()
     return folder

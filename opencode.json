@@ -1,0 +1,54 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [".github/copilot-instructions.md"],
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      ".git/**",
+      "backend/.ruff_cache/**",
+      "backend/__pycache__/**",
+      "backend/.coverage"
+    ]
+  },
+  "command": {
+    "build": {
+      "description": "Build all Docker images",
+      "template": "Build the backend and frontend Docker images using the commands from the README:\n\ndocker build -f backend/Dockerfile --target test -t todo-app-backend-test ./backend\ndocker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend"
+    },
+    "test": {
+      "description": "Run all tests via Docker",
+      "template": "Run all backend and frontend tests using Docker:\n\nBackend: docker run --rm todo-app-backend-test uv run pytest -q -o addopts=''\nFrontend: docker run --rm todo-app-frontend-test npm run test\n\nReport any failures clearly."
+    },
+    "test-backend": {
+      "description": "Run backend tests via Docker",
+      "template": "Run backend tests using Docker:\n\ndocker run --rm todo-app-backend-test uv run pytest -q -o addopts=''\n\nReport any failures."
+    },
+    "test-frontend": {
+      "description": "Run frontend tests via Docker",
+      "template": "Run frontend tests using Docker:\n\ndocker run --rm todo-app-frontend-test npm run test\n\nReport any failures."
+    },
+    "up": {
+      "description": "Start the full stack",
+      "template": "Start the full todo-app stack with Docker Compose:\n\ndocker compose up --build --wait\n\nWait for all services (db, api, frontend) to become healthy before confirming success."
+    },
+    "down": {
+      "description": "Stop and remove stack containers and networks",
+      "template": "Stop the todo-app stack and remove containers and networks:\n\ndocker compose down\n\nConfirm all containers have been stopped and removed."
+    },
+    "lint": {
+      "description": "Lint backend and frontend via Docker",
+      "template": "Run linters for both services using Docker:\n\nBackend: docker run --rm todo-app-backend-test uv run ruff check .\nFrontend: docker run --rm todo-app-frontend-test npm run lint\n\nReport any issues found."
+    }
+  },
+  "formatter": {
+    "ruff": {
+      "command": ["docker", "run", "--rm", "-v", "${workspaceFolder}/backend:/app", "todo-app-backend-test", "uv", "run", "ruff", "format", "$FILE"],
+      "extensions": [".py"]
+    },
+    "prettier": {
+      "command": ["docker", "run", "--rm", "-v", "${workspaceFolder}/frontend:/usr/src/app", "todo-app-frontend-test", "npx", "prettier", "--write", "$FILE"],
+      "extensions": [".js", ".jsx", ".css", ".json"]
+    }
+  }
+}

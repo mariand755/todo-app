@@ -1,7 +1,5 @@
 # Todo-App
-A simple To-Do List project with a Python backend (CLI + library) and a React frontend.
-
-Organize tasks into folders, add, edit, delete, and search items efficiently.
+A Docker-first To-Do app with a Python FastAPI backend (plus CLI/library) and a React frontend, supporting folder/item CRUD and ordering, with CI-enforced quality and health checks.
 
 **Contents overview:**
 - `backend/`:
@@ -21,22 +19,22 @@ Organize tasks into folders, add, edit, delete, and search items efficiently.
    Single-page app in `frontend/` for a graphical UI.
 
 - **Folder Management**:
-   Add, edit, delete folders; search by title; list folders.
+   Add, edit, delete, and pin/unpin folders; search by title; list folders. Pinned folders sort to the top of the sidebar.
 
-- **Todo Item Management**: Add, edit, delete items within folders; search by title; list items.
+- **Todo Item Management**: Add, edit, delete, toggle completion, and reorder items within folders; search by title; list items.
 
 - **Persistence**:
-   Simple SQL setup in `backend/db/db_setup.sql` for storing folders and items.
+   SQLAlchemy models backed by Postgres (env-driven) with SQLite fallback; soft deletes via `is_deleted` flags; `is_pinned` column on folders.
 
 - **User-Friendly CLI**:
    Interactive prompts and command aliases for quick navigation.
 
 - **Dev & Deployment**:
-   Dockerfiles for `backend` and `frontend`; `docker-compose.yaml` to run services locally.
+   Dockerfiles for `backend` and `frontend`; `docker-compose.yaml` to run services locally with health checks.
 
 - **Testing**:
-   Unit tests under `backend/tests/`.
-   Integration tests under `backend/tests/`.
+   Backend: unit tests (`BUT##` markers) and integration tests (`BINT##` markers) under `backend/tests/`.
+   Frontend: unit tests (`@FUT## |` Vitest title prefixes) and integration tests (`@FINT## |` Vitest title prefixes) under `frontend/src/test/`.
 
 
 ## Project Structure
@@ -45,41 +43,74 @@ Note: Dotfiles and dotfolders (.*) omitted
 todo-app/
 ├── docker-compose.yaml
 ├── README.md
-├── TO Do List
 ├── backend/
 │   ├── Dockerfile
 │   ├── pyproject.toml
 │   ├── requirements.txt
 │   ├── app/
-│   │   ├── __init__.py
-│   │   └── api.py
+│   │   ├── api.py
+│   │   └── logging_config.py
 │   ├── commandline_interface/
 │   │   └── main.py
 │   ├── db/
 │   │   └── db_setup.sql
 │   ├── library/
-│   │   ├── __init__.py
 │   │   ├── folder_manager.py
 │   │   ├── folder.py
 │   │   ├── models.py
 │   │   └── todo_item.py
 │   └── tests/
+│       ├── conftest.py
+│       ├── helpers.py
+│       ├── integration/
+│       │   ├── test_api.py
+│       │   ├── test_item_order_persistence.py
+│       │   └── test_positions_integration.py
+│       └── unit/
+│           ├── test_folder.py
+│           ├── test_folder_manager.py
+│           ├── test_folder_positions.py
+│           ├── test_models.py
+│           ├── test_position_mapping.py
+│           └── test_positions.py
+├── docs/
+│   ├── ci-governance.md
+│   └── frontend-docker.md
 ├── frontend/
 │   ├── Dockerfile
 │   ├── package.json
 │   └── src/
 │       ├── App.jsx
+│       ├── logger.js
 │       ├── main.jsx
 │       ├── useApi.js
-│       └── components/
-│           ├── FolderItem.jsx
-│           ├── LandingContent.jsx
-│           ├── MainContent.jsx
-│           ├── NewFolderForm.jsx
-│           ├── Sidebar.jsx
-│           └── TodoItem.jsx
+│       ├── components/
+│       │   ├── FolderItem.jsx
+│       │   ├── LandingContent.jsx
+│       │   ├── LoadingContent.jsx
+│       │   ├── MainContent.jsx
+│       │   ├── NewFolderForm.jsx
+│       │   ├── Sidebar.jsx
+│       │   └── TodoItem.jsx
+│       └── test/
+│           ├── integration/
+│           │   └── App.integration.test.jsx
+│           └── unit/
+│               ├── api/
+│               │   └── useApi.unit.test.js
+│               └── components/
+│                   ├── FolderItem.test.jsx
+│                   ├── LandingContent.test.jsx
+│                   ├── LoadingContent.test.jsx
+│                   ├── MainContent.test.jsx
+│                   ├── NewFolderForm.test.jsx
+│                   ├── Sidebar.test.jsx
+│                   └── TodoItem.test.jsx
 └── scripts/
-  └── terminal_command.sh
+   ├── fix_frontend_it_callbacks.py
+   ├── rewrite_frontend_test_ids.py
+   ├── rewrite_test_id_markers.py
+   └── terminal_command.sh
 ```
 
 
@@ -111,8 +142,10 @@ npm run dev
 
 Or run the full stack with Docker Compose (if configured):
 ```sh
-docker-compose up --build
+docker compose up --build --wait
 ```
+
+- Full reset if local state gets stuck (destructive): `docker compose down -v && docker compose up -d --build --wait`
 
 ## QA & CI Commands
 
@@ -152,10 +185,22 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/integratio
 docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
 ```
 
+### Test ID Notes
+
+- Canonical testing policy: docs/testing-governance.md
+- Backend test IDs use pytest markers and can be selected with -m.
+- Frontend test IDs use Vitest title prefixes and can be selected with -t.
+
 ### CI Workflows
 
 - Backend Docker CI: `.github/workflows/docker_backend.yml`
 - Frontend Docker CI: `.github/workflows/docker_frontend.yml`
+- Compose Health CI: `.github/workflows/compose_health.yml`
+
+### CI Governance and Docs
+
+- CI policy (triage, SLOs, flaky cleanup): `docs/ci-governance.md`
+- Frontend Docker guide: `docs/frontend-docker.md`
 
 ## Features Overview
 - Follow the interactive prompts to manage folders and todo items from the CLI.
@@ -163,11 +208,11 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
 
 ### Usage
 - **Folders:**
-   - Add, view, edit, delete, and search folders via the CLI
-   - Or the frontend UI.
+   - Add, view, edit, delete, pin/unpin, and search folders via the CLI or the frontend UI.
+   - Pinned folders always sort to the top of the sidebar.
 
 - **Items:**
-   - Add, view, edit, delete, and search todo items inside a selected folder.
+   - Add, view, edit, delete, toggle completion, and reorder todo items inside a selected folder.
 
 - **Exit:**
    - Quit the CLI with the `exit` command
@@ -192,11 +237,8 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
 
 5. Exit the CLI:
    - Enter `exit`
-   - Or stop `docker-compose` / close the frontend tab.
+   - Or stop `docker compose` / close the frontend tab.
 
-
-## License
-This project is for learning purposes and does not have a formal license.
 
 ---
 

@@ -1,0 +1,171 @@
+name: Bug
+description: Defect report with reproducibility evidence and triage metadata.
+title: "BUG-### <defect summary>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for defects.
+
+        Contract reminders:
+        - Parent link is preferred (`Story/Case` first, `Epic` for cross-cutting defects).
+        - Reproducibility evidence is required unless explicitly impossible.
+        - Root cause details can start as unknown, but must be completed before closure.
+
+  - type: input
+    id: parent_reference
+    attributes:
+      label: Parent reference (preferred)
+      description: Story/Case issue link or Epic link. Leave blank only for triage-approved standalone bug.
+      placeholder: "https://github.com/<owner>/<repo>/issues/<id>"
+    validations:
+      required: false
+
+  - type: textarea
+    id: standalone_exception_rationale
+    attributes:
+      label: Standalone exception rationale
+      description: Required only if no parent is provided.
+      placeholder: Explain why this bug should remain standalone and who approved the exception.
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction_details
+    attributes:
+      label: Reproduction details
+      description: Include steps, expected behavior, and actual behavior.
+      placeholder: |
+        Steps:
+        1. ...
+        2. ...
+
+        Expected:
+        Actual:
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment_impact
+    attributes:
+      label: Environment and impact
+      description: Runtime context and severity impact.
+      placeholder: Browser/device/version, backend environment, user impact scope.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence_package
+    attributes:
+      label: Reproducibility evidence package
+      description: Attach or reference screenshots, video, logs, traces, request/response captures.
+      placeholder: Paste links, artifacts, and key excerpts.
+    validations:
+      required: true
+
+  - type: textarea
+    id: no_artifact_rationale
+    attributes:
+      label: No-artifact rationale
+      description: If evidence cannot be captured, explain why.
+      placeholder: Capture constraints and triage approval note.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - backend
+        - frontend
+        - cli
+        - database
+        - qa
+        - ci-cd
+        - security
+        - docs
+        - mobile
+        - infra
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort
+      description: Bug defaults to S unless triage indicates otherwise.
+      options:
+        - S
+        - XS
+        - M
+        - L
+        - XL
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - Now
+        - Next
+        - Later
+        - Hold
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Default triage baseline is P1.
+      options:
+        - P1
+        - P0
+        - P2
+        - P3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: bug_lifecycle_stage
+    attributes:
+      label: Bug lifecycle stage
+      options:
+        - New
+        - Triaged
+        - Ready
+        - In Progress
+        - Review
+        - Done
+    validations:
+      required: true
+
+  - type: textarea
+    id: root_cause_section
+    attributes:
+      label: Root cause section
+      description: If unknown now, record `root cause undetermined` and follow-up owner/date.
+      placeholder: |
+        Primary cause:
+        Contributing factors:
+        Prevention/follow-up:
+
+        Or:
+        root cause undetermined
+        follow-up owner:
+        target date:
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contract_ack
+    attributes:
+      label: Contract acknowledgment
+      options:
+        - label: I provided reproducibility details and an evidence package (or explicit no-artifact rationale).
+          required: true
+        - label: I understand parent linkage is required before Ready unless a standalone exception is documented.
+          required: true

@@ -3,7 +3,7 @@ repos:
   # Ruff (lint + format)
   # -----------------------
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.9
+    rev: v0.11.10
     hooks:
       - id: ruff
         args: [--fix]
@@ -13,7 +13,7 @@ repos:
   # Mypy (type checking)
   # -----------------------
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.15.0
     hooks:
       - id: mypy
         types: [python]
@@ -22,12 +22,31 @@ repos:
         args: ["--config-file=backend/pyproject.toml"]
         files: ^backend/(app|library|commandline_interface)/  # skip backend/tests
 
+  # -----------------------
+  # Frontend checks
+  # -----------------------
+  - repo: local
+    hooks:
+      - id: frontend-eslint
+        name: frontend-eslint
+        language: system
+        entry: bash -c 'docker image inspect todo-app-frontend-test >/dev/null 2>&1 || docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend; docker run --rm -v "$PWD/frontend:/usr/src/app" -w /usr/src/app todo-app-frontend-test npm run lint'
+        pass_filenames: false
+        files: ^frontend/.*\.(js|jsx)$
+
+      - id: frontend-format-check
+        name: frontend-format-check
+        language: system
+        entry: bash -c 'docker image inspect todo-app-frontend-test >/dev/null 2>&1 || docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend; docker run --rm -v "$PWD/frontend:/usr/src/app" -w /usr/src/app todo-app-frontend-test npm run format:check'
+        pass_filenames: false
+        files: ^frontend/
+
 
   # -----------------------
   # General hygiene
   # -----------------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
         files: \.(py|yml|yaml|md|txt|sh|toml|json)$

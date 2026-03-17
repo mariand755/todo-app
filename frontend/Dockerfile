@@ -17,7 +17,7 @@ WORKDIR /usr/src/app
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
 # Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
 # into this layer.
-RUN npm install -g vite
+RUN npm install -g npm@11.11.0 vite
 COPY package.json package-lock.json ./
 RUN  npm i --include=dev
 

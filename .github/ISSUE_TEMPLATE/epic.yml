@@ -1,0 +1,122 @@
+name: Epic
+description: Top-level capability that spans multiple stories and changes.
+title: "TD-### <capability title> [EPIC]"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for top-level capabilities.
+
+        Contract reminders:
+        - Epic is a top-level issue (no parent required).
+        - Title must keep `TD-###` and `[EPIC]` marker.
+        - Include at least one story candidate in the breakdown section.
+
+  - type: textarea
+    id: scope_statement
+    attributes:
+      label: Scope statement
+      description: What capability does this epic enable?
+      placeholder: Describe the capability boundary and intended user/business outcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define rollout success criteria for this epic.
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Select 1-2 areas. Use at most two for cross-domain epics.
+      multiple: true
+      options:
+        - backend
+        - frontend
+        - cli
+        - database
+        - qa
+        - ci-cd
+        - security
+        - docs
+        - mobile
+        - infra
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort
+      description: Epics default to XL unless clearly constrained.
+      options:
+        - XL
+        - L
+        - M
+        - S
+        - XS
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - Now
+        - Next
+        - Later
+        - Hold
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+
+  - type: textarea
+    id: story_breakdown
+    attributes:
+      label: Story breakdown candidates
+      description: Add planned Story/Case slices (at least one).
+      placeholder: |
+        - TD-### Story candidate 1
+        - TD-### Story candidate 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies_risks
+    attributes:
+      label: Dependencies and risks
+      description: List key dependencies, blockers, or known risks.
+      placeholder: External dependency, sequence risk, cross-team input, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contract_ack
+    attributes:
+      label: Contract acknowledgment
+      options:
+        - label: I kept the `TD-###` + `[EPIC]` title pattern.
+          required: true
+        - label: I included acceptance criteria and story breakdown candidates.
+          required: true

@@ -1,3 +1,4 @@
+import logging
 import os
 
 import sqlalchemy as sa
@@ -10,18 +11,40 @@ DB_USER = os.getenv("POSTGRES_USER", "postgres")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
 DB_HOST = os.getenv("POSTGRES_HOST", "db")
 DB_NAME = os.getenv("POSTGRES_DB", "postgres")
+SQL_ECHO = os.getenv("SQL_ECHO", "false").strip().lower() in {"1", "true", "yes", "on"}
+
+logger = logging.getLogger("todo_app.models")
 
 # Database engine
 try:
-    engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}", echo=True)
+    engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}", echo=SQL_ECHO)
 except Exception:
     # Fallback to an in-memory sqlite DB when engine creation fails (useful for tests / missing drivers)
+    logger.warning("Falling back to sqlite in-memory engine")
     engine = create_engine("sqlite:///:memory:", echo=False)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 Base: DeclarativeMeta = declarative_base()
+
+
+def ensure_folder_pin_column() -> None:
+    """Add folder.is_pinned to existing databases created before pinning support."""
+    try:
+        inspector = sa.inspect(engine)
+        if not inspector.has_table("folder"):
+            return
+
+        existing_columns = {column["name"] for column in inspector.get_columns("folder")}
+        if "is_pinned" in existing_columns:
+            return
+
+        with engine.begin() as connection:
+            connection.execute(sa.text("ALTER TABLE folder ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE NOT NULL"))
+        logger.info("Added missing folder.is_pinned column")
+    except Exception:
+        logger.exception("Failed to ensure folder pin column")
 
 
 def get_db():
@@ -83,6 +106,7 @@ class Folder(Base):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String, nullable=False)
     is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
+    is_pinned = sa.Column(sa.Boolean, default=False, nullable=False)
     position = sa.Column(sa.Integer, default=-1, nullable=False)
 
 
@@ -95,3 +119,6 @@ class TodoItem(Base):
     is_deleted = sa.Column(sa.Boolean, default=False, nullable=False)
     completed = sa.Column(sa.Boolean, default=False, nullable=False)
     position = sa.Column(sa.Integer, default=-1, nullable=False)
+
+
+ensure_folder_pin_column()

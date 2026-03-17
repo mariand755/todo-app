@@ -3,21 +3,21 @@ name: CodeQL
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "backend/**"
   push:
     branches: [main]
-    paths:
-      - "backend/**"
   schedule:
     - cron: "0 6 * * 1" # weekly
   workflow_dispatch:
 
 jobs:
   analyze:
-    name: Analyze (Python)
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
     timeout-minutes: 60 # CodeQL analysis can take a while, especially on the first run
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript]
     permissions:
       security-events: write
       actions: read
@@ -30,7 +30,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: python
+          languages: ${{ matrix.language }}
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v4

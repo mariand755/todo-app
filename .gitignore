@@ -58,6 +58,9 @@ cover/
 
 # Django stuff:
 *.log
+*.log.*
+logs/
+**/logs/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -226,4 +229,6 @@ build/
 
 # Optional: local editor settings
 .vscode/
-copilot-instructions.md
+
+# Private files
+docs/private_docs/*

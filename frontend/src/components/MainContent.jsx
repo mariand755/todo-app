@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TodoItem from "./TodoItem.jsx";
 import SlIcon from "@shoelace-style/shoelace/dist/react/icon/index.js";
 import SlMenu from "@shoelace-style/shoelace/dist/react/menu/index.js";
@@ -23,6 +23,11 @@ const MainContent = ({
 }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [editFolderTitle, setEditFolderTitle] = useState(currentFolderTitle);
+  const [editInputName, setEditInputName] = useState(
+    () => `folder-edit-title-${Date.now()}`,
+  );
+  const deleteConfirmButtonRef = useRef(null);
 
   const [newTodo, setNewTodo] = useState("");
 
@@ -33,6 +38,46 @@ const MainContent = ({
   const handleDelete = () => {
     onDeleteFolder(currentFolderId);
   };
+
+  const openEditDialog = () => {
+    setEditFolderTitle(currentFolderTitle);
+    setEditInputName(
+      `folder-edit-title-${String(currentFolderId ?? "none")}-${Date.now()}`,
+    );
+    setOpenDialog(true);
+  };
+
+  const submitFolderEdit = (rawTitle) => {
+    const nextTitle = String(rawTitle ?? "").trim();
+    if (!nextTitle) {
+      setOpenDialog(false);
+      return;
+    }
+
+    handleEdit(nextTitle);
+    setOpenDialog(false);
+  };
+
+  const confirmDelete = () => {
+    handleDelete();
+    setDeleteDialog(false);
+  };
+
+  useEffect(() => {
+    if (openDialog) {
+      setEditFolderTitle(currentFolderTitle);
+    }
+  }, [currentFolderTitle, openDialog]);
+
+  useEffect(() => {
+    if (!deleteDialog) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      deleteConfirmButtonRef.current?.focus();
+    });
+  }, [deleteDialog]);
 
   const handleAddTodo = (e) => {
     e.preventDefault();
@@ -81,7 +126,7 @@ const MainContent = ({
                   ></SlIcon>
                 </button>
                 <SlMenu style={{ maxWidth: "200px" }}>
-                  <SlMenuItem value="edit" onClick={() => setOpenDialog(true)}>
+                  <SlMenuItem value="edit" onClick={openEditDialog}>
                     Edit
                   </SlMenuItem>
                   <SlDivider />
@@ -109,26 +154,30 @@ const MainContent = ({
           <SlInput
             id="edit-folder-input"
             aria-label="New folder name"
+            onSlInput={(event) => setEditFolderTitle(event.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleEdit(e.target.value);
-                setOpenDialog(false);
+                submitFolderEdit(e.target.value ?? editFolderTitle);
               } else if (e.key === "Escape") {
                 setOpenDialog(false);
               }
             }}
             size="medium"
-            value={currentFolderTitle}
+            value={editFolderTitle}
+            name={editInputName}
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellCheck={false}
+            aria-autocomplete="none"
+            data-lpignore="true"
+            data-1p-ignore="true"
             pill
           />
           <SlButton
             slot="footer"
             variant="primary"
-            onClick={() => {
-              const inputElement = document.getElementById("edit-folder-input");
-              handleEdit(inputElement.value);
-              setOpenDialog(false);
-            }}
+            onClick={() => submitFolderEdit(editFolderTitle)}
           >
             OK
           </SlButton>
@@ -144,12 +193,16 @@ const MainContent = ({
             Delete folder confirmation
           </h2>
           <SlButton
+            ref={deleteConfirmButtonRef}
             slot="footer"
             variant="primary"
-            onClick={() => {
-              handleDelete();
-              setDeleteDialog(false);
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                confirmDelete();
+              }
             }}
+            onClick={confirmDelete}
           >
             OK
           </SlButton>

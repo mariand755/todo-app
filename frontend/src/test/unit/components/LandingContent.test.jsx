@@ -8,7 +8,7 @@ describe("LandingContent", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders hero, features, and call-to-action content", () => {
+  it("@FUT10 | renders hero, features, and call-to-action content", async () => {
     render(<LandingContent />);
 
     expect(
@@ -20,7 +20,7 @@ describe("LandingContent", () => {
     expect(screen.getByText(/Check the/i)).toBeInTheDocument();
   });
 
-  it("renders expected decorative icons for sections", () => {
+  it("@FUT11 | renders expected decorative icons for sections", async () => {
     render(<LandingContent />);
 
     expect(screen.getByText("📋")).toBeInTheDocument();

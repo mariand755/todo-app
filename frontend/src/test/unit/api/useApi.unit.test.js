@@ -1,51 +1,104 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  afterAll,
+  afterEach,
+} from "vitest";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 import { makeAPICall } from "@/useApi";
+import { logger } from "@/logger";
+
+const server = setupServer(
+  http.get("http://localhost:8000/folders", () => {
+    return HttpResponse.json([{ id: 1, title: "Test Folder" }]);
+  }),
+  http.post("http://localhost:8000/folders", async ({ request }) => {
+    const payload = await request.json();
+    return HttpResponse.json(payload, { status: 201 });
+  }),
+  http.put("http://localhost:8000/folders/1", async ({ request }) => {
+    const payload = await request.json();
+    return HttpResponse.json(payload, { status: 200 });
+  }),
+);
+
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: "error" });
+});
+
+afterEach(() => {
+  server.resetHandlers();
+  vi.restoreAllMocks();
+});
+
+afterAll(() => {
+  server.close();
+});
 
 describe("makeAPICall", () => {
-  beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn());
-  });
-
-  it("calls fetch for GET requests without JSON body/options", async () => {
-    const response = { ok: true };
-    fetch.mockResolvedValue(response);
-
+  it("@FUT01 | calls fetch for GET requests without JSON body/options", async () => {
     const result = await makeAPICall("GET", "/folders");
+    const body = await result.json();
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8000/folders");
-    expect(result).toBe(response);
+    expect(result.ok).toBe(true);
+    expect(body).toEqual([{ id: 1, title: "Test Folder" }]);
   });
 
-  it("uppercases http method before request", async () => {
-    const response = { ok: true };
-    fetch.mockResolvedValue(response);
+  it("@FUT02 | uppercases http method before request", async () => {
+    let methodSeenByHandler = "";
+    server.use(
+      http.post("http://localhost:8000/folders", async ({ request }) => {
+        methodSeenByHandler = request.method;
+        return HttpResponse.json(await request.json(), { status: 201 });
+      }),
+    );
 
-    await makeAPICall("post", "/folders", { title: "Work" });
+    const result = await makeAPICall("post", "/folders", { title: "Work" });
+    const body = await result.json();
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8000/folders", {
-      method: "POST",
-      body: JSON.stringify({ title: "Work" }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    expect(result.status).toBe(201);
+    expect(methodSeenByHandler).toBe("POST");
+    expect(body).toEqual({ title: "Work" });
   });
 
-  it("returns null when GET fetch throws", async () => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
-    fetch.mockRejectedValue(new Error("network error"));
+  it("@FUT03 | returns null when GET fetch throws", async () => {
+    server.use(
+      http.get("http://localhost:8000/folders", () => {
+        return HttpResponse.error();
+      }),
+    );
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
     const result = await makeAPICall("GET", "/folders");
 
     expect(result).toBeNull();
+    expect(errorSpy).toHaveBeenCalledWith(
+      "GET request failed",
+      expect.objectContaining({ url: "http://localhost:8000/folders" }),
+    );
   });
 
-  it("returns null when non-GET fetch throws", async () => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
-    fetch.mockRejectedValue(new Error("network error"));
+  it("@FUT04 | returns null when non-GET fetch throws", async () => {
+    server.use(
+      http.put("http://localhost:8000/folders/1", () => {
+        return HttpResponse.error();
+      }),
+    );
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
     const result = await makeAPICall("PUT", "/folders/1", { title: "x" });
 
     expect(result).toBeNull();
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Request failed",
+      expect.objectContaining({
+        method: "PUT",
+        url: "http://localhost:8000/folders/1",
+      }),
+    );
   });
 });

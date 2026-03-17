@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import NewFolderForm from "@/components/NewFolderForm";
 
 describe("NewFolderForm", () => {
-  it("submits trimmed title via button and clears input", () => {
+  it("@FUT21 | submits trimmed title via button and clears input", async () => {
     const onNewFolder = vi.fn();
     render(<NewFolderForm onNewFolder={onNewFolder} />);
 
@@ -16,7 +16,7 @@ describe("NewFolderForm", () => {
     expect(input).toHaveValue("");
   });
 
-  it("submits on Enter key press", () => {
+  it("@FUT22 | submits on Enter key press", async () => {
     const onNewFolder = vi.fn();
     render(<NewFolderForm onNewFolder={onNewFolder} />);
 
@@ -27,7 +27,7 @@ describe("NewFolderForm", () => {
     expect(onNewFolder).toHaveBeenCalledWith("Personal");
   });
 
-  it("does not submit empty or whitespace-only title", () => {
+  it("@FUT23 | does not submit empty or whitespace-only title", async () => {
     const onNewFolder = vi.fn();
     render(<NewFolderForm onNewFolder={onNewFolder} />);
 

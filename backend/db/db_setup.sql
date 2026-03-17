@@ -3,9 +3,25 @@ CREATE TABLE IF NOT EXISTS folder (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
 	is_deleted bool DEFAULT false NULL,
+	is_pinned bool DEFAULT false NOT NULL,
 	position int4 DEFAULT -1 NOT NULL
 
 );
+
+DO $$
+BEGIN
+	IF NOT EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_schema = 'public'
+		  AND table_name = 'folder'
+		  AND column_name = 'is_pinned'
+	) THEN
+		ALTER TABLE public.folder
+		ADD COLUMN is_pinned bool DEFAULT false NOT NULL;
+	END IF;
+END
+$$;
 
 -- public.todo_item definition
 

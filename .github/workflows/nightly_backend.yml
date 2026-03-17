@@ -57,7 +57,16 @@ jobs:
         run: uv run mypy app library commandline_interface
 
       - name: Run tests + coverage
-        run: uv run pytest -q -o addopts='' --cov=app --cov=library --cov-report=term-missing --cov-fail-under=85
+        run: uv run pytest -q -o addopts='' --cov=app --cov=library --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85
+
+      - name: Upload backend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-nightly
+          path: backend/coverage.xml
+          retention-days: 30
+          if-no-files-found: warn
 
       # -------- SECURITY (SCA) --------
       - name: Dependency audit (pip-audit)
@@ -91,7 +100,17 @@ jobs:
         with:
           image-ref: backend:nightly
           format: table
+          output: trivy-backend-nightly.txt
           ignore-unfixed: true
           vuln-type: os,library
           severity: HIGH,CRITICAL
           exit-code: "1"
+
+      - name: Upload Trivy backend artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-backend-nightly
+          path: trivy-backend-nightly.txt
+          retention-days: 30
+          if-no-files-found: warn
