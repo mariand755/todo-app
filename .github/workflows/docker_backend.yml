@@ -3,17 +3,9 @@ name: Docker Backend
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "docker-compose.yaml"
-      - ".github/workflows/**"
 
   push:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "docker-compose.yaml"
-      - ".github/workflows/**"
 
   workflow_dispatch:
 
@@ -25,7 +17,53 @@ permissions:
   contents: read
 
 jobs:
+  detect-relevant-changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      should_run: ${{ steps.filter.outputs.should_run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect backend docker-relevant changes
+        id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+
+          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only "$base" "$head" > changed_files.txt
+
+          if grep -E -q '^(backend/|docker-compose\.yaml|\.github/workflows/)' changed_files.txt; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   docker-build-and-scan:
+    needs: detect-relevant-changes
+    if: needs.detect-relevant-changes.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
