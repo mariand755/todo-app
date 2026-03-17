@@ -1,0 +1,50 @@
+name: Add To Project
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: add-to-project-${{ github.run_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate add-to-project secret
+        shell: bash
+        env:
+          ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADD_TO_PROJECT_PAT}" ]]; then
+            echo "Missing required secret: ADD_TO_PROJECT_PAT"
+            exit 1
+          fi
+
+      - name: Add issue or PR to Todo App Task Board
+        uses: actions/add-to-project@v1.0.2
+        with:
+          project-url: https://github.com/users/mariand755/projects/2
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+
+      - name: Fallback guidance for manual add
+        if: failure()
+        shell: bash
+        run: |
+          echo "Auto-add failed for this item."
+          echo "Fallback path:"
+          echo "1) Open the issue/PR in GitHub."
+          echo "2) In the right sidebar, click Projects."
+          echo "3) Add the item to 'Todo App Task Board' (#2)."
+          echo "4) Leave a note on the issue/PR with manual add confirmation and failure context."
