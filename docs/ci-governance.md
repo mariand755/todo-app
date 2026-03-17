@@ -15,7 +15,7 @@ This policy defines CI artifact retention, failure triage ownership, SLO targets
   - Trivy reports from Docker workflows (PR + nightly)
 
 ## Triage Ownership
-- Primary triage owner: **@mariand755** (single-owner repository).
+- Primary triage owner: **single maintainer** (assign via `@mentions` or CODEOWNERS file).
 - Triage responsibilities:
   - Review failed checks daily when active PRs exist.
   - Classify failure cause as test regression, flaky check, infra/transient, or security finding.
@@ -36,6 +36,13 @@ This policy defines CI artifact retention, failure triage ownership, SLO targets
   2. Identify recurring non-deterministic failures.
   3. Fix quick wins immediately; otherwise open/update a tracking issue.
   4. Link flaky issues to affected workflow job names.
+
+## CodeQL Configuration Hygiene
+- Tracking item: `TD-019` (GitHub issue `#26`, Project `#2`).
+- Keep a single CodeQL workflow path and stable job identity in `.github/workflows/codeql.yml`.
+- Keep configuration parity between `pull_request` and `push` (`main`) triggers for the same CodeQL workflow intent (languages, path filters, and config inputs).
+- After CodeQL workflow changes, require one full run on `main` before treating neutral configuration signals as resolved.
+- Treat neutral CodeQL configuration rows as non-blocking unless accompanied by failed `Analyze (...)` jobs or actionable security findings.
 
 ## Review and Revision
 - Revisit this policy when adding new maintainers or major CI workflows.

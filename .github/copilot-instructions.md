@@ -111,6 +111,7 @@ npm run dev
 - When touching models, be explicit whether you mean the SQLAlchemy models in `models.py` or the in-memory classes. Prefer creating new names if possible to avoid confusion.
 - Prefer Docker-first execution (`docker compose` / containerized test commands) for build/test/validation.
 - Keep Compose health checks and dependency conditions intact when changing startup behavior.
+- For CodeQL hygiene, preserve a stable `.github/workflows/codeql.yml` identity and keep `pull_request`/`push` configuration intent aligned; after workflow edits, expect one full `main` run before considering parity cleanup complete.
 - For frontend changes, call the API at `http://localhost:8000`. Use `frontend/src/useApi.js` as the example for fetch usage and headers.
 - Preserve logging baseline: backend request-id logs and env-controlled verbosity (`LOG_LEVEL`, `SQL_ECHO`), plus frontend logger wrapper usage (avoid raw `console` calls outside `frontend/src/logger.js`).
 - When adding new tests, place a `@pytest.mark.BUT##` or `@pytest.mark.BINT##` decorator (backend) or prefix the frontend Vitest test name with `@FUT## | ` / `@FINT## | `, incrementing from the last used ID in that series.
@@ -121,6 +122,19 @@ npm run dev
 - Toggle item complete: PUT `/folders/{folder_id}/items/{item_id}/toggle`.
 - Toggle folder pin: PUT `/folders/{folder_id}/pin` with JSON `{ "is_pinned": true }`.
 - Health endpoint: GET `/health`.
+
+## Tracked Governance Items
+
+### CodeQL Workflow Hygiene (Task)
+- **Classification:** Task (non-blocking operational cleanup)
+- **Status:** Outstanding (GitHub issue `#26`, Project `#2`)
+- **Policy:** See `docs/ci-governance.md` → "CodeQL Configuration Hygiene" section.
+- **Recommended approach:**
+  1. Keep a single CodeQL workflow path and stable job identity in `.github/workflows/codeql.yml`.
+  2. Ensure configuration parity between `pull_request` and `push` (`main`) triggers (languages, path filters, config inputs).
+  3. After making changes, require one full run on `main` to confirm parity is resolved.
+  4. Treat neutral CodeQL configuration rows as non-blocking unless accompanied by failed `Analyze (...)` jobs.
+- **Why:** Eliminates "1 configuration not found" warnings on PR; improves CI signal clarity.
 
 ---
 Instruction scope can be extended as needed for tests, CI, and local debugging workflows.
