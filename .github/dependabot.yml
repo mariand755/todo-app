@@ -25,6 +25,12 @@ updates:
       timezone: "UTC"
     open-pull-requests-limit: 3
     groups:
+      react-stack:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
       test-and-lint:
         patterns:
           - "vitest*"
