@@ -123,18 +123,5 @@ npm run dev
 - Toggle folder pin: PUT `/folders/{folder_id}/pin` with JSON `{ "is_pinned": true }`.
 - Health endpoint: GET `/health`.
 
-## Tracked Governance Items
-
-### CodeQL Workflow Hygiene (Task)
-- **Classification:** Task (non-blocking operational cleanup)
-- **Status:** Outstanding (GitHub issue `#26`, Project `#2`)
-- **Policy:** See `docs/ci-governance.md` → "CodeQL Configuration Hygiene" section.
-- **Recommended approach:**
-  1. Keep a single CodeQL workflow path and stable job identity in `.github/workflows/codeql.yml`.
-  2. Ensure configuration parity between `pull_request` and `push` (`main`) triggers (languages, path filters, config inputs).
-  3. After making changes, require one full run on `main` to confirm parity is resolved.
-  4. Treat neutral CodeQL configuration rows as non-blocking unless accompanied by failed `Analyze (...)` jobs.
-- **Why:** Eliminates "1 configuration not found" warnings on PR; improves CI signal clarity.
-
 ---
 Instruction scope can be extended as needed for tests, CI, and local debugging workflows.
