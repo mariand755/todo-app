@@ -149,6 +149,7 @@ def handle_item_operations(folder: Folder):
 
 
 def handle_input_int(user_prompt: str) -> int | None:
+    user_input = ""
     try:
         user_input = input(user_prompt).strip()
         if user_input == "":
