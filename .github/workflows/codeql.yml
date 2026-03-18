@@ -9,15 +9,25 @@ on:
     - cron: "0 6 * * 1" # weekly
   workflow_dispatch:
 
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
-    timeout-minutes: 60 # CodeQL analysis can take a while, especially on the first run
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        language: [python, javascript-typescript]
+        include:
+          # Python is interpreted — build-mode:none skips autobuild (faster, more accurate)
+          - language: python
+            build-mode: none
+          # JavaScript/TypeScript may need a build step for accurate results
+          - language: javascript-typescript
+            build-mode: autobuild
     permissions:
       security-events: write
       actions: read
@@ -31,9 +41,14 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-and-quality
 
       - name: Autobuild
+        if: matrix.build-mode == 'autobuild'
         uses: github/codeql-action/autobuild@v4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
