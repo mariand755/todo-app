@@ -25,7 +25,7 @@ jobs:
           # Python is interpreted — build-mode:none skips autobuild (faster, more accurate)
           - language: python
             build-mode: none
-          # JavaScript/TypeScript may need a build step for accurate results
+          # JavaScript/TypeScript: autobuild resolves npm dependencies for accurate results
           - language: javascript-typescript
             build-mode: autobuild
     permissions:
