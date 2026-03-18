@@ -1,9 +1,30 @@
 import { logger } from "./logger";
 
 const apiURL = "http://localhost:8000";
+const apiOrigin = new URL(apiURL).origin;
+
+function buildSafeApiUrl(apiPath) {
+  if (typeof apiPath !== "string" || !apiPath.startsWith("/")) {
+    throw new Error("API path must start with '/'.");
+  }
+
+  const resolvedUrl = new URL(apiPath, apiURL);
+  if (resolvedUrl.origin !== apiOrigin) {
+    throw new Error("API path must resolve to the configured API origin.");
+  }
+
+  return resolvedUrl.toString();
+}
 
 export async function makeAPICall(http_method, api_path, payload = null) {
-  const url = `${apiURL}${api_path}`;
+  let url = "";
+  try {
+    url = buildSafeApiUrl(api_path);
+  } catch (ex) {
+    logger.error("Invalid API path", { api_path, error: ex });
+    return null;
+  }
+
   const method = http_method.toUpperCase();
   if (method == "GET") {
     try {

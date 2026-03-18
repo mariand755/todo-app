@@ -101,4 +101,16 @@ describe("makeAPICall", () => {
       }),
     );
   });
+
+  it("@FUT50 | rejects API paths that resolve outside configured origin", async () => {
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
+
+    const result = await makeAPICall("GET", "//evil.example/steal");
+
+    expect(result).toBeNull();
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Invalid API path",
+      expect.objectContaining({ api_path: "//evil.example/steal" }),
+    );
+  });
 });
