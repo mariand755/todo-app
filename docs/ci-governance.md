@@ -38,7 +38,6 @@ This policy defines CI artifact retention, failure triage ownership, SLO targets
   4. Link flaky issues to affected workflow job names.
 
 ## CodeQL Configuration Hygiene
-- Tracking item: `TD-019` (GitHub issue `#26`, Project `#2`).
 - Keep a single CodeQL workflow path and stable job identity in `.github/workflows/codeql.yml`.
 - Keep configuration parity between `pull_request` and `push` (`main`) triggers for the same CodeQL workflow intent (languages, path filters, and config inputs).
 - After CodeQL workflow changes, require one full run on `main` before treating neutral configuration signals as resolved.
