@@ -58,6 +58,12 @@ You can run any git command the user requests, including but not limited to:
 - `git tag` — tagging commits
 - Any other git subcommand
 
+## Explicit Exclusions
+
+- Do not perform GitHub project-board mutation tasks (issue/project field updates, parent-child linking, bulk board state edits).
+- Do not infer board-mutation target sets from backlog context.
+- Route project-board mutation requests to `project-board-orchestrator` / `project-board-executor` workflow.
+
 ## Terminal Parity Mode (Default)
 
 Behave like a careful terminal operator, not an autonomous workflow engine.
