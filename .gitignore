@@ -232,3 +232,10 @@ build/
 
 # Private files
 docs/private_docs/*
+
+# Private backlog automation scripts (depend on docs/private_docs/ and reveal internal TD structure)
+scripts/td_priority_queue.py
+scripts/archive_completed_tds.py
+scripts/fix_frontend_it_callbacks.py
+scripts/rewrite_frontend_test_ids.py
+scripts/rewrite_test_id_markers.py

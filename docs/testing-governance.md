@@ -73,14 +73,11 @@ Frontend slices:
 - vitest -t "@FUT24"
 - vitest -t "@FINT09"
 
-## Rewrite Scripts
+## Rewrite Tooling
 
-- scripts/rewrite_test_id_markers.py
-  - Rebuilds backend BUT and BINT markers
-- scripts/rewrite_frontend_test_ids.py
-  - Rebuilds frontend FUT and FINT title prefixes
-- scripts/fix_frontend_it_callbacks.py
-  - Legacy recovery helper for older malformed it callback rewrites
+- Bulk test-ID rewrite utilities are maintainer-only private tooling.
+- Public contribution flow should treat IDs as source-controlled labels and update only touched tests.
+- If a full renumber/rewrite pass is needed, open a maintainer task instead of ad-hoc local rewrites.
 
 ## Change Rules
 

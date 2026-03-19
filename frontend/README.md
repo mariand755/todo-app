@@ -83,8 +83,7 @@ docker run --rm todo-app-frontend-test npm run test
 
 ## Test ID tooling
 
-- `../scripts/rewrite_frontend_test_ids.py`: rebuilds frontend `@FUT## |` and `@FINT## |` title prefixes.
-- `../scripts/fix_frontend_it_callbacks.py`: legacy recovery helper for older rewrites that truncated `it(...)` callback signatures.
-- `../scripts/rewrite_test_id_markers.py`: backend companion script for `BUT##` and `BINT##` pytest markers.
+- Bulk test-ID rewrite utilities are maintained as private maintainer tooling.
+- For routine work, follow `docs/testing-governance.md` rules and add IDs incrementally in changed tests.
 
 CI workflow: `.github/workflows/docker_frontend.yml`

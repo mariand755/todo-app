@@ -107,9 +107,6 @@ todo-app/
 │                   ├── Sidebar.test.jsx
 │                   └── TodoItem.test.jsx
 └── scripts/
-   ├── fix_frontend_it_callbacks.py
-   ├── rewrite_frontend_test_ids.py
-   ├── rewrite_test_id_markers.py
    └── terminal_command.sh
 ```
 
