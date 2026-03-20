@@ -14,12 +14,18 @@ description: >-
     user: "For issues #101 and #104 only, set Status=In Progress and add area labels"
     assistant: "I'll route approved mutation IDs to project-board-executor and keep scope locked to #101 and #104."
   </example>
+
 mode: primary
-tools:
-  write: false
-  edit: false
-  webfetch: false
-  task: false
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+  task:
+     "*": deny
+     "project-board-analyst": allow
+     "project-board-executor": allow
+     "board-doc-writer": allow
+
 ---
 You are a project-board workflow orchestrator.
 

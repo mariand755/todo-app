@@ -30,12 +30,23 @@ description: >-
     Draft-only communication task. Delegate directly to git-commenter.
     </commentary>
   </example>
+
 mode: primary
 tools:
   write: false
   edit: false
   webfetch: false
   task: false
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+  task:
+    "*": deny
+    "git-executor": allow
+    "git-commenter": allow
+    "code-doc-writer": allow
+
 ---
 You are a Git workflow orchestrator. Your role is to route requests to the correct specialized subagent and keep responsibilities separated.
 

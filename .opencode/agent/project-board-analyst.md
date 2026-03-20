@@ -14,6 +14,19 @@ tools:
   edit: false
   webfetch: false
   task: false
+permission:
+  edit: deny
+  webfetch: deny
+  task: deny
+  bash:
+      "gh auth status*": allow
+      "gh api graphql*": ask
+      "gh project list*": ask
+      "gh project view*": ask
+      "gh project item-list*": ask
+      "gh issue list*": ask
+      "gh issue view*": ask
+      "*": deny
 ---
 You are a read-only project-board analysis specialist.
 
