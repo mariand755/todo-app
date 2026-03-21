@@ -27,6 +27,7 @@
           "*": "deny",
           "git-executor": "allow",
           "git-commenter": "allow",
+          "code-doc-writer": "allow",
           "project-board-orchestrator": "allow"
         }
       }
@@ -44,12 +45,13 @@
       "mode": "primary",
       "permission": {
         "edit": "deny",
-        "bash": "deny",
+        "bash": "allow",
         "webfetch": "deny",
         "task": {
           "*": "deny",
           "project-board-analyst": "allow",
-          "project-board-executor": "allow"
+          "project-board-executor": "allow",
+          "board-doc-writer": "allow"
         }
       }
     },
