@@ -1,6 +1,77 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [".github/copilot-instructions.md"],
+  "default_agent": "build",
+  "agent": {
+    "build": {
+      "description": "Default implementation agent for development tasks.",
+      "mode": "primary"
+    },
+    "plan": {
+      "description": "Planning and analysis agent with guarded mutation permissions.",
+      "mode": "primary",
+      "permission": {
+        "edit": "ask",
+        "bash": "ask",
+        "webfetch": "ask"
+      }
+    },
+    "git-orchestrator": {
+      "description": "Routes Git execution and drafting requests to the correct Git subagent.",
+      "mode": "primary",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "deny",
+        "task": {
+          "*": "deny",
+          "git-executor": "allow",
+          "git-commenter": "allow",
+          "code-doc-writer": "allow",
+          "project-board-orchestrator": "allow"
+        }
+      }
+    },
+    "git-executor": {
+      "description": "Performs git command execution with explicit user confirmations.",
+      "mode": "subagent"
+    },
+    "git-commenter": {
+      "description": "Drafts PR, commit, and release communication artifacts.",
+      "mode": "subagent"
+    },
+    "project-board-orchestrator": {
+      "description": "Routes project board work between analysis and approved mutation flows.",
+      "mode": "primary",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "webfetch": "deny",
+        "task": {
+          "*": "deny",
+          "project-board-analyst": "allow",
+          "project-board-executor": "allow",
+          "board-doc-writer": "allow"
+        }
+      }
+    },
+    "project-board-analyst": {
+      "description": "Read-only project board diagnostics and intake recommendations.",
+      "mode": "subagent"
+    },
+    "project-board-executor": {
+      "description": "Executes explicitly approved project board mutations.",
+      "mode": "subagent"
+    },
+    "board-doc-writer": {
+      "description": "Writes explicitly approved governance and private docs. Drafts first, never writes without owner approval. Routed from project-board-orchestrator.",
+      "mode": "subagent"
+    },
+    "code-doc-writer": {
+      "description": "Writes explicitly approved code, CI, and workflow files. Drafts first, never writes without owner approval. Routed from git-orchestrator.",
+      "mode": "subagent"
+    }
+  },
   "watcher": {
     "ignore": [
       "node_modules/**",

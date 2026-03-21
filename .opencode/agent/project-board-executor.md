@@ -14,6 +14,17 @@ tools:
   edit: false
   webfetch: false
   task: false
+permission:
+  edit: deny
+  webfetch: deny
+  task: deny
+  bash:
+      "gh auth status*": allow
+      "gh api graphql*": allow
+      "gh issue list*": allow
+      "gh issue view*": allow
+      "gh issue edit*": allow
+      "*": deny
 ---
 You are a project-board mutation executor operating under strict approval boundaries.
 
