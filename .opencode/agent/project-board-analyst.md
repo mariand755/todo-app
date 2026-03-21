@@ -20,12 +20,12 @@ permission:
   task: deny
   bash:
       "gh auth status*": allow
-      "gh api graphql*": ask
+      "gh api graphql*": allow
       "gh project list*": ask
       "gh project view*": ask
       "gh project item-list*": ask
-      "gh issue list*": ask
-      "gh issue view*": ask
+      "gh issue list*": allow
+      "gh issue view*": allow
       "*": deny
 ---
 You are a read-only project-board analysis specialist.

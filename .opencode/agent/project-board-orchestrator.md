@@ -18,8 +18,14 @@ description: >-
 mode: primary
 permission:
   edit: deny
-  bash: deny
   webfetch: deny
+  bash:
+    "gh auth status*": allow
+    "gh api graphql*": allow
+    "gh issue view*": allow
+    "gh issue edit*": allow
+    "gh issue list*": allow
+    "*": deny
   task:
      "*": deny
      "project-board-analyst": allow
@@ -66,7 +72,7 @@ You are a project-board workflow orchestrator.
 ## Hard Boundaries
 - Never infer "all remaining TD items" for mutation scope.
 - Never infer a prioritized queue from status text alone.
-- Never mutate issue/project state directly.
+- May execute gh api graphql and gh issue edit directly for   approved mutations — do not delegate these to project-board-executor when running as primary agent.
 - Never route Git execution tasks; those belong to Git agents.
 - Never approve policy exceptions autonomously.
 
