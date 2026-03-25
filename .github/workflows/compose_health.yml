@@ -156,3 +156,16 @@ jobs:
       - name: Teardown
         if: always()
         run: docker compose down -v
+
+  compose-health-gate:
+    needs: [detect-relevant-changes, compose-health]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.compose-health.result }}" == "failure" || "${{ needs.compose-health.result }}" == "cancelled" ]]; then
+            echo "compose-health failed or was cancelled"
+            exit 1
+          fi
+          echo "Compose health gate passed (job succeeded or was skipped)"

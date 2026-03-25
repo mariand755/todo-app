@@ -43,5 +43,32 @@ This policy defines CI artifact retention, failure triage ownership, SLO targets
 - After CodeQL workflow changes, require one full run on `main` before treating neutral configuration signals as resolved.
 - Treat neutral CodeQL configuration rows as non-blocking unless accompanied by failed `Analyze (...)` jobs or actionable security findings.
 
+## Required Status Check Gate Pattern
+
+Every PR-triggered workflow that produces a branch-protection required status check **must** include a gate job. This prevents docs-only or config-only PRs from being permanently blocked when path-filtered jobs are skipped.
+
+### Rule
+- Each workflow with a required check must have a gate job that uses `if: always()` and `needs:` the real job(s).
+- The gate job name (not the real job name) is what gets added to branch protection required checks.
+- The gate job succeeds when the real job succeeded **or** was skipped (irrelevant paths). It fails only when the real job failed or was cancelled.
+- When adding a new workflow with a required check, always add a gate job following this pattern — otherwise you reintroduce the same PR-blocking problem.
+
+### Current gate jobs and their required check names
+| Workflow | Gate Job | Covers |
+|----------|----------|--------|
+| `quality_checks.yml` | `quality-gate` | `test-backend`, `test-frontend` |
+| `compose_health.yml` | `compose-health-gate` | `compose-health` |
+| `docker_backend.yml` | `docker-backend-gate` | `docker-build-and-scan` |
+| `docker_frontend.yml` | `docker-frontend-gate` | `docker-build-and-test` |
+| `backend_integration.yml` | `integration-gate` | `integration-postgres` |
+| `security_frontend.yml` | `secret-scan-gate` | `Secret scan (gitleaks)` |
+| `codeql.yml` | _(none needed)_ | `CodeQL` — always runs, no path filter |
+
+### Validation
+After any change to gate jobs or branch protection required checks:
+1. Test with a **docs-only PR** (e.g., `.opencode/` or `docs/` changes only) to confirm all gates pass when real jobs are skipped.
+2. Test with a **code PR** (e.g., `backend/` or `frontend/` changes) to confirm gates pass when real jobs succeed.
+3. Verify no required check is left in a permanent "waiting" state.
+
 ## Review and Revision
 - Revisit this policy when adding new maintainers or major CI workflows.

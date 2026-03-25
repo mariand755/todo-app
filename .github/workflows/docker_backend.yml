@@ -139,3 +139,16 @@ jobs:
             trivy-backend-runtime-pr.txt
           retention-days: 14
           if-no-files-found: warn
+
+  docker-backend-gate:
+    needs: [detect-relevant-changes, docker-build-and-scan]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.docker-build-and-scan.result }}" == "failure" || "${{ needs.docker-build-and-scan.result }}" == "cancelled" ]]; then
+            echo "docker-build-and-scan failed or was cancelled"
+            exit 1
+          fi
+          echo "Docker backend gate passed (job succeeded or was skipped)"
