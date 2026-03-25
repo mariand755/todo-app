@@ -3,22 +3,67 @@ name: Quality Checks
 on:
   pull_request:
     branches: [ main ]
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - '.github/workflows/**'
 
   push:
     branches: [ main ]
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - '.github/workflows/**'
 
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-checks-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  detect-relevant-changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      should_run: ${{ steps.filter.outputs.should_run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect quality-relevant changes
+        id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+
+          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only "$base" "$head" > changed_files.txt
+
+          if grep -E -q '^(backend/|frontend/|\.github/workflows/quality_checks\.yml)' changed_files.txt; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test-backend:
+    needs: detect-relevant-changes
+    if: needs.detect-relevant-changes.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -73,6 +118,8 @@ jobs:
         if-no-files-found: warn
 
   test-frontend:
+    needs: detect-relevant-changes
+    if: needs.detect-relevant-changes.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -123,3 +170,21 @@ jobs:
 
     - name: Run unit tests
       run: npm run test -- --run src/test/unit
+
+  quality-gate:
+    needs: [detect-relevant-changes, test-backend, test-frontend]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check results
+        run: |
+          if [[ "${{ needs.test-backend.result }}" == "failure" || "${{ needs.test-backend.result }}" == "cancelled" ]]; then
+            echo "test-backend failed or was cancelled"
+            exit 1
+          fi
+          if [[ "${{ needs.test-frontend.result }}" == "failure" || "${{ needs.test-frontend.result }}" == "cancelled" ]]; then
+            echo "test-frontend failed or was cancelled"
+            exit 1
+          fi
+          echo "Quality gate passed (jobs succeeded or were skipped)"

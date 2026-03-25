@@ -125,3 +125,16 @@ jobs:
           else
             echo "No postgres service container found."
           fi
+
+  integration-gate:
+    needs: [detect-relevant-changes, integration-postgres]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.integration-postgres.result }}" == "failure" || "${{ needs.integration-postgres.result }}" == "cancelled" ]]; then
+            echo "integration-postgres failed or was cancelled"
+            exit 1
+          fi
+          echo "Integration gate passed (job succeeded or was skipped)"

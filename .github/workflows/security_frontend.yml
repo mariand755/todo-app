@@ -90,3 +90,16 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  secret-scan-gate:
+    needs: [secret-scan]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.secret-scan.result }}" == "failure" || "${{ needs.secret-scan.result }}" == "cancelled" ]]; then
+            echo "secret-scan failed or was cancelled"
+            exit 1
+          fi
+          echo "Secret scan gate passed (job succeeded or was skipped)"

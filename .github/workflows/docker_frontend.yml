@@ -123,3 +123,16 @@ jobs:
           path: trivy-frontend-pr.txt
           retention-days: 14
           if-no-files-found: warn
+
+  docker-frontend-gate:
+    needs: [detect-relevant-changes, docker-build-and-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.docker-build-and-test.result }}" == "failure" || "${{ needs.docker-build-and-test.result }}" == "cancelled" ]]; then
+            echo "docker-build-and-test failed or was cancelled"
+            exit 1
+          fi
+          echo "Docker frontend gate passed (job succeeded or was skipped)"
