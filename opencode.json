@@ -51,6 +51,22 @@
           "*": "deny",
           "project-board-analyst": "allow",
           "project-board-executor": "allow",
+          "board-doc-writer": "allow",
+          "pm-strategist": "allow"
+        }
+      }
+    },
+    "pm-strategist": {
+      "description": "Strategic PM planning for velocity, sprint packing, milestone health, iteration retrospectives, and deliverable rollup. Advisory only; routes board reads through project-board-orchestrator and routes approved mutations back through project-board-orchestrator.",
+      "mode": "primary",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "deny",
+        "task": {
+          "*": "deny",
+          "project-board-orchestrator": "allow",
+          "project-board-analyst": "allow",
           "board-doc-writer": "allow"
         }
       }

@@ -233,6 +233,12 @@ build/
 # Private files
 docs/private_docs/*
 
+# Private agent strategy specs (PM, board-strategy layer)
+.opencode/agent/pm-strategist.md
+.opencode/agent/project-board-analyst.md
+.opencode/agent/project-board-executor.md
+.opencode/agent/project-board-orchestrator.md
+
 # Private backlog automation scripts (depend on docs/private_docs/ and reveal internal TD structure)
 scripts/td_priority_queue.py
 scripts/archive_completed_tds.py
