@@ -69,8 +69,11 @@ jobs:
           if-no-files-found: warn
 
       # -------- SECURITY (SCA) --------
+      - name: Export runtime requirements from lockfile
+        run: uv export --frozen --format requirements.txt --no-dev --no-editable --no-emit-project --output-file runtime-requirements.txt
+
       - name: Dependency audit (pip-audit)
-        run: uv run pip-audit
+        run: uv run pip-audit -r runtime-requirements.txt
 
   docker-build-and-trivy:
     name: Docker build + Trivy scan
