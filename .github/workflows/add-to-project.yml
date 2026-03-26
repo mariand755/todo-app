@@ -38,6 +38,151 @@ jobs:
           project-url: https://github.com/users/mariand755/projects/2
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
 
+      - name: Auto-tag project item metadata
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          set -euo pipefail
+
+          PROJECT_OWNER="mariand755"
+          PROJECT_NUMBER="2"
+          ITEM_TITLE="${{ github.event.issue.title || github.event.pull_request.title }}"
+          ITEM_NUMBER="${{ github.event.issue.number || github.event.pull_request.number }}"
+          ITEM_LABELS="${{ join(github.event.issue.labels.*.name || github.event.pull_request.labels.*.name, ',') }}"
+
+          # Field IDs
+          PROJECT_ID="PVT_kwHOATOaf84BRQRG"
+          PRIORITY_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWGw"
+          AREA_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHM"
+          EFFORT_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHQ"
+
+          # Priority option IDs
+          P1_ID="92bd28dd"
+          P2_ID="2c4c5526"
+          P3_ID="292a7c3d"
+
+          # Area option IDs
+          AREA_BACKEND="d8ab51bd"
+          AREA_FRONTEND="b0062d97"
+          AREA_QA="988014c0"
+          AREA_CICD="e773215a"
+          AREA_SECURITY="b75aefc3"
+          AREA_DOCS="4eb15cf5"
+          AREA_FULLSTACK="20dd9126"
+
+          # Effort option IDs
+          EFFORT_XS="0c3669b8"
+          EFFORT_S="8bff0bc1"
+
+          # Classify by title pattern
+          AREA_OPT=""
+          PRIORITY_OPT=""
+          EFFORT_OPT=""
+          FALLBACK=false
+
+          case "$ITEM_TITLE" in
+            "chore(deps-dev):"*|"chore(deps):"*|"deps: bump"*|"Bump "*)
+              # Dependabot / generic dep bumps — refine by title content
+              if echo "$ITEM_TITLE" | grep -qiE '\/(frontend|node|npm|vite|vitest|eslint)'; then
+                AREA_OPT="$AREA_FRONTEND"
+              elif echo "$ITEM_TITLE" | grep -qiE '\/(backend|python|pip|uv|fastapi|sqlalchemy)'; then
+                AREA_OPT="$AREA_BACKEND"
+              else
+                AREA_OPT="$AREA_CICD"
+              fi
+              PRIORITY_OPT="$P3_ID"
+              EFFORT_OPT="$EFFORT_XS"
+              ;;
+            "deps(frontend):"*)
+              AREA_OPT="$AREA_FRONTEND"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS" ;;
+            "deps(backend):"*)
+              AREA_OPT="$AREA_BACKEND"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS" ;;
+            "deps:"*)
+              AREA_OPT="$AREA_FULLSTACK"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS" ;;
+            "ci("*|"ci/docs("*)
+              AREA_OPT="$AREA_CICD"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S" ;;
+            "chore:"*|"chore(opencode):"*|"fix(opencode):"*|"chore(agents):"*)
+              AREA_OPT="$AREA_CICD"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS" ;;
+            "security:"*)
+              AREA_OPT="$AREA_SECURITY"; PRIORITY_OPT="$P1_ID"; EFFORT_OPT="$EFFORT_S" ;;
+            "test:"*|"validation:"*)
+              AREA_OPT="$AREA_QA"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS" ;;
+            "merge:"*)
+              AREA_OPT="$AREA_CICD"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS" ;;
+            "docs:"*)
+              AREA_OPT="$AREA_DOCS"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS" ;;
+            "fix(backend):"*|"feat(backend):"*)
+              AREA_OPT="$AREA_BACKEND"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S" ;;
+            "fix(frontend):"*|"feat(frontend):"*)
+              AREA_OPT="$AREA_FRONTEND"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S" ;;
+            "fix("*|"feat("*)
+              AREA_OPT="$AREA_FULLSTACK"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S" ;;
+            *)
+              FALLBACK=true ;;
+          esac
+
+          # Labels override: Dependabot label always wins
+          if echo "$ITEM_LABELS" | grep -q "dependencies"; then
+            if echo "$ITEM_TITLE" | grep -qiE 'frontend|node|npm|vite|vitest|eslint'; then
+              AREA_OPT="$AREA_FRONTEND"
+            elif echo "$ITEM_TITLE" | grep -qiE 'backend|python|pip|uv|fastapi|sqlalchemy'; then
+              AREA_OPT="$AREA_BACKEND"
+            else
+              AREA_OPT="$AREA_CICD"
+            fi
+            PRIORITY_OPT="$P3_ID"
+            EFFORT_OPT="$EFFORT_XS"
+            FALLBACK=false
+          fi
+
+          # Get project item ID for this issue/PR
+          ITEM_ID=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 200 --format json \
+            | jq -r --argjson num "$ITEM_NUMBER" '.items[] | select(.content.number == $num) | .id' | head -n1)
+
+          if [[ -z "$ITEM_ID" ]]; then
+            echo "Item not found in project board yet — skipping metadata tagging."
+            exit 0
+          fi
+
+          # Check if metadata already set (skip to avoid overwriting manual tags)
+          EXISTING=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 200 --format json \
+            | jq -r --argjson num "$ITEM_NUMBER" '.items[] | select(.content.number == $num) | [.area, .priority, .effort] | @csv')
+          if ! echo "$EXISTING" | grep -q "null\|UNSET\|,,$\|^,,"; then
+            echo "Metadata already set for item #$ITEM_NUMBER — skipping."
+            exit 0
+          fi
+
+          if [[ "$FALLBACK" == "true" ]]; then
+            echo "No pattern matched for: $ITEM_TITLE — applying needs-metadata label."
+            gh issue edit "$ITEM_NUMBER" --repo "$PROJECT_OWNER/todo-app" --add-label "needs-metadata" 2>/dev/null || \
+              gh pr edit "$ITEM_NUMBER" --repo "$PROJECT_OWNER/todo-app" --add-label "needs-metadata" 2>/dev/null || true
+            exit 0
+          fi
+
+          # Apply Area, Priority, Effort via GraphQL
+          set_field() {
+            local field_id="$1" option_id="$2"
+            gh api graphql -f query='
+              mutation($project: ID!, $item: ID!, $field: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $project
+                  itemId: $item
+                  fieldId: $field
+                  value: { singleSelectOptionId: $value }
+                }) { projectV2Item { id } }
+              }' \
+              -f project="$PROJECT_ID" \
+              -f item="$ITEM_ID" \
+              -f field="$field_id" \
+              -f value="$option_id" > /dev/null
+          }
+
+          set_field "$AREA_FIELD_ID" "$AREA_OPT"
+          set_field "$PRIORITY_FIELD_ID" "$PRIORITY_OPT"
+          set_field "$EFFORT_FIELD_ID" "$EFFORT_OPT"
+          echo "Tagged item #$ITEM_NUMBER: area=$(echo $ITEM_TITLE | head -c 30)... priority/effort set."
+
       - name: Fallback guidance for manual add
         if: failure()
         shell: bash
