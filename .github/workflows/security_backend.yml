@@ -82,9 +82,11 @@ jobs:
       - name: Sync deps (include dev)
         run: uv sync --frozen --group dev
 
-      # Audits installed deps; fails if vulnerabilities are found
-      - name: pip-audit
-        run: uv run pip-audit
+      - name: Export runtime requirements from lockfile
+        run: uv export --frozen --format requirements.txt --no-dev --no-editable --no-emit-project --output-file runtime-requirements.txt
+
+      - name: pip-audit runtime requirements
+        run: uv run pip-audit -r runtime-requirements.txt
 
   secret-scan:
     name: Secret scan (gitleaks)
