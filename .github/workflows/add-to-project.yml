@@ -80,6 +80,7 @@ jobs:
           PRIORITY_OPT=""
           EFFORT_OPT=""
           FALLBACK=false
+          TITLE_LC="$(echo "$ITEM_TITLE" | tr '[:upper:]' '[:lower:]')"
 
           case "$ITEM_TITLE" in
             "chore(deps-dev):"*|"chore(deps):"*|"deps: bump"*|"Bump "*)
@@ -122,6 +123,25 @@ jobs:
               FALLBACK=true ;;
           esac
 
+          # Keyword-based fallback for plain-language titles.
+          # This keeps metadata automation working even when strict prefix
+          # conventions (e.g., fix(backend):) are not used.
+          if [[ "$FALLBACK" == "true" ]]; then
+            if echo "$TITLE_LC" | grep -qiE 'security|vulnerability|cve|audit'; then
+              AREA_OPT="$AREA_SECURITY"; PRIORITY_OPT="$P1_ID"; EFFORT_OPT="$EFFORT_S"; FALLBACK=false
+            elif echo "$TITLE_LC" | grep -qiE 'backend|api|fastapi|sqlalchemy|database|postgres|migration'; then
+              AREA_OPT="$AREA_BACKEND"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S"; FALLBACK=false
+            elif echo "$TITLE_LC" | grep -qiE 'frontend|react|vite|vitest|eslint|ui|ux|css'; then
+              AREA_OPT="$AREA_FRONTEND"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S"; FALLBACK=false
+            elif echo "$TITLE_LC" | grep -qiE 'test|testing|e2e|integration|qa'; then
+              AREA_OPT="$AREA_QA"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S"; FALLBACK=false
+            elif echo "$TITLE_LC" | grep -qiE 'ci|workflow|actions|docker|compose|build'; then
+              AREA_OPT="$AREA_CICD"; PRIORITY_OPT="$P2_ID"; EFFORT_OPT="$EFFORT_S"; FALLBACK=false
+            elif echo "$TITLE_LC" | grep -qiE 'docs|documentation|readme'; then
+              AREA_OPT="$AREA_DOCS"; PRIORITY_OPT="$P3_ID"; EFFORT_OPT="$EFFORT_XS"; FALLBACK=false
+            fi
+          fi
+
           # Labels override: Dependabot label always wins
           if echo "$ITEM_LABELS" | grep -q "dependencies"; then
             if echo "$ITEM_TITLE" | grep -qiE 'frontend|node|npm|vite|vitest|eslint'; then
@@ -136,19 +156,31 @@ jobs:
             FALLBACK=false
           fi
 
-          # Get project item ID for this issue/PR
-          ITEM_ID=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 200 --format json \
-            | jq -r --argjson num "$ITEM_NUMBER" '.items[] | select(.content.number == $num) | .id' | head -n1)
+          # Get project item ID for this issue/PR (with retry because the item can
+          # take a few seconds to appear after add-to-project finishes).
+          ITEM_JSON=""
+          ITEM_ID=""
+          for attempt in {1..10}; do
+            ITEM_JSON=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
+              | jq -c --argjson num "$ITEM_NUMBER" '.items[] | select(.content.number == $num)' | head -n1)
+            ITEM_ID=$(jq -r '.id // empty' <<<"${ITEM_JSON:-}")
+            if [[ -n "$ITEM_ID" ]]; then
+              break
+            fi
+            echo "Project item for #$ITEM_NUMBER not found yet (attempt ${attempt}/10); retrying..."
+            sleep 3
+          done
 
           if [[ -z "$ITEM_ID" ]]; then
             echo "Item not found in project board yet — skipping metadata tagging."
             exit 0
           fi
 
-          # Check if metadata already set (skip to avoid overwriting manual tags)
-          EXISTING=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 200 --format json \
-            | jq -r --argjson num "$ITEM_NUMBER" '.items[] | select(.content.number == $num) | [.area, .priority, .effort] | @csv')
-          if ! echo "$EXISTING" | grep -q "null\|UNSET\|,,$\|^,,"; then
+          # Check if metadata already set (skip to avoid overwriting manual tags).
+          HAS_AREA=$(jq -r '((.area // "") | tostring | length) > 0' <<<"$ITEM_JSON")
+          HAS_PRIORITY=$(jq -r '((.priority // "") | tostring | length) > 0' <<<"$ITEM_JSON")
+          HAS_EFFORT=$(jq -r '((.effort // "") | tostring | length) > 0' <<<"$ITEM_JSON")
+          if [[ "$HAS_AREA" == "true" && "$HAS_PRIORITY" == "true" && "$HAS_EFFORT" == "true" ]]; then
             echo "Metadata already set for item #$ITEM_NUMBER — skipping."
             exit 0
           fi
