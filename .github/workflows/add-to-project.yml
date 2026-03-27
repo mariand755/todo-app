@@ -33,10 +33,13 @@ jobs:
           fi
 
       - name: Add issue or PR to Todo App Task Board
-        uses: actions/add-to-project@v1.0.2
-        with:
-          project-url: https://github.com/users/mariand755/projects/2
-          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          set -euo pipefail
+          ITEM_URL="${{ github.event.issue.html_url || github.event.pull_request.html_url }}"
+          gh project item-add 2 --owner mariand755 --url "$ITEM_URL"
 
       - name: Auto-tag project item metadata
         shell: bash
