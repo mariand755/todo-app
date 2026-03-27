@@ -37,4 +37,15 @@ describe("NewFolderForm", () => {
 
     expect(onNewFolder).not.toHaveBeenCalled();
   });
+
+  it("@FUT54 | does not submit when non-Enter key is pressed in handleKeyPress", async () => {
+    const onNewFolder = vi.fn();
+    render(<NewFolderForm onNewFolder={onNewFolder} />);
+
+    const input = screen.getByLabelText("New folder name");
+    fireEvent.change(input, { target: { value: "New Folder" } });
+    fireEvent.keyUp(input, { key: "Escape" });
+
+    expect(onNewFolder).not.toHaveBeenCalled();
+  });
 });

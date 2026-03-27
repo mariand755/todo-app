@@ -149,4 +149,22 @@ describe("MainContent", () => {
 
     expect(screen.getByText("No items in this folder.")).toBeInTheDocument();
   });
+
+  it("@FUT55 | does not render folder controls when currentFolderId is null", async () => {
+    render(<MainContent {...baseProps} currentFolderId={null} />);
+
+    expect(
+      screen.queryByRole("button", { name: "Folder options menu" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@FUT56 | does not call onAddTodo when it is undefined (typeof guard)", async () => {
+    render(<MainContent {...baseProps} onAddTodo={undefined} />);
+
+    const input = screen.getByLabelText("New todo item");
+    fireEvent.change(input, { target: { value: "Test" } });
+    fireEvent.submit(input.closest("form"));
+
+    expect(input).toHaveValue("");
+  });
 });

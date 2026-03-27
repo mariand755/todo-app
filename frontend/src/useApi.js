@@ -3,6 +3,15 @@ import { logger } from "./logger";
 const apiURL = "http://localhost:8000";
 const apiOrigin = new URL(apiURL).origin;
 
+/**
+ * Security: origin-pinned URL builder.
+ * Every fetch() in this module is routed through buildSafeApiUrl(), which
+ * rejects any path that does not start with "/" or that would resolve to a
+ * different origin than the configured API base (http://localhost:8000).
+ * This makes the js/client-side-request-forgery CodeQL alerts on the fetch
+ * calls below false positives — cross-origin and malformed paths throw
+ * before fetch is ever reached.
+ */
 function buildSafeApiUrl(apiPath) {
   if (typeof apiPath !== "string" || !apiPath.startsWith("/")) {
     throw new Error("API path must start with '/'.");
