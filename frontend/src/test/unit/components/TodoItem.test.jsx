@@ -97,6 +97,17 @@ describe("TodoItem", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("@FUT57 | Space key on delete confirmation button confirms deletion", async () => {
+    const onDeleteToDoItem = vi.fn();
+    render(<TodoItem {...baseProps} onDeleteToDoItem={onDeleteToDoItem} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    const confirmButton = screen.getAllByRole("button", { name: "OK" })[0];
+    fireEvent.keyDown(confirmButton, { key: " " });
+
+    expect(onDeleteToDoItem).toHaveBeenCalledWith(10);
+  });
+
   it("@FUT35 | OK button in edit dialog submits updated title", async () => {
     const onEditToDoItem = vi.fn();
     render(<TodoItem {...baseProps} onEditToDoItem={onEditToDoItem} />);
@@ -105,5 +116,28 @@ describe("TodoItem", () => {
     fireEvent.click(screen.getByRole("button", { name: "OK" }));
 
     expect(onEditToDoItem).toHaveBeenCalledWith(10, "Write tests");
+  });
+
+  it("@FUT58 | non-Enter/Escape key in edit dialog input does not submit or close", async () => {
+    const onEditToDoItem = vi.fn();
+    render(<TodoItem {...baseProps} onEditToDoItem={onEditToDoItem} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByLabelText("New item name");
+    fireEvent.keyDown(input, { key: "Tab" });
+
+    expect(onEditToDoItem).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("New item name")).toBeInTheDocument();
+  });
+
+  it("@FUT59 | non-Enter/Space key on delete confirm button does not trigger deletion", async () => {
+    const onDeleteToDoItem = vi.fn();
+    render(<TodoItem {...baseProps} onDeleteToDoItem={onDeleteToDoItem} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    const confirmButton = screen.getAllByRole("button", { name: "OK" })[0];
+    fireEvent.keyDown(confirmButton, { key: "Tab" });
+
+    expect(onDeleteToDoItem).not.toHaveBeenCalled();
   });
 });
