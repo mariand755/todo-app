@@ -18,13 +18,9 @@
     },
     "git-orchestrator": {
       "description": "Routes Git execution and drafting requests to the correct Git subagent.",
-      "mode": "primary",
+      "mode": "subagent",
       "permission": {
-        "edit": "deny",
-        "bash": "deny",
-        "webfetch": "deny",
         "task": {
-          "*": "deny",
           "git-executor": "allow",
           "git-commenter": "allow",
           "code-doc-writer": "allow",
@@ -46,12 +42,13 @@
       "permission": {
         "edit": "deny",
         "bash": "allow",
-        "webfetch": "deny",
+        "webfetch": "ask",
         "task": {
           "*": "deny",
           "project-board-analyst": "allow",
           "project-board-executor": "allow",
           "board-doc-writer": "allow",
+          "git-orchestrator": "allow",
           "pm-strategist": "allow"
         }
       }
@@ -62,7 +59,7 @@
       "permission": {
         "edit": "deny",
         "bash": "deny",
-        "webfetch": "deny",
+        "webfetch": "ask",
         "task": {
           "*": "deny",
           "project-board-orchestrator": "allow",
