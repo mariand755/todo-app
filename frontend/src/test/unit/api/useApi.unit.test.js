@@ -113,4 +113,25 @@ describe("makeAPICall", () => {
       expect.objectContaining({ api_path: "//evil.example/steal" }),
     );
   });
+
+  it("@FUT51 | rejects non-leading-slash relative paths", async () => {
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
+
+    const result = await makeAPICall("GET", "folders");
+
+    expect(result).toBeNull();
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Invalid API path",
+      expect.objectContaining({ api_path: "folders" }),
+    );
+  });
+
+  it("@FUT52 | allows valid relative API paths through to fetch", async () => {
+    const result = await makeAPICall("GET", "/folders");
+
+    expect(result).not.toBeNull();
+    expect(result.ok).toBe(true);
+    const body = await result.json();
+    expect(body).toEqual([{ id: 1, title: "Test Folder" }]);
+  });
 });
