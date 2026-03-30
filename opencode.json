@@ -41,6 +41,8 @@
       "mode": "subagent",
       "permission": {
         "edit": "deny",
+        "webfetch": "ask",
+        "bash": "ask",
         "task": {
           "*": "deny",
           "project-board-analyst": "allow",
@@ -63,6 +65,7 @@
           "project-board-analyst": "allow",
           "project-board-executor": "allow",
           "board-doc-writer": "allow",
+          "code-doc-writer": "allow",
           "git-orchestrator": "allow"
         }
       }
@@ -80,7 +83,7 @@
       "mode": "subagent"
     },
     "code-doc-writer": {
-      "description": "Writes explicitly approved code, CI, and workflow files. Drafts first, never writes without owner approval. Routed from git-orchestrator.",
+      "description": "Writes explicitly approved code, CI, and workflow files. Drafts first, never writes without owner approval. Routed from git-orchestrator or pm-strategist.",
       "mode": "subagent"
     }
   },
