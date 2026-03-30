@@ -79,12 +79,32 @@ jobs:
             list_items | jq -r --argjson issue "$num" '.items[] | select(.content.number==$issue) | .id' | head -n1
           }
 
-          item_id="$(get_item_id "$issue_number")"
+          ensure_item_id() {
+            local num="$1"
+            local id=""
 
-          if [[ -z "$item_id" ]]; then
-            gh project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --url "https://github.com/${GITHUB_REPOSITORY}/issues/${issue_number}" >/dev/null
-            item_id="$(get_item_id "$issue_number")"
-          fi
+            id="$(get_item_id "$num")"
+            if [[ -n "$id" ]]; then
+              printf '%s\n' "$id"
+              return 0
+            fi
+
+            gh project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --url "https://github.com/${GITHUB_REPOSITORY}/issues/${num}" >/dev/null || true
+
+            for attempt in {1..10}; do
+              id="$(get_item_id "$num")"
+              if [[ -n "$id" ]]; then
+                printf '%s\n' "$id"
+                return 0
+              fi
+              echo "Project item for issue #${num} not found yet (attempt ${attempt}/10); retrying..."
+              sleep 3
+            done
+
+            return 1
+          }
+
+          item_id="$(ensure_item_id "$issue_number" || true)"
 
           if [[ -z "$item_id" ]]; then
             echo "Unable to locate project item for issue #${issue_number}"
@@ -187,6 +207,31 @@ jobs:
             list_items | jq -r --argjson issue "$num" '.items[] | select(.content.number==$issue) | .id' | head -n1
           }
 
+          ensure_item_id() {
+            local num="$1"
+            local id=""
+
+            id="$(get_item_id "$num")"
+            if [[ -n "$id" ]]; then
+              printf '%s\n' "$id"
+              return 0
+            fi
+
+            gh project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --url "https://github.com/${GITHUB_REPOSITORY}/issues/${num}" >/dev/null || true
+
+            for attempt in {1..10}; do
+              id="$(get_item_id "$num")"
+              if [[ -n "$id" ]]; then
+                printf '%s\n' "$id"
+                return 0
+              fi
+              echo "Project item for issue #${num} not found yet (attempt ${attempt}/10); retrying..."
+              sleep 3
+            done
+
+            return 1
+          }
+
           while IFS= read -r issue_number; do
             [[ -z "$issue_number" ]] && continue
 
@@ -201,11 +246,7 @@ jobs:
               continue
             fi
 
-            item_id="$(get_item_id "$issue_number")"
-            if [[ -z "$item_id" ]]; then
-              gh project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --url "https://github.com/${GITHUB_REPOSITORY}/issues/${issue_number}" >/dev/null
-              item_id="$(get_item_id "$issue_number")"
-            fi
+            item_id="$(ensure_item_id "$issue_number" || true)"
 
             if [[ -z "$item_id" ]]; then
               echo "Unable to locate project item for issue #${issue_number}."
