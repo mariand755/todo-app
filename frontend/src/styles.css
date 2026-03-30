@@ -1,10 +1,120 @@
+/* ==================== */
+/* Theme: CSS Variables  */
+/* ==================== */
+:root {
+  /* Backgrounds */
+  --color-bg-body: #f4f6f8;
+  --color-bg-surface: #ffffff;
+  --color-bg-sidebar: #2c3e50;
+  --color-bg-sidebar-hover: #34495e;
+  --color-bg-sidebar-active: #1abc9c;
+  --color-bg-input: #ffffff;
+
+  /* Text */
+  --color-text-primary: #333333;
+  --color-text-secondary: #555555;
+  --color-text-muted: #7f8c8d;
+  --color-text-sidebar: #ecf0f1;
+  --color-text-sidebar-muted: #bdc3c7;
+  --color-text-sidebar-active: #2c3e50;
+  --color-text-icon: #4f555d;
+
+  /* Accent (same both themes) */
+  --color-accent: #1abc9c;
+  --color-accent-hover: #16a085;
+  --color-accent-rgb: 26, 188, 156;
+
+  /* Borders */
+  --color-border: #cccccc;
+  --color-border-sidebar: #34495e;
+
+  /* Todo items */
+  --color-todo-incomplete: #e74c3c;
+  --color-todo-complete: #2ecc71;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --shadow-tooltip: 0 6px 18px rgba(0, 0, 0, 0.25);
+
+  /* Checkbox */
+  --color-checkbox-border: #cccccc;
+  --color-checkbox-checked: #2ecc71;
+
+  /* Skeleton loading */
+  --color-skeleton-name: rgba(236, 240, 241, 0.28);
+  --color-skeleton-pin: rgba(236, 240, 241, 0.2);
+
+  /* Pin button */
+  --color-pin-default: rgba(236, 240, 241, 0.35);
+  --color-pin-active: #1abc9c;
+  --color-pin-hover: #ecf0f1;
+
+  /* Focus ring */
+  --color-focus-ring: #1abc9c;
+
+  /* Menu button hover */
+  --color-menu-hover: rgba(26, 188, 156, 0.12);
+
+  /* Button defaults */
+  --color-btn-bg: #f9f9f9;
+}
+
+[data-theme="dark"] {
+  /* Backgrounds */
+  --color-bg-body: #1a1a2e;
+  --color-bg-surface: #16213e;
+  --color-bg-sidebar: #0f3460;
+  --color-bg-sidebar-hover: #1a4a7a;
+  --color-bg-sidebar-active: #1abc9c;
+  --color-bg-input: #1e2a4a;
+
+  /* Text */
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #8899a6;
+  --color-text-sidebar: #ecf0f1;
+  --color-text-sidebar-muted: #8899a6;
+  --color-text-sidebar-active: #1a1a2e;
+  --color-text-icon: #a0a0a0;
+
+  /* Borders */
+  --color-border: #3a3a5c;
+  --color-border-sidebar: #1a4a7a;
+
+  /* Shadows (deeper in dark mode) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-tooltip: 0 6px 18px rgba(0, 0, 0, 0.5);
+
+  /* Checkbox */
+  --color-checkbox-border: #3a3a5c;
+
+  /* Skeleton */
+  --color-skeleton-name: rgba(236, 240, 241, 0.15);
+  --color-skeleton-pin: rgba(236, 240, 241, 0.1);
+
+  /* Pin button */
+  --color-pin-default: rgba(236, 240, 241, 0.25);
+
+  /* Menu button hover */
+  --color-menu-hover: rgba(26, 188, 156, 0.2);
+
+  /* Button defaults */
+  --color-btn-bg: #1e2a4a;
+}
+
 /* Basic Reset and Setup */
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f4f6f8; /* Very light background */
-  color: #333;
+  background-color: var(--color-bg-body);
+  color: var(--color-text-primary);
 }
 
 #app-container {
@@ -16,7 +126,7 @@ body {
   border-radius: 0; /* remove rounding for fullscreen */
   box-shadow: none; /* optional: remove shadow for fullscreen view */
   overflow: hidden;
-  background-color: #fff;
+  background-color: var(--color-bg-surface);
 }
 
 /* -------------------- */
@@ -25,8 +135,8 @@ body {
 
 #folder-sidebar {
   width: 250px;
-  background-color: #2c3e50; /* Darker, professional flat color */
-  color: #ecf0f1;
+  background-color: var(--color-bg-sidebar);
+  color: var(--color-text-sidebar);
   padding: 20px 0;
   box-sizing: border-box;
   overflow-y: auto; /* <-- keep sidebar usable when many folders exist */
@@ -54,12 +164,12 @@ body {
 }
 
 .folder-item:hover {
-  background-color: #34495e; /* Subtle hover effect */
+  background-color: var(--color-bg-sidebar-hover);
 }
 
 .folder-item.active {
-  background-color: #1abc9c; /* Primary accent color for selection */
-  color: #2c3e50;
+  background-color: var(--color-bg-sidebar-active);
+  color: var(--color-text-sidebar-active);
   border-left: none;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -79,7 +189,7 @@ body {
   width: 68%;
   height: 12px;
   border-radius: 999px;
-  background: rgba(236, 240, 241, 0.28);
+  background: var(--color-skeleton-name);
   animation: sidebar-pulse 1.2s ease-in-out infinite;
 }
 
@@ -88,7 +198,7 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: rgba(236, 240, 241, 0.2);
+  background: var(--color-skeleton-pin);
   animation: sidebar-pulse 1.2s ease-in-out infinite;
 }
 
@@ -119,7 +229,7 @@ body {
   border: none;
   padding: 4px;
   cursor: pointer;
-  color: rgba(236, 240, 241, 0.35);
+  color: var(--color-pin-default);
   opacity: 0;
   font-size: 1rem;
   display: flex;
@@ -136,15 +246,15 @@ body {
 
 .folder-pin-btn.is-pinned {
   opacity: 1;
-  color: #1abc9c;
+  color: var(--color-pin-active);
 }
 
 .folder-pin-btn:hover {
-  color: #ecf0f1;
+  color: var(--color-pin-hover);
 }
 
 .folder-pin-btn:focus-visible {
-  outline: 2px solid #1abc9c;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -162,7 +272,7 @@ body {
   border-radius: 6px;
   font-size: 0.9rem;
   line-height: 1.3;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-tooltip);
   opacity: 0;
   transform: translateY(4px);
   transition:
@@ -192,7 +302,7 @@ body {
 /* add-folder row specific layout so the input/button behave */
 .add-folder {
   margin-top: 10px;
-  color: #bdc3c7;
+  color: var(--color-text-sidebar-muted);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -223,7 +333,7 @@ body {
   align-items: center;
   justify-content: center;
   margin-left: 4px;
-  background-color: #1abc9c;
+  background-color: var(--color-accent);
   color: #ffffff;
   border: none;
   border-radius: 6px;
@@ -234,7 +344,7 @@ body {
 .add-folder sl-icon-button:hover,
 .add-folder sl_button:hover,
 .add-folder sl_icon-button:hover {
-  background-color: #16a085;
+  background-color: var(--color-accent-hover);
   color: #fff;
 }
 
@@ -289,12 +399,12 @@ body {
 
 .folder-menu-button:hover,
 .todo-item-menu-button:hover {
-  background-color: rgba(26, 188, 156, 0.12);
+  background-color: var(--color-menu-hover);
 }
 
 .folder-menu-button:focus-visible,
 .todo-item-menu-button:focus-visible {
-  outline: 2px solid #1abc9c;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -307,7 +417,7 @@ body {
   height: 18px;
   font-size: 0.95rem;
   font-weight: 400;
-  color: #4f555d;
+  color: var(--color-text-icon);
   opacity: 0.9;
   transition: color 0.2s;
 }
@@ -320,7 +430,7 @@ body {
 
 .folder-menu-button:hover .folder-menu-trigger,
 .todo-item-menu-button:hover .todo-item-menu-trigger {
-  color: #1abc9c;
+  color: var(--color-accent);
 }
 
 /* Actions row (add todo input + button) — keep consistent sizing */
@@ -334,15 +444,17 @@ body {
 #new-todo-input {
   flex: 1 1 auto;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 1em;
   transition: border-color 0.2s;
   min-width: 0;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-primary);
 }
 
 #add-todo-btn {
-  background-color: #1abc9c;
+  background-color: var(--color-accent);
   color: white;
   border: none;
   padding: 10px 14px;
@@ -376,10 +488,10 @@ body {
   align-items: center;
   padding: 15px;
   margin-bottom: 8px;
-  background-color: #fff;
+  background-color: var(--color-bg-surface);
   border-radius: 4px;
-  border-left: 5px solid #e74c3c; /* A color to draw attention */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-left: 5px solid var(--color-todo-incomplete);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s;
   width: 100%;
   position: relative;
@@ -390,12 +502,12 @@ body {
 }
 
 .todo-item:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .todo-item.complete {
   opacity: 0.6;
-  border-left: 5px solid #2ecc71; /* Green for complete */
+  border-left: 5px solid var(--color-todo-complete);
 }
 
 .todo-text {
@@ -408,7 +520,7 @@ body {
 
 .todo-item.complete .todo-text {
   text-decoration: line-through;
-  color: #7f8c8d;
+  color: var(--color-text-muted);
 }
 
 /* Todo item actions container - align to the right edge */
@@ -464,7 +576,7 @@ input[type="checkbox"] {
   appearance: none; /* Hide default checkbox */
   width: 20px;
   height: 20px;
-  border: 2px solid #ccc;
+  border: 2px solid var(--color-checkbox-border);
   border-radius: 4px;
   cursor: pointer;
   position: relative; /* required for pseudo-element positioning */
@@ -472,11 +584,12 @@ input[type="checkbox"] {
   vertical-align: middle;
   outline: none;
   transition: all 0.2s;
+  background-color: transparent;
 }
 
 input[type="checkbox"]:checked {
-  border-color: #2ecc71;
-  background-color: #2ecc71;
+  border-color: var(--color-checkbox-checked);
+  background-color: var(--color-checkbox-checked);
 }
 
 /* Custom checkmark using pseudo-element */
@@ -504,16 +617,87 @@ input[type="checkbox"]:checked::after {
   border-width: 0;
 }
 
+/* Sidebar header row: Folders title + theme toggle */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 20px;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--color-border-sidebar);
+}
+
+/* Adjust home button when wrapped in sidebar-header */
+.sidebar-header .sidebar-home-btn {
+  width: auto;
+  flex: 1 1 auto;
+  padding: 0;
+  margin: 0;
+  border-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.1;
+}
+
+/* Theme toggle button */
+.theme-toggle-btn {
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--color-text-sidebar);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition:
+    opacity 160ms ease,
+    color 120ms ease,
+    transform 160ms ease;
+  line-height: 1;
+  will-change: opacity, transform;
+}
+
+/* Desktop pointer behavior: mirror pin icon pattern (reveal on row hover/focus). */
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle-btn {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(1px);
+  }
+
+  .sidebar-header:hover .theme-toggle-btn,
+  .theme-toggle-btn:hover,
+  .theme-toggle-btn:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
+.theme-toggle-btn:hover {
+  color: var(--color-accent);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
 /* Sidebar home button styling */
 .sidebar-home-btn {
   background: none;
   border: none;
   border-radius: 0;
-  color: #ecf0f1;
+  color: var(--color-text-sidebar);
   padding: 0 20px;
   margin-top: 0;
   margin-bottom: 30px;
-  border-bottom: 2px solid #34495e;
+  border-bottom: 2px solid var(--color-border-sidebar);
   padding-bottom: 10px;
   font-size: 1.5em;
   font-weight: 600;
@@ -527,19 +711,19 @@ input[type="checkbox"]:checked::after {
 }
 
 .sidebar-home-btn:hover {
-  color: #1abc9c;
-  border-bottom-color: #34495e;
+  color: var(--color-accent);
+  border-bottom-color: var(--color-border-sidebar);
 }
 
 .sidebar-home-btn:focus {
   color: inherit;
-  border-bottom-color: #34495e;
+  border-bottom-color: var(--color-border-sidebar);
   outline: none;
 }
 
 .sidebar-home-btn:focus-visible {
-  color: #1abc9c;
-  border-bottom-color: #34495e;
+  color: var(--color-accent);
+  border-bottom-color: var(--color-border-sidebar);
   outline: none;
 }
 
@@ -549,7 +733,7 @@ input:focus,
 select:focus,
 textarea:focus,
 [tabindex]:focus {
-  outline: 2px solid #1abc9c;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -559,7 +743,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid #1abc9c;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -574,7 +758,7 @@ sl-menu:focus-visible {
 
 /* Folder item keyboard focus */
 .folder-item[role="button"]:focus {
-  outline: 2px solid #1abc9c;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: -2px;
 }
 
@@ -644,8 +828,8 @@ sl-menu:focus-visible {
   }
 
   .folder-item.active {
-    background-color: #1abc9c;
-    color: #2c3e50;
+    background-color: var(--color-bg-sidebar-active);
+    color: var(--color-text-sidebar-active);
     border-left: none;
     font-weight: 700;
     letter-spacing: 0.01em;

@@ -10,8 +10,10 @@ import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
 import LandingContent from "./components/LandingContent";
 import LoadingContent from "./components/LoadingContent";
+import ThemeToggle from "./components/ThemeToggle";
 import "./styles.css";
 import "@shoelace-style/shoelace/dist/themes/light.css";
+import "@shoelace-style/shoelace/dist/themes/dark.css";
 
 setBasePath(
   "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/",
@@ -401,6 +403,7 @@ function App() {
         onEditFolder={handleEditFolder}
         onToggleFolderPin={handleToggleFolderPin}
         onHomeClick={handleHomeClick}
+        themeToggle={<ThemeToggle />}
       />
       <DndProvider backend={HTML5Backend}>
         <div

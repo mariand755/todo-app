@@ -4,7 +4,11 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-body) 0%,
+    var(--color-bg-surface) 100%
+  );
 }
 
 .notepad-animation {
@@ -48,7 +52,7 @@
 
 .loading-text {
   font-size: 1.1rem;
-  color: #555;
+  color: var(--color-text-secondary);
   font-weight: 500;
   letter-spacing: 0.5px;
   animation: pulse-text 1.5s ease-in-out infinite;
@@ -62,4 +66,30 @@
   50% {
     opacity: 1;
   }
+}
+
+/* SVG Notepad theming */
+.notepad-bg {
+  fill: var(--color-bg-surface);
+  stroke: var(--color-text-primary);
+  stroke-width: 2;
+}
+
+.notepad-spiral {
+  fill: var(--color-text-muted);
+}
+
+.notepad-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.pen-body {
+  stroke: var(--color-text-secondary);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.pen-tip {
+  fill: #ff6b6b; /* Keep red accent for visual pop in both themes */
 }

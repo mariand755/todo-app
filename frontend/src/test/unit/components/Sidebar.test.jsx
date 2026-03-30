@@ -111,4 +111,28 @@ describe("Sidebar", () => {
 
     expect(onHomeClick).not.toHaveBeenCalled();
   });
+
+  it("@FUT82 | renders injected theme toggle without breaking home button behavior", async () => {
+    const onHomeClick = vi.fn();
+
+    render(
+      <Sidebar
+        folders={folders}
+        activeFolderId={null}
+        onFolderClick={vi.fn()}
+        onNewFolder={vi.fn()}
+        onEditFolder={vi.fn()}
+        onHomeClick={onHomeClick}
+        themeToggle={<button type="button">Switch theme</button>}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Switch theme" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Go to home" }));
+
+    expect(onHomeClick).toHaveBeenCalledTimes(1);
+  });
 });

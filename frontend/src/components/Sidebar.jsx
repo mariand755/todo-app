@@ -11,6 +11,7 @@ const Sidebar = ({
   onEditFolder,
   onToggleFolderPin,
   onHomeClick,
+  themeToggle,
 }) => {
   const showLoadingPlaceholders = isLoading && folders.length === 0;
   const visibleFolders = showLoadingPlaceholders
@@ -30,16 +31,19 @@ const Sidebar = ({
 
   return (
     <aside id="folder-sidebar">
-      <button
-        id="home-button"
-        className="sidebar-home-btn"
-        onClick={onHomeClick}
-        onKeyDown={handleHomeKeydown}
-        aria-label="Go to home"
-        title="Return to home"
-      >
-        Folders
-      </button>
+      <div className="sidebar-header">
+        <button
+          id="home-button"
+          className="sidebar-home-btn"
+          onClick={onHomeClick}
+          onKeyDown={handleHomeKeydown}
+          aria-label="Go to home"
+          title="Return to home"
+        >
+          Folders
+        </button>
+        {themeToggle}
+      </div>
       <ul id="folder-list">
         {visibleFolders.map((folder) =>
           folder.isLoadingPlaceholder ? (
