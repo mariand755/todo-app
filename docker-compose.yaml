@@ -15,7 +15,6 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
       - POSTGRES_HOST=db
-      - UV_PROJECT_ENVIRONMENT=/tmp/.venv
       - UV_LINK_MODE=copy
     depends_on:
       db:
