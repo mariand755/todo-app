@@ -19,6 +19,12 @@ Use directory-level README files for local quick-start only.
 - Backend integration tests: backend/tests/integration
 - Frontend unit tests: frontend/src/test/unit
 - Frontend integration tests: frontend/src/test/integration
+- E2E smoke tests: e2e/tests/smoke
+- E2E critical path tests: e2e/tests/critical
+- E2E regression tests: e2e/tests/regression
+- E2E page objects: e2e/pages
+- E2E fixtures: e2e/fixtures
+- E2E utilities: e2e/utils
 
 ## Test ID Conventions
 
@@ -26,6 +32,7 @@ Use directory-level README files for local quick-start only.
 - Backend integration tests: pytest marker @pytest.mark.BINT##
 - Frontend unit tests: Vitest title prefix @FUT## |
 - Frontend integration tests: Vitest title prefix @FINT## |
+- E2E tests: Playwright test title prefix @E2E### | (3-digit, sequential across all E2E files, starting at E2E001; IDs are immutable once assigned, gaps permitted)
 
 Examples:
 
@@ -33,6 +40,8 @@ Examples:
 - @pytest.mark.BINT12
 - it("@FUT09 | calls onTogglePin with inverted pin state", async () => { ... })
 - it("@FINT03 | loads folder from initial deep link URL", async () => { ... })
+- test("@E2E001 | creates a new folder and verifies it appears in sidebar", async () => { ... })
+- test("@E2E005 | reorders items via drag and drop", async () => { ... })
 
 ## Why Frontend Uses Title Prefixes
 
@@ -57,6 +66,12 @@ Frontend:
 docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend
 docker run --rm todo-app-frontend-test npm run test
 
+E2E (planned — requires Playwright scaffold from TD-009a):
+
+docker compose up --build --wait
+npx playwright test --project=smoke
+npx playwright test --project=regression
+
 ## Local Slice Commands
 
 Backend slices:
@@ -72,6 +87,14 @@ Frontend slices:
 - vitest --run src/test/integration
 - vitest -t "@FUT24"
 - vitest -t "@FINT09"
+
+E2E slices (planned):
+
+- npx playwright test tests/smoke
+- npx playwright test tests/critical
+- npx playwright test -g "@E2E001"
+- npx playwright test --project=chromium
+- npx playwright test --debug tests/smoke/folder-crud.spec.ts
 
 ## Rewrite Tooling
 

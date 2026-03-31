@@ -37,7 +37,7 @@ def todo_list():
 
 
 def handle_folder_operations(folder_manager: FolderManager):
-    commands = ["add", "view", "exit", "edit", "delete", "search"]
+    commands = ["(a)dd", "(v)iew", "(ex)it", "(ed)it", "(d)elete", "(s)earch"]
     command_str = "/".join(commands)
     while True:
         command = input(f"Enter command for folder ({command_str}): ").strip().lower()
@@ -58,9 +58,13 @@ def handle_folder_operations(folder_manager: FolderManager):
                 edit_id = handle_input_int("Which folder title do you want to edit, unless done editing. ID: ")
                 if edit_id is None:
                     break
+                # -1 from invalid input intentionally fails the existence check → re-prompts
                 elif not folder_manager.does_folder_exist(edit_id):
                     continue
-                updated_title = input("Enter updated folder title name: ")
+                updated_title = input("Enter updated folder title name: ").strip()
+                if updated_title == "":
+                    effect_bold(f"{Color.RED}Title cannot be empty.{Color.OFF}")
+                    continue
                 updated_item = {}
                 updated_item[edit_id] = updated_title
                 folder_manager.edit_folders_within_app(updated_item)
@@ -71,6 +75,7 @@ def handle_folder_operations(folder_manager: FolderManager):
                 delete_id = handle_input_int("Which folder title do you want to delete, unless done deleting. ID: ")
                 if delete_id is None:
                     break
+                # -1 from invalid input intentionally fails the existence check → re-prompts
                 elif not folder_manager.does_folder_exist(delete_id):
                     continue
                 folder_manager.remove_folders_within_app([delete_id])
@@ -91,9 +96,13 @@ def handle_folder_operations(folder_manager: FolderManager):
             effect_bold(f"{BrightColor.GREEN}Exiting the Folder Manager.{BrightColor.OFF}")
             break
 
+        else:
+            unknown_msg = "Unknown command. Use (a)dd, (v)iew, (ed)it, (d)elete, (s)earch, or (ex)it."
+            effect_bold(f"{Color.RED}{unknown_msg}{Color.OFF}")
+
 
 def handle_item_operations(folder: Folder):
-    commands = ["add", "view", "exit", "edit", "delete", "search"]
+    commands = ["(a)dd", "(v)iew", "(ex)it", "(ed)it", "(d)elete", "(s)earch"]
     command_str = "/".join(commands)
     while True:
         command = input(f"Enter command ({command_str}): ").strip().lower()
@@ -114,9 +123,13 @@ def handle_item_operations(folder: Folder):
                 edit_id = handle_input_int("Which title do you want to edit, unless done editing. ID: ")
                 if edit_id is None:
                     break
+                # -1 from invalid input intentionally fails the existence check → re-prompts
                 elif not folder.does_item_exist(edit_id):
                     continue
-                updated_title = input("Enter updated title name: ")
+                updated_title = input("Enter updated title name: ").strip()
+                if updated_title == "":
+                    effect_bold(f"{Color.RED}Title cannot be empty.{Color.OFF}")
+                    continue
                 updated_item = {}
                 updated_item[edit_id] = updated_title
                 folder.edit_items_within_folder(updated_item)
@@ -127,6 +140,7 @@ def handle_item_operations(folder: Folder):
                 delete_id = handle_input_int("Which title do you want to delete, unless done deleting. ID: ")
                 if delete_id is None:
                     break
+                # -1 from invalid input intentionally fails the existence check → re-prompts
                 elif not folder.does_item_exist(delete_id):
                     continue
                 folder.remove_items_within_folder([delete_id])
@@ -147,14 +161,34 @@ def handle_item_operations(folder: Folder):
             effect_bold(f"{BrightColor.GREEN}Exiting the ToDo Item Manager.{BrightColor.OFF}")
             break
 
+        else:
+            unknown_msg = "Unknown command. Use (a)dd, (v)iew, (ed)it, (d)elete, (s)earch, or (ex)it."
+            effect_bold(f"{Color.RED}{unknown_msg}{Color.OFF}")
+
 
 def handle_input_int(user_prompt: str) -> int | None:
+    """Parse user input as a positive integer ID.
+
+    Returns:
+        int  — valid positive ID entered by user
+        None — empty input, signals caller to exit the current loop
+        -1   — invalid input (non-numeric, zero, or negative);
+               error message already displayed to user.
+               Callers rely on -1 never matching a real ID
+               (IDs auto-increment from 1) so the subsequent
+               does_folder_exist / does_item_exist check fails
+               and the loop re-prompts.
+    """
     user_input = ""
     try:
         user_input = input(user_prompt).strip()
         if user_input == "":
             return None
-        return int(user_input)
+        value = int(user_input)
+        if value < 1:
+            effect_bold(f"{Color.RED}ID must be a positive number.{Color.OFF}")
+            return -1
+        return value
     except ValueError:
         effect_bold(f"{Color.RED}Invalid ID '{user_input}' was entered.{Color.OFF}")
         return -1

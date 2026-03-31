@@ -37,24 +37,23 @@
       "mode": "subagent"
     },
     "project-board-orchestrator": {
-      "description": "Routes project board work between analysis and approved mutation flows.",
-      "mode": "primary",
+      "description": "Routes project board work between analysis and approved mutation flows. Subagent under pm-strategist.",
+      "mode": "subagent",
       "permission": {
         "edit": "deny",
-        "bash": "allow",
         "webfetch": "ask",
+        "bash": "ask",
         "task": {
           "*": "deny",
           "project-board-analyst": "allow",
           "project-board-executor": "allow",
           "board-doc-writer": "allow",
-          "git-orchestrator": "allow",
-          "pm-strategist": "allow"
+          "git-orchestrator": "allow"
         }
       }
     },
     "pm-strategist": {
-      "description": "Strategic PM planning for velocity, sprint packing, milestone health, iteration retrospectives, and deliverable rollup. Advisory only; routes board reads through project-board-orchestrator and routes approved mutations back through project-board-orchestrator.",
+      "description": "Central PM router and strategic planner. Single primary entry point. Routes board work through project-board-orchestrator, Git work through git-orchestrator, and docs through board-doc-writer.",
       "mode": "primary",
       "permission": {
         "edit": "deny",
@@ -64,7 +63,10 @@
           "*": "deny",
           "project-board-orchestrator": "allow",
           "project-board-analyst": "allow",
-          "board-doc-writer": "allow"
+          "project-board-executor": "allow",
+          "board-doc-writer": "allow",
+          "code-doc-writer": "allow",
+          "git-orchestrator": "allow"
         }
       }
     },
@@ -81,7 +83,7 @@
       "mode": "subagent"
     },
     "code-doc-writer": {
-      "description": "Writes explicitly approved code, CI, and workflow files. Drafts first, never writes without owner approval. Routed from git-orchestrator.",
+      "description": "Writes explicitly approved code, CI, and workflow files. Drafts first, never writes without owner approval. Routed from git-orchestrator or pm-strategist.",
       "mode": "subagent"
     }
   },

@@ -30,9 +30,10 @@ class Folder:
     def add_new_item_to_folder(self, new_item_title: str):
         if isinstance(new_item_title, str) is False:
             raise ValueError(FolderConstants.ERR_NON_STR_INPUT)
-        if new_item_title == "":
+        stripped_title = new_item_title.strip()
+        if stripped_title == "":
             raise ValueError(FolderConstants.ERR_EMPTY_STR_INPUT)
-        new_item = TodoItem(id=self.__new_id, title=new_item_title)
+        new_item = TodoItem(id=self.__new_id, title=stripped_title)
         self.items.append(new_item)
         self.__new_id += 1
         return new_item
@@ -62,9 +63,14 @@ class Folder:
             self.edit_item_within_folder(id, updated_title)
 
     def edit_item_within_folder(self, id_to_edit: int, updated_title: str):
+        if isinstance(updated_title, str) is False:
+            raise ValueError(FolderConstants.ERR_NON_STR_INPUT)
+        stripped_title = updated_title.strip()
+        if stripped_title == "":
+            raise ValueError(FolderConstants.ERR_EMPTY_STR_INPUT)
         index_to_edit = self.__find_index(id_to_edit)
         if index_to_edit != -1:
-            self.items[index_to_edit].title = updated_title
+            self.items[index_to_edit].title = stripped_title
             return self.items[index_to_edit]
         return None
 
@@ -99,22 +105,3 @@ class Folder:
             if item.title.lower().startswith(lowercase_title):
                 results.append(item)
         return results
-
-
-"""
-    def search_for_item_in_folder(self, id_to_find:int):
-        index_to_find = self.__find_index(id_to_find)
-        if index_to_find != -1:
-            return self.items[index_to_find]
-        return None
-
-
-
-    def search_for_item_using_title(self, title_to_find:str)->TodoItem:
-        lowercase_title = title_to_find.lower().strip()
-        for item in self.items:
-            #searching usng prefix search
-            if item.title.lower().startswith(lowercase_title):
-                return item
-        return None
-"""

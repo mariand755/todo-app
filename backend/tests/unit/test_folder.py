@@ -254,3 +254,66 @@ def test_get_item_nonexistent_returns_none(test_folder: Folder):
 
     # assert
     assert missing is None
+
+
+# Whitespace-only item titles should be rejected just like empty strings.
+@pytest.mark.BUT53
+def test_add_new_item_to_folder_whitespace_only_raises_error(test_folder):
+    # arrange
+    whitespace_input = "   "
+
+    # act / assert
+    with pytest.raises(ValueError) as err:
+        test_folder.add_new_item_to_folder(whitespace_input)
+    assert FolderConstants.ERR_EMPTY_STR_INPUT == err.value.args[0]
+
+
+# Items added with surrounding whitespace should have their titles stripped.
+@pytest.mark.BUT54
+def test_add_new_item_to_folder_strips_whitespace(test_folder):
+    # arrange
+    padded_title = "  hello world  "
+
+    # act
+    item = test_folder.add_new_item_to_folder(padded_title)
+
+    # assert
+    assert item.title == "hello world"
+
+
+# Editing an item with a non-string title should raise a ValueError.
+@pytest.mark.BUT55
+def test_edit_item_within_folder_non_str_raises_error(test_folder):
+    # arrange
+    test_folder.add_new_item_to_folder("original")  # id 1
+
+    # act / assert
+    with pytest.raises(ValueError) as err:
+        test_folder.edit_item_within_folder(1, 123)
+    assert FolderConstants.ERR_NON_STR_INPUT == err.value.args[0]
+
+
+# Editing an item with an empty or whitespace-only title should raise a ValueError.
+@pytest.mark.BUT56
+def test_edit_item_within_folder_empty_str_raises_error(test_folder):
+    # arrange
+    test_folder.add_new_item_to_folder("original")  # id 1
+
+    # act / assert
+    with pytest.raises(ValueError) as err:
+        test_folder.edit_item_within_folder(1, "   ")
+    assert FolderConstants.ERR_EMPTY_STR_INPUT == err.value.args[0]
+
+
+# Editing an item should strip whitespace from the new title.
+@pytest.mark.BUT57
+def test_edit_item_within_folder_strips_whitespace(test_folder):
+    # arrange
+    test_folder.add_new_item_to_folder("original")  # id 1
+
+    # act
+    updated = test_folder.edit_item_within_folder(1, "  updated title  ")
+
+    # assert
+    assert updated is not None
+    assert updated.title == "updated title"
