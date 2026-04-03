@@ -5,6 +5,8 @@ on:
     types: [opened, reopened]
   pull_request_target:
     types: [opened, reopened]
+  schedule:
+    - cron: '0 8 * * 1'  # Weekly Monday 8am UTC — sweep stale needs-metadata labels
   workflow_dispatch:
 
 concurrency:
@@ -13,11 +15,12 @@ concurrency:
 
 permissions:
   contents: read
-  issues: read
-  pull-requests: read
+  issues: write
+  pull-requests: write
 
 jobs:
   add-to-project:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
 
     steps:
@@ -184,7 +187,11 @@ jobs:
           HAS_PRIORITY=$(jq -r '((.priority // "") | tostring | length) > 0' <<<"$ITEM_JSON")
           HAS_EFFORT=$(jq -r '((.effort // "") | tostring | length) > 0' <<<"$ITEM_JSON")
           if [[ "$HAS_AREA" == "true" && "$HAS_PRIORITY" == "true" && "$HAS_EFFORT" == "true" ]]; then
-            echo "Metadata already set for item #$ITEM_NUMBER — skipping."
+            echo "Metadata already set for item #$ITEM_NUMBER — skipping field tagging."
+            # Remove needs-metadata label if still present (fields were set by
+            # another path, e.g., project-board-executor via GraphQL).
+            gh issue edit "$ITEM_NUMBER" --repo "$PROJECT_OWNER/todo-app" --remove-label "needs-metadata" 2>/dev/null || \
+              gh pr edit "$ITEM_NUMBER" --repo "$PROJECT_OWNER/todo-app" --remove-label "needs-metadata" 2>/dev/null || true
             exit 0
           fi
 
@@ -218,6 +225,12 @@ jobs:
           set_field "$EFFORT_FIELD_ID" "$EFFORT_OPT"
           echo "Tagged item #$ITEM_NUMBER: area=$(echo $ITEM_TITLE | head -c 30)... priority/effort set."
 
+          # Remove needs-metadata label if it was lingering from a prior run
+          # (e.g., agent-created issues whose fields were set via GraphQL before
+          # this workflow fired — classic race condition).
+          gh issue edit "$ITEM_NUMBER" --repo "$PROJECT_OWNER/todo-app" --remove-label "needs-metadata" 2>/dev/null || \
+            gh pr edit "$ITEM_NUMBER" --repo "$PROJECT_OWNER/todo-app" --remove-label "needs-metadata" 2>/dev/null || true
+
       - name: Fallback guidance for manual add
         if: failure()
         shell: bash
@@ -228,3 +241,66 @@ jobs:
           echo "2) In the right sidebar, click Projects."
           echo "3) Add the item to 'Todo App Task Board' (#2)."
           echo "4) Leave a note on the issue/PR with manual add confirmation and failure context."
+
+  sweep-needs-metadata:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate secret
+        shell: bash
+        env:
+          ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADD_TO_PROJECT_PAT}" ]]; then
+            echo "Missing required secret: ADD_TO_PROJECT_PAT"
+            exit 1
+          fi
+
+      - name: Sweep stale needs-metadata labels
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          set -euo pipefail
+
+          PROJECT_OWNER="mariand755"
+          REPO="mariand755/todo-app"
+
+          echo "Scanning for issues/PRs with needs-metadata label..."
+          LABELED_ITEMS=$(gh issue list --repo "$REPO" --label "needs-metadata" --state open --json number,title --jq '.[].number' 2>/dev/null || true)
+          LABELED_PRS=$(gh pr list --repo "$REPO" --label "needs-metadata" --state open --json number,title --jq '.[].number' 2>/dev/null || true)
+          ALL_ITEMS=$(echo -e "${LABELED_ITEMS}\n${LABELED_PRS}" | sort -u | grep -v '^$' || true)
+
+          if [[ -z "$ALL_ITEMS" ]]; then
+            echo "No open items with needs-metadata label found."
+            exit 0
+          fi
+
+          BOARD_JSON=$(gh project item-list 2 --owner "$PROJECT_OWNER" --limit 500 --format json)
+          REMOVED=0
+          KEPT=0
+
+          for NUM in $ALL_ITEMS; do
+            ITEM=$(echo "$BOARD_JSON" | jq -c --argjson n "$NUM" '.items[] | select(.content.number == $n)' | head -n1)
+            if [[ -z "$ITEM" ]]; then
+              echo "#$NUM: not on project board — skipping."
+              continue
+            fi
+
+            HAS_AREA=$(jq -r '((.area // "") | tostring | length) > 0' <<<"$ITEM")
+            HAS_PRIORITY=$(jq -r '((.priority // "") | tostring | length) > 0' <<<"$ITEM")
+            HAS_EFFORT=$(jq -r '((.effort // "") | tostring | length) > 0' <<<"$ITEM")
+
+            if [[ "$HAS_AREA" == "true" && "$HAS_PRIORITY" == "true" && "$HAS_EFFORT" == "true" ]]; then
+              echo "#$NUM: all metadata fields populated — removing needs-metadata label."
+              gh issue edit "$NUM" --repo "$REPO" --remove-label "needs-metadata" 2>/dev/null || \
+                gh pr edit "$NUM" --repo "$REPO" --remove-label "needs-metadata" 2>/dev/null || true
+              REMOVED=$((REMOVED + 1))
+            else
+              echo "#$NUM: metadata still incomplete (area=$HAS_AREA, priority=$HAS_PRIORITY, effort=$HAS_EFFORT) — keeping label."
+              KEPT=$((KEPT + 1))
+            fi
+          done
+
+          echo "Sweep complete: $REMOVED labels removed, $KEPT labels kept."
