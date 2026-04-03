@@ -48,20 +48,23 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          ITEM_TITLE: ${{ github.event.issue.title || github.event.pull_request.title }}
+          ITEM_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          IS_PR: ${{ github.event.pull_request.number && 'true' || 'false' }}
+          ITEM_LABELS: ${{ join(github.event.issue.labels.*.name || github.event.pull_request.labels.*.name, ',') }}
         run: |
           set -euo pipefail
 
           PROJECT_OWNER="mariand755"
           PROJECT_NUMBER="2"
-          ITEM_TITLE="${{ github.event.issue.title || github.event.pull_request.title }}"
-          ITEM_NUMBER="${{ github.event.issue.number || github.event.pull_request.number }}"
-          ITEM_LABELS="${{ join(github.event.issue.labels.*.name || github.event.pull_request.labels.*.name, ',') }}"
 
           # Field IDs
           PROJECT_ID="PVT_kwHOATOaf84BRQRG"
           PRIORITY_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWGw"
           AREA_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHM"
           EFFORT_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHQ"
+          TYPE_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWGs"
+          TYPE_TASK="92b3797e"
 
           # Priority option IDs
           P1_ID="92bd28dd"
@@ -223,6 +226,16 @@ jobs:
           set_field "$AREA_FIELD_ID" "$AREA_OPT"
           set_field "$PRIORITY_FIELD_ID" "$PRIORITY_OPT"
           set_field "$EFFORT_FIELD_ID" "$EFFORT_OPT"
+
+          # Auto-tag Type=Task for PRs (issues get Type from templates or manual setup)
+          if [[ "$IS_PR" == "true" ]]; then
+            HAS_TYPE=$(jq -r '((.type // "") | tostring | length) > 0' <<<"$ITEM_JSON")
+            if [[ "$HAS_TYPE" != "true" ]]; then
+              set_field "$TYPE_FIELD_ID" "$TYPE_TASK"
+              echo "Set Type=Task for PR #$ITEM_NUMBER"
+            fi
+          fi
+
           echo "Tagged item #$ITEM_NUMBER: area=$(echo $ITEM_TITLE | head -c 30)... priority/effort set."
 
           # Remove needs-metadata label if it was lingering from a prior run
