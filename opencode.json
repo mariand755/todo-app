@@ -1,15 +1,15 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [".github/copilot-instructions.md"],
-  "default_agent": "build",
+  "default_agent": "pm-strategist",
   "agent": {
     "build": {
       "description": "Default implementation agent for development tasks.",
-      "mode": "primary"
+      "mode": "subagent"
     },
     "plan": {
       "description": "Planning and analysis agent with guarded mutation permissions.",
-      "mode": "primary",
+      "mode": "subagent",
       "permission": {
         "edit": "ask",
         "bash": "ask",
@@ -79,7 +79,7 @@
       "mode": "subagent"
     },
     "board-doc-writer": {
-      "description": "Writes explicitly approved governance and private docs. Drafts first, never writes without owner approval. Routed from project-board-orchestrator.",
+      "description": "Writes explicitly approved governance and private docs. Drafts first, never writes without owner approval. Routed from project-board-orchestrator or pm-strategist.",
       "mode": "subagent"
     },
     "code-doc-writer": {

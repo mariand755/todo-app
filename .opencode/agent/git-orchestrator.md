@@ -35,6 +35,12 @@ mode: subagent
 permission:
   edit: deny
   webfetch: deny
+  task:
+    "*": deny
+    "git-executor": allow
+    "git-commenter": allow
+    "code-doc-writer": allow
+    "project-board-orchestrator": allow
 
 ---
 You are a Git workflow orchestrator. Your role is to route requests to the correct specialized subagent and keep responsibilities separated.
