@@ -15,7 +15,8 @@ SQL_ECHO = os.getenv("SQL_ECHO", "false").strip().lower() in {"1", "true", "yes"
 
 logger = logging.getLogger("todo_app.models")
 
-# Database engine
+# Tries Postgres first (using env vars), falls back to in-memory SQLite
+# if the Postgres driver isn't available — handy for tests.
 try:
     engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}", echo=SQL_ECHO)
 except Exception:
@@ -29,8 +30,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base: DeclarativeMeta = declarative_base()
 
 
+# Add folder.is_pinned to existing databases created before pinning support.
 def ensure_folder_pin_column() -> None:
-    """Add folder.is_pinned to existing databases created before pinning support."""
     try:
         inspector = sa.inspect(engine)
         if not inspector.has_table("folder"):
@@ -47,6 +48,7 @@ def ensure_folder_pin_column() -> None:
         logger.exception("Failed to ensure folder pin column")
 
 
+# FastAPI dependency — gives each request its own DB session and cleans up after.
 def get_db():
     db = SessionLocal()
     try:
@@ -55,21 +57,17 @@ def get_db():
         db.close()
 
 
+# Return the next position index for a new TodoItem in the folder.
+#   This counts non-deleted items in the folder and returns that count
+#    (so the first item will have position 0).
 def get_next_item_position(db_session: Session, folder_id: int) -> int:
-    """Return the next position index for a new TodoItem in the folder.
-
-    This counts non-deleted items in the folder and returns that count
-    (so the first item will have position 0).
-    """
     count = db_session.query(TodoItem).filter(TodoItem.folder_id == folder_id, TodoItem.is_deleted.is_(False)).count()
     return int(count)
 
 
+# Return the next position index for a new Folder.
+# Uses the highest non-deleted folder position and appends after it.
 def get_next_folder_position(db_session: Session) -> int:
-    """Return the next position index for a new Folder.
-
-    Uses the highest non-deleted folder position and appends after it.
-    """
     max_position = (
         db_session.query(sa.func.max(Folder.position))
         .filter(Folder.is_deleted.is_(False), Folder.position >= 0)
@@ -80,11 +78,9 @@ def get_next_folder_position(db_session: Session) -> int:
     return int(max_position) + 1
 
 
+# Backfill missing folder positions for legacy rows.
+# Returns True when any row was updated, else False.
 def ensure_folder_positions(db_session: Session) -> bool:
-    """Backfill missing folder positions for legacy rows.
-
-    Returns True when any row was updated, else False.
-    """
     unpositioned_folders = db_session.query(Folder).filter(Folder.position < 0).order_by(Folder.id).all()
     if not unpositioned_folders:
         return False
@@ -100,6 +96,8 @@ def ensure_folder_positions(db_session: Session) -> bool:
     return True
 
 
+# Folders use soft deletes (is_deleted) and position-based ordering.
+# New folders start with position=-1 until backfilled by ensure_folder_positions.
 class Folder(Base):
     __tablename__ = "folder"
 
@@ -110,6 +108,7 @@ class Folder(Base):
     position = sa.Column(sa.Integer, default=-1, nullable=False)
 
 
+# Items belong to a folder. Soft-deleted and ordered by position, same as folders.
 class TodoItem(Base):
     __tablename__ = "todo_item"
 
@@ -121,4 +120,5 @@ class TodoItem(Base):
     position = sa.Column(sa.Integer, default=-1, nullable=False)
 
 
+# Runs at import time to patch older databases that don't have the is_pinned column yet.
 ensure_folder_pin_column()
