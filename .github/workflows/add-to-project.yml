@@ -76,7 +76,8 @@ jobs:
           AREA_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHM"
           EFFORT_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHQ"
           TYPE_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWGs"
-          TYPE_TASK="92b3797e"
+          TYPE_TASK="bd8706ad"
+          TYPE_PR="a3cd4b86"
 
           # Priority option IDs
           P1_ID="92bd28dd"
@@ -239,12 +240,12 @@ jobs:
           set_field "$PRIORITY_FIELD_ID" "$PRIORITY_OPT"
           set_field "$EFFORT_FIELD_ID" "$EFFORT_OPT"
 
-          # Auto-tag Type=Task for PRs (issues get Type from templates or manual setup)
+          # Auto-tag Type=PR for pull requests (issues get Type from templates or manual setup)
           if [[ "$IS_PR" == "true" ]]; then
             HAS_TYPE=$(jq -r '((.type // "") | tostring | length) > 0' <<<"$ITEM_JSON")
             if [[ "$HAS_TYPE" != "true" ]]; then
-              set_field "$TYPE_FIELD_ID" "$TYPE_TASK"
-              echo "Set Type=Task for PR #$ITEM_NUMBER"
+              set_field "$TYPE_FIELD_ID" "$TYPE_PR"
+              echo "Set Type=PR for PR #$ITEM_NUMBER"
             fi
           fi
 

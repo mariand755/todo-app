@@ -2,10 +2,13 @@
 # When an issue is closed, its board status moves to Done. When a PR is opened
 # against an issue (via "closes #XX" in the PR body), that issue moves to In Progress.
 # When a PR merges, linked issues with closing keywords move to Done.
+# The PR board item itself also gets a Status: Review for human/agent PRs,
+# Todo for Dependabot PRs (needs triage), and Done on merge.
 #
 # Jobs:
-#   sync-issue-status    — fires on issue open/reopen/close; sets Todo or Done
+#   sync-issue-status     — fires on issue open/reopen/close; sets Todo or Done
 #   sync-pr-linked-issues — fires on PR events; parses body for linked issues
+#   sync-pr-status        — fires on PR events; sets Status on the PR board item itself
 
 name: Project Status Sync
 
@@ -268,3 +271,101 @@ jobs:
               --field-id "$STATUS_FIELD_ID" \
               --single-select-option-id "$target_option_id"
           done <<< "$issue_numbers"
+
+  sync-pr-status:
+    if: ${{ github.event_name == 'pull_request_target' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate project automation secret
+        shell: bash
+        env:
+          ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADD_TO_PROJECT_PAT}" ]]; then
+            echo "Missing required secret: ADD_TO_PROJECT_PAT"
+            exit 1
+          fi
+
+      - name: Set PR board item status
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          set -euo pipefail
+
+          PROJECT_OWNER="${GITHUB_REPOSITORY_OWNER}"
+          PROJECT_NUMBER="2"
+
+          resolve_project_metadata() {
+            local graphql_query project_data
+
+            graphql_query='query($owner: String!, $number: Int!) { user(login: $owner) { projectV2(number: $number) { id fields(first: 50) { nodes { __typename ... on ProjectV2SingleSelectField { id name options { id name } } } } } } }'
+
+            project_data="$(gh api graphql -f query="$graphql_query" -F owner="$PROJECT_OWNER" -F number="$PROJECT_NUMBER")"
+
+            PROJECT_ID="$(jq -r '.data.user.projectV2.id // empty' <<<"$project_data")"
+            STATUS_FIELD_ID="$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Status") | .id' <<<"$project_data")"
+            STATUS_TODO_OPTION_ID="$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Todo") | .id' <<<"$project_data")"
+            STATUS_REVIEW_OPTION_ID="$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Review") | .id' <<<"$project_data")"
+            STATUS_DONE_OPTION_ID="$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' <<<"$project_data")"
+
+            if [[ -z "$PROJECT_ID" || -z "$STATUS_FIELD_ID" || -z "$STATUS_TODO_OPTION_ID" || -z "$STATUS_REVIEW_OPTION_ID" || -z "$STATUS_DONE_OPTION_ID" ]]; then
+              echo "Unable to resolve project metadata."
+              exit 1
+            fi
+          }
+
+          resolve_project_metadata
+
+          event_action="${{ github.event.action }}"
+          is_merged="${{ github.event.pull_request.merged || false }}"
+          pr_number="${{ github.event.pull_request.number }}"
+          pr_actor="${{ github.actor }}"
+
+          # Determine target status for the PR board item
+          if [[ "$event_action" == "closed" ]]; then
+            if [[ "$is_merged" != "true" ]]; then
+              echo "PR #${pr_number} closed without merge. No PR status sync needed."
+              exit 0
+            fi
+            target_option_id="$STATUS_DONE_OPTION_ID"
+            echo "PR #${pr_number} merged — setting Status=Done."
+          elif [[ "$pr_actor" == "dependabot[bot]" ]]; then
+            target_option_id="$STATUS_TODO_OPTION_ID"
+            echo "Dependabot PR #${pr_number} — setting Status=Todo (needs triage)."
+          else
+            target_option_id="$STATUS_REVIEW_OPTION_ID"
+            echo "Human/agent PR #${pr_number} — setting Status=Review."
+          fi
+
+          # Find the PR's board item
+          list_items() {
+            gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json
+          }
+
+          get_item_id() {
+            local num="$1"
+            list_items | jq -r --argjson pr "$num" '.items[] | select(.content.number==$pr) | .id' | head -n1
+          }
+
+          item_id=""
+          for attempt in {1..10}; do
+            item_id="$(get_item_id "$pr_number")"
+            if [[ -n "$item_id" ]]; then
+              break
+            fi
+            echo "Project item for PR #${pr_number} not found yet (attempt ${attempt}/10); retrying..."
+            sleep 3
+          done
+
+          if [[ -z "$item_id" ]]; then
+            echo "Unable to locate project item for PR #${pr_number} — skipping status sync."
+            exit 0
+          fi
+
+          gh project item-edit \
+            --id "$item_id" \
+            --project-id "$PROJECT_ID" \
+            --field-id "$STATUS_FIELD_ID" \
+            --single-select-option-id "$target_option_id"
