@@ -1,3 +1,13 @@
+# PR-time security checks for the frontend. Runs npm audit against
+# dependencies and a gitleaks secret scan across the full Git history.
+# Skips the audit job if no frontend files changed.
+#
+# Jobs:
+#   detect-relevant-changes — skips if no frontend files changed
+#   dependency-audit        — npm audit (fail on high/critical)
+#   secret-scan             — gitleaks across full repo history
+#   secret-scan-gate        — blocks merge if secret scan fails
+
 name: Security Frontend
 
 on:

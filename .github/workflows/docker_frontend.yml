@@ -1,3 +1,13 @@
+# Builds the frontend Docker image, runs lint, format checks, and the full
+# Vitest suite inside the container, then scans the image with Trivy for
+# HIGH/CRITICAL vulnerabilities. Same idea as docker_backend but for the
+# React/Vite side of the app.
+#
+# Jobs:
+#   detect-relevant-changes — skips if no frontend/docker/workflow files changed
+#   docker-build-and-test   — build image, lint + tests in container, Trivy scan
+#   docker-frontend-gate    — blocks merge on failure
+
 name: Docker Frontend
 
 on:

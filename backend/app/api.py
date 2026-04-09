@@ -20,6 +20,8 @@ logger = logging.getLogger("todo_app.api")
 
 app = FastAPI()
 
+
+# Only the frontend dev server makes cross-origin requests.
 origins = ["http://localhost:3000"]
 
 app.add_middleware(
@@ -31,6 +33,8 @@ app.add_middleware(
 )
 
 
+# Logs every request with a unique ID, method, path, status, and duration.
+# The request ID is also returned in the X-Request-ID response header.
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     request_id = uuid.uuid4().hex[:12]
@@ -61,9 +65,10 @@ async def log_requests(request: Request, call_next):
         request_id_context.reset(token)
 
 
+# Reformats Pydantic validation errors into a simpler {field, problem} shape
+# so the frontend doesn't have to parse FastAPI's default error format.
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    # Custom logic to reformat the errors
     errors = exc.errors()
     simplified_errors = []
     for error in errors:
@@ -80,6 +85,8 @@ async def health_check():
     return {"status": "ok"}
 
 
+# Returns all non-deleted folders, pinned ones first, then sorted by position.
+# Fixes any gaps in folder positions before querying.
 @app.get("/folders")
 async def get_folders(db_session: Session = Depends(get_db)):
     positions_updated = ensure_folder_positions(db_session)
@@ -105,6 +112,8 @@ class FolderResponse(BaseModel):
     is_pinned: bool
 
 
+# Creates a new folder. Fixes position gaps first so the new folder
+# gets the correct next position.
 @app.post("/folders", response_model=FolderResponse)
 async def create_folder(new_folder_request: CreateFolder, db_session: Session = Depends(get_db)):
     positions_updated = ensure_folder_positions(db_session)
@@ -116,9 +125,11 @@ async def create_folder(new_folder_request: CreateFolder, db_session: Session = 
     return new_folder
 
 
+# Returns a specific folder by ID.
 @app.get("/folders/{folder_id}")
 async def get_folder(folder_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
+    # Validates that the folder exists and isn't deleted.
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     return folder
@@ -128,9 +139,11 @@ class UpdateFolder(BaseModel):
     title: str
 
 
+# Updates a folder's title.
 @app.put("/folders/{folder_id}", response_model=FolderResponse)
 async def update_folder(folder_id: int, update_folder_request: UpdateFolder, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
+    # Validates that the folder exists and isn't deleted.
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.title = update_folder_request.title
@@ -143,6 +156,7 @@ class UpdateFolderPin(BaseModel):
     is_pinned: bool
 
 
+# Updates a folder's pinned status.
 @app.put("/folders/{folder_id}/pin", response_model=FolderResponse)
 async def update_folder_pin(
     folder_id: int,
@@ -150,6 +164,7 @@ async def update_folder_pin(
     db_session: Session = Depends(get_db),
 ):
     folder = db_session.get(FolderModel, folder_id)
+    # Validates that the folder exists and isn't deleted.
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.is_pinned = update_folder_pin_request.is_pinned
@@ -158,9 +173,11 @@ async def update_folder_pin(
     return folder
 
 
+# Soft-deletes a folder — marks it as deleted instead of removing the row.
 @app.delete("/folders/{folder_id}")
 async def delete_folder(folder_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
+    # Validates that the folder exists and isn't deleted.
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     folder.is_deleted = True
@@ -169,9 +186,11 @@ async def delete_folder(folder_id: int, db_session: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+# Returns all non-deleted items within a folder, sorted by position.
 @app.get("/folders/{folder_id}/items")
 async def get_folder_items(folder_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
+    # Validates that the folder exists and isn't deleted.
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     todo_items = (
@@ -200,6 +219,8 @@ class ItemArrayResponse(BaseModel):
     items: Sequence[ItemResponse]
 
 
+# Creates a new item within a folder.
+# The new item is added to the end of the list by assigning it the next position value.
 @app.post("/folders/{folder_id}/items", response_model=ItemResponse)
 async def create_new_item(folder_id: int, new_item_request: CreateItem, db_session: Session = Depends(get_db)):
     folder = db_session.query(FolderModel).filter(FolderModel.id == folder_id).first()
@@ -220,6 +241,8 @@ async def create_new_item(folder_id: int, new_item_request: CreateItem, db_sessi
     return add_new_item
 
 
+# Returns a specific item by ID within a folder.
+# Validates that the folder exists and isn't deleted.
 @app.get("/folders/{folder_id}/items/{item_id}")
 async def get_folder_item(folder_id: int, item_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.query(FolderModel).filter(FolderModel.id == folder_id).first()
@@ -242,6 +265,7 @@ class UpdateItem(BaseModel):
     title: str
 
 
+# Updates an item's title. Completed items are locked and can't be edited.
 @app.put("/folders/{folder_id}/items/{item_id}", response_model=ItemResponse)
 async def update_item(
     folder_id: int,
@@ -249,6 +273,7 @@ async def update_item(
     update_item_request: UpdateItem,
     db_session: Session = Depends(get_db),
 ):
+    # Validates that the folder exists and isn't deleted before updating item.
     folder = db_session.get(FolderModel, folder_id)
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
@@ -260,6 +285,7 @@ async def update_item(
         )
         .first()
     )
+    # Validates that the item exists and isn't deleted before updating.
     if item is None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     if item.completed:
@@ -270,9 +296,11 @@ async def update_item(
     return item
 
 
+# Soft-deletes an item - marks it as deleted instead of removing the row.
 @app.delete("/folders/{folder_id}/items/{item_id}")
 async def delete_item(folder_id: int, item_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
+    # Validate folder exists and isn't deleted before deleting item.
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = (
@@ -283,6 +311,7 @@ async def delete_item(folder_id: int, item_id: int, db_session: Session = Depend
         )
         .first()
     )
+    # Validate item exists and isn't deleted before deleting.
     if item is None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     item.is_deleted = True
@@ -291,9 +320,11 @@ async def delete_item(folder_id: int, item_id: int, db_session: Session = Depend
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+# Flips an item between complete and incomplete.
 @app.put("/folders/{folder_id}/items/{item_id}/toggle", response_model=ItemResponse)
 async def toggle_item(folder_id: int, item_id: int, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)
+    # Validate folder exists and isn't deleted before toggling item.
     if folder is None or folder.is_deleted:
         raise HTTPException(status_code=404, detail="Folder not found")
     item = (
@@ -304,6 +335,7 @@ async def toggle_item(folder_id: int, item_id: int, db_session: Session = Depend
         )
         .first()
     )
+    # Validate item exists and isn't deleted before toggling.
     if item is None or item.is_deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     item.completed = not item.completed
@@ -316,14 +348,11 @@ class UpdateItemOrder(BaseModel):
     itemOrder_id: list[int] = Field(..., min_length=1)
 
 
+# Assign sequential positions to `all_items` based on `item_order_ids`.
+#   - Items whose id appears in `item_order_ids` receive positions according to that list.
+#   - Items not present in the list are assigned positions after the listed items.
+#   This function mutates the objects in `all_items` in-place and also returns them.
 def apply_item_order_positions(all_items, item_order_ids: list[int]):
-    """Assign sequential positions to `all_items` based on `item_order_ids`.
-
-    - Items whose id appears in `item_order_ids` receive positions according to that list.
-    - Items not present in the list are assigned positions after the listed items.
-
-    This function mutates the objects in `all_items` in-place and also returns them.
-    """
     position_map = {item_id: idx for idx, item_id in enumerate(item_order_ids)}
     next_position = len(item_order_ids)
     for item in all_items:
@@ -336,6 +365,8 @@ def apply_item_order_positions(all_items, item_order_ids: list[int]):
     return all_items
 
 
+# Reorders items in a folder based on the provided list of item IDs.
+# Used by the frontend for drag-and-drop sorting.
 @app.put("/folders/{folder_id}/item_order", response_model=ItemArrayResponse)
 async def item_order(folder_id: int, update_item_order: UpdateItemOrder, db_session: Session = Depends(get_db)):
     folder = db_session.get(FolderModel, folder_id)

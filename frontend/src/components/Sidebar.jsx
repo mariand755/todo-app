@@ -13,6 +13,8 @@ const Sidebar = ({
   onHomeClick,
   themeToggle,
 }) => {
+  // While folders are loading, show skeleton placeholder rows so the sidebar
+  // doesn't look empty. Once real folders arrive, these get swapped out.
   const showLoadingPlaceholders = isLoading && folders.length === 0;
   const visibleFolders = showLoadingPlaceholders
     ? [
@@ -68,6 +70,8 @@ const Sidebar = ({
           ),
         )}
 
+        {/* The "new folder" row lives inside a FolderItem wrapper so it inherits
+         the same list styling. It only shows after loading is done.*/}
         {!showLoadingPlaceholders && (
           <FolderItem
             key="new"

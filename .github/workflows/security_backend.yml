@@ -1,3 +1,12 @@
+# PR-time security checks for the backend. Runs pip-audit against runtime
+# dependencies and a gitleaks secret scan across the full Git history.
+# Skips the audit job if no backend files changed.
+#
+# Jobs:
+#   detect-relevant-changes — skips if no backend files changed
+#   dependency-audit        — pip-audit on runtime requirements
+#   secret-scan             — gitleaks across full repo history
+
 name: Security Backend
 
 on:

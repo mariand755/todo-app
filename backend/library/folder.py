@@ -5,12 +5,15 @@ from colorist import Color, effect_bold
 from library.todo_item import TodoItem
 
 
+# Shared error messages for input validation across folder operations.
 class FolderConstants:
     ERR_NON_STR_INPUT = "input is not a string"
     ERR_EMPTY_STR_INPUT = "input is empty"
     ERR_ITEMS_NOT_ARRAY = "input is not array"
 
 
+# In-memory folder used by the CLI — not the SQLAlchemy model in models.py.
+# Manages its own item list and auto-increments item IDs internally.
 class Folder:
     def __init__(self, id: int, title: str):
         self.id = id
@@ -74,6 +77,7 @@ class Folder:
             return self.items[index_to_edit]
         return None
 
+    # Returns the list index for a given item ID, or -1 if not found.
     def __find_index(self, id_to_find: int):
         index_to_find = -1
         for index, item in enumerate(self.items):
@@ -95,6 +99,7 @@ class Folder:
         else:
             return None
 
+    # Case-insensitive prefix search — matches items whose title starts with the query.
     def search_for_items_using_title(self, title_to_find: str) -> List[TodoItem]:
         results: List[TodoItem] = []
         lowercase_title = title_to_find.lower().strip()

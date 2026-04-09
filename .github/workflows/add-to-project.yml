@@ -1,3 +1,15 @@
+# Automatically adds new issues and PRs to the Todo App Task Board (project #2),
+# then tries to fill in Area, Priority, and Effort fields based on title patterns
+# (e.g. "fix(backend):" → Area=backend, P2, Effort=S). If no pattern matches,
+# a "needs-metadata" label is applied so the item gets triaged manually.
+#
+# A weekly sweep job (Monday 8am UTC) cleans up stale "needs-metadata" labels
+# on items whose fields were filled in by another path (like the agent system).
+#
+# Jobs:
+#   add-to-project    — runs on issue/PR open/reopen; adds item + auto-tags metadata
+#   sweep-needs-metadata — runs on schedule/dispatch; removes resolved labels
+
 name: Add To Project
 
 on:
@@ -64,7 +76,8 @@ jobs:
           AREA_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHM"
           EFFORT_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWHQ"
           TYPE_FIELD_ID="PVTSSF_lAHOATOaf84BRQRGzg_XWGs"
-          TYPE_TASK="92b3797e"
+          TYPE_TASK="bd8706ad"
+          TYPE_PR="a3cd4b86"
 
           # Priority option IDs
           P1_ID="92bd28dd"
@@ -227,12 +240,12 @@ jobs:
           set_field "$PRIORITY_FIELD_ID" "$PRIORITY_OPT"
           set_field "$EFFORT_FIELD_ID" "$EFFORT_OPT"
 
-          # Auto-tag Type=Task for PRs (issues get Type from templates or manual setup)
+          # Auto-tag Type=PR for pull requests (issues get Type from templates or manual setup)
           if [[ "$IS_PR" == "true" ]]; then
             HAS_TYPE=$(jq -r '((.type // "") | tostring | length) > 0' <<<"$ITEM_JSON")
             if [[ "$HAS_TYPE" != "true" ]]; then
-              set_field "$TYPE_FIELD_ID" "$TYPE_TASK"
-              echo "Set Type=Task for PR #$ITEM_NUMBER"
+              set_field "$TYPE_FIELD_ID" "$TYPE_PR"
+              echo "Set Type=PR for PR #$ITEM_NUMBER"
             fi
           fi
 

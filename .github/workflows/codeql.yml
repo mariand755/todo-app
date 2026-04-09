@@ -1,3 +1,7 @@
+# Weekly and PR-time CodeQL static analysis for Python and JavaScript/TypeScript.
+# Uses GitHub's security-and-quality query suite to catch vulnerabilities
+# and code quality issues.
+
 name: CodeQL
 
 on:

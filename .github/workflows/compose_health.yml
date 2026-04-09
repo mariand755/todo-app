@@ -1,3 +1,13 @@
+# End-to-end smoke test using Docker Compose. Builds the full stack (API + frontend + DB),
+# waits for all services to pass their health checks, then runs a Python script that
+# exercises the core API paths: health, create folder, create item, toggle, reorder, delete.
+# This catches wiring issues (ports, env vars, DB migrations) that unit tests miss.
+#
+# Jobs:
+#   detect-relevant-changes — skips if no backend/frontend/compose files changed
+#   compose-health          — builds stack, runs smoke tests, tears down
+#   compose-health-gate     — blocks merge on failure
+
 name: Compose Health
 
 on:
