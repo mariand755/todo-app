@@ -1,3 +1,15 @@
+# Automatically adds new issues and PRs to the Todo App Task Board (project #2),
+# then tries to fill in Area, Priority, and Effort fields based on title patterns
+# (e.g. "fix(backend):" → Area=backend, P2, Effort=S). If no pattern matches,
+# a "needs-metadata" label is applied so the item gets triaged manually.
+#
+# A weekly sweep job (Monday 8am UTC) cleans up stale "needs-metadata" labels
+# on items whose fields were filled in by another path (like the agent system).
+#
+# Jobs:
+#   add-to-project    — runs on issue/PR open/reopen; adds item + auto-tags metadata
+#   sweep-needs-metadata — runs on schedule/dispatch; removes resolved labels
+
 name: Add To Project
 
 on:

@@ -1,3 +1,12 @@
+# Nightly frontend health check — runs the full quality suite (lint, type check,
+# format, tests, coverage) plus an npm audit and a Docker build with Trivy scan.
+# Scheduled daily at 6am UTC so issues surface before the next working session.
+# Same structure as nightly_backend but for the React/Vite side.
+#
+# Jobs:
+#   frontend-quality-and-audit — lint, tests, coverage, npm audit
+#   docker-build-and-trivy     — build image, Trivy scan for HIGH/CRITICAL
+
 name: Nightly Frontend
 
 on:

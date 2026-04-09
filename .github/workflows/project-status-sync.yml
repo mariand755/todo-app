@@ -1,3 +1,12 @@
+# Keeps the project board Status field in sync with GitHub issue/PR lifecycle events.
+# When an issue is closed, its board status moves to Done. When a PR is opened
+# against an issue (via "closes #XX" in the PR body), that issue moves to In Progress.
+# When a PR merges, linked issues with closing keywords move to Done.
+#
+# Jobs:
+#   sync-issue-status    — fires on issue open/reopen/close; sets Todo or Done
+#   sync-pr-linked-issues — fires on PR events; parses body for linked issues
+
 name: Project Status Sync
 
 on:

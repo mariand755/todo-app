@@ -1,3 +1,13 @@
+# Builds the backend Docker image in both test and runtime targets, runs the
+# full test suite inside the container, then scans both images with Trivy for
+# HIGH/CRITICAL vulnerabilities. This validates that the Dockerfile itself
+# produces a working, secure image — not just that the code passes locally.
+#
+# Jobs:
+#   detect-relevant-changes — skips if no backend/docker/workflow files changed
+#   docker-build-and-scan   — build test + runtime images, pytest in container, Trivy scan
+#   docker-backend-gate     — blocks merge on failure
+
 name: Docker Backend
 
 on:

@@ -9,6 +9,8 @@ import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
 import SlButton from "@shoelace-style/shoelace/dist/react/button/index.js";
 import SlInput from "@shoelace-style/shoelace/dist/react/input/index.js";
 
+// react-dnd drag type — all todo items share the same type so they can
+// be reordered within the list by dragging.
 const ItemTypes = {
   CARD: "card",
 };
@@ -47,6 +49,9 @@ const TodoItem = ({
 
   const classes = `todo-item ${item.completed ? "complete" : ""} ${isOpen ? "menu-open" : ""}`;
 
+  // Drag-and-drop reordering: when a dragged item hovers past the vertical
+  // midpoint of another item, this swaps their positions immediately. This gives
+  // the smooth "live reorder" feel instead of waiting for the drop.
   const [{ handlerId }, drop] = useDrop({
     accept: ItemTypes.CARD,
     collect(monitor) {

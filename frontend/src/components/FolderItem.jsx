@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+// Double-clicking a folder switches it to an inline text input for quick renaming.
+// Pressing Enter or blurring the input saves the new title; Escape cancels.
 const FolderItem = ({ folder, isActive, onClick, onEdit, onTogglePin }) => {
   const [isEditing, setIsEditing] = useState(false);
 

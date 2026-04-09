@@ -1,3 +1,13 @@
+# Runs backend integration tests against a real Postgres database instead of
+# the in-memory SQLite used by unit tests. A Postgres service container spins up
+# alongside the runner, and TEST_DATABASE_URL points the test suite at it.
+# This catches SQL dialect differences and real DB behavior that SQLite hides.
+#
+# Jobs:
+#   detect-relevant-changes — skips if no backend/compose files changed
+#   integration-postgres    — starts Postgres service, runs pytest -m integration
+#   integration-gate        — blocks merge on failure
+
 name: Backend Integration (Postgres)
 
 on:

@@ -7,6 +7,9 @@ const ThemeToggle = () => {
     () => document.documentElement.getAttribute("data-theme") === "dark",
   );
 
+  // A MutationObserver watches the <html> data-theme attribute so this
+  // component stays in sync even if the theme changes from outside React
+  // (e.g. the theme utility toggling the attribute directly on the DOM).
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setIsDark(document.documentElement.getAttribute("data-theme") === "dark");

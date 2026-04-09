@@ -1,3 +1,11 @@
+# Nightly backend health check — runs the full quality suite (lint, type check,
+# format, tests, coverage) plus a pip-audit and a Docker build with Trivy scan.
+# Scheduled daily at 6am UTC so issues surface before the next working session.
+#
+# Jobs:
+#   backend-quality-and-audit — ruff, mypy, pytest with coverage, pip-audit
+#   docker-build-and-trivy    — build image, Trivy scan for HIGH/CRITICAL
+
 name: Nightly Backend
 
 on:

@@ -1,3 +1,14 @@
+# PR and push quality gate for backend and frontend code.
+# First checks if any backend/ or frontend/ files actually changed (skips
+# the heavy jobs if not). Then runs lint, format, type checks, and tests
+# for each side in parallel. A final gate job blocks the PR if either fails.
+#
+# Jobs:
+#   detect-relevant-changes — skips everything if only docs/CI files changed
+#   test-backend            — ruff, mypy, pytest with 85% coverage minimum
+#   test-frontend           — eslint, prettier, vitest with coverage
+#   quality-gate            — blocks merge if any test job failed
+
 name: Quality Checks
 
 on:

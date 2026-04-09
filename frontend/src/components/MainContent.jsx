@@ -24,6 +24,10 @@ const MainContent = ({
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [editFolderTitle, setEditFolderTitle] = useState(currentFolderTitle);
+
+  // Generate a unique input name each time the edit dialog opens.
+  // This prevents browsers and password managers from autofilling
+  // the folder name field with saved credentials.
   const [editInputName, setEditInputName] = useState(
     () => `folder-edit-title-${Date.now()}`,
   );
@@ -63,6 +67,8 @@ const MainContent = ({
     setDeleteDialog(false);
   };
 
+  // Keep the edit input in sync if the folder title changes while the dialog is open
+  // (e.g. a rename arrives from another source).
   useEffect(() => {
     if (openDialog) {
       setEditFolderTitle(currentFolderTitle);
