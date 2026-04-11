@@ -4,6 +4,8 @@ from library.folder import Folder
 from library.folder_manager import FolderManager
 
 
+# This file contains the main command line interface for the Todo List App.
+# It allows users to manage folders and items through a series of prompts and commands.
 def todo_list():
     folder_manager = FolderManager()
     effect_bold(f"{Color.MAGENTA}Welcome to the Todo List App!{Color.OFF}")  # Initialize an empty todo list

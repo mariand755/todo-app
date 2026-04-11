@@ -3,6 +3,8 @@ from typing import Dict, List, Union
 from library.folder import Folder
 
 
+# This class is responsible for managing folders within the CLI app.
+# It provides functions to add, edit, remove, and search for folders.
 class FolderManagerConstants:
     ERR_ADD_FOLDER_NON_STR = "input is not a string"
     ERR_EMPTY_FOLDER = "input is empty"
