@@ -111,6 +111,13 @@ todo-app/
 ```
 
 
+## Architecture & Data Flow
+- Browser → React (port 3000) → fetch → FastAPI (port 8000) → SQLAlchemy → Postgres (port 5432)
+- Startup order (Docker): Postgres → API (waits for DB healthy) → Frontend (waits for API healthy)
+- CORS: Only http://localhost:3000 is allowed as a cross-origin caller
+- All API calls flow through useApi.js → makeAPICall(), which enforces an origin-pinned URL check before every fetch()
+
+
 ## Getting Started
 
 ### Prerequisites
