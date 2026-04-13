@@ -111,6 +111,13 @@ todo-app/
 ```
 
 
+## Architecture & Data Flow
+- Browser → React (port 3000) → fetch → FastAPI (port 8000) → SQLAlchemy → Postgres (port 5432)
+- Startup order (Docker): Postgres → API (waits for DB healthy) → Frontend (waits for API healthy)
+- CORS: Only http://localhost:3000 is allowed as a cross-origin caller
+- All API calls flow through useApi.js → makeAPICall(), which enforces an origin-pinned URL check before every fetch()
+
+
 ## Getting Started
 
 ### Prerequisites
@@ -125,11 +132,16 @@ cd todo-app
 ```
 
 ### Running the App
-Run the CLI (backend):
+First have docker running with `docker compose up --build --wait` to ensure the database, api & frontend are ready.
+Then run the CLI with the following command.
+
+Run the CLI with docker (backend):
 ```sh
-python backend/commandline_interface/main.py
+docker compose exec -w /app api /opt/venv/bin/python -m commandline_interface.main
 ```
 
+Local development without Docker:
+```sh
 Run the frontend (development):
 ```sh
 cd frontend
@@ -137,9 +149,14 @@ npm install
 npm run dev
 ```
 
-Or run the full stack with Docker Compose (if configured):
+Run the full stack with Docker Compose:
 ```sh
 docker compose up --build --wait
+```
+
+Stopping the app:
+```sh
+docker compose down
 ```
 
 - Full reset if local state gets stuck (destructive): `docker compose down -v && docker compose up -d --build --wait`
@@ -216,10 +233,10 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
    - Or close the frontend browser tab.
 
 
-### Example Workflow
+### Example Workflow in CLI
 1. Start the CLI:
    ```sh
-   python backend/commandline_interface/main.py
+   docker compose exec -w /app api /opt/venv/bin/python -m commandline_interface.main
    ```
 2. Add a folder:
    - Choose `folders` → `add` in the CLI
@@ -234,8 +251,9 @@ docker run --rm todo-app-frontend-test npm run test -- --run src/test/unit
 
 5. Exit the CLI:
    - Enter `exit`
-   - Or stop `docker compose` / close the frontend tab.
 
+6. Exit Docker Compose:
+   - Stop with `docker compose down`
 
 ---
 
