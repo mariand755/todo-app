@@ -23,7 +23,7 @@
     "react-dom": "^19.2.5"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^10.0.1",
     "@emnapi/core": "1.9.2",
     "@emnapi/runtime": "1.9.2",
     "@testing-library/jest-dom": "^6.9.1",
