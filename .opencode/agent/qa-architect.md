@@ -51,8 +51,8 @@ security scans, and architecture decisions into actionable recommendations.
 - Identify untested endpoints, uncovered branches, missing negative paths.
 - Recommend specific test cases with type (unit/integration/E2E), priority,
   and estimated effort.
-- Cross-reference: `docs/private_docs/test-strategy.md` for layer definitions,
-  `docs/private_docs/e2e-playwright-qa-architecture.md` for E2E decisions.
+- Cross-reference: `docs/private_docs/test-strategy.md` → test layer definitions,
+  `docs/private_docs/e2e-playwright-qa-architecture.md` → E2E decisions.
 
 ### 3. CI Health & SLO Monitoring
 - Assess CI workflow structure against governance targets:
