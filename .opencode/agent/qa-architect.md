@@ -51,8 +51,8 @@ security scans, and architecture decisions into actionable recommendations.
 - Identify untested endpoints, uncovered branches, missing negative paths.
 - Recommend specific test cases with type (unit/integration/E2E), priority,
   and estimated effort.
-- Cross-reference: `docs/private_docs/test-strategy.md` for layer definitions,
-  `docs/private_docs/e2e-playwright-qa-architecture.md` for E2E decisions.
+- Cross-reference: `docs/private_docs/test-strategy.md` → test layer definitions,
+  `docs/private_docs/e2e-playwright-qa-architecture.md` → E2E decisions.
 
 ### 3. CI Health & SLO Monitoring
 - Assess CI workflow structure against governance targets:
@@ -126,6 +126,8 @@ security scans, and architecture decisions into actionable recommendations.
 - `docs/private_docs/test-strategy.md` — canonical test layer strategy
 - `docs/private_docs/ai-agent-roadmap.md` — 12 QA initiatives + 5 contracts
 - `docs/private_docs/e2e-playwright-qa-architecture.md` — 23 E2E decisions
+- `docs/private_docs/qa-agent-contracts.md` — formal specs for 4 QA sub-agent contracts (expands embedded summaries above)
+- `docs/private_docs/qa-architect-assessment-log.md` — QA assessment evidence trail
 - `docs/ci-governance.md` — CI SLO targets
 - `frontend/vitest.config.js` — frontend coverage thresholds
 - `backend/tests/` — backend test structure
