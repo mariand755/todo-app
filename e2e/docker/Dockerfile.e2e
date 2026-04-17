@@ -1,0 +1,27 @@
+# E2E test runner — Playwright with Chromium pre-installed
+# Q5.1-01 (Docker-first), Q5.1-04 (Chromium for PR smoke)
+FROM node:22-slim
+
+WORKDIR /app/e2e
+
+# Install system deps needed by Playwright Chromium
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+      libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 \
+      libpango-1.0-0 libcairo2 libasound2 libxshmfence1 libx11-xcb1 \
+      fonts-liberation libappindicator3-1 xdg-utils wget ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy package files and install deps
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Install Playwright Chromium browser inside the container
+RUN npx playwright install chromium
+
+# Copy test source files
+COPY . .
+
+# Default command runs smoke tests with Chromium only
+CMD ["npx", "playwright", "test", "--project=chromium"]

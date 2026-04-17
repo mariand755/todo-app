@@ -62,6 +62,20 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+  # E2E test runner — only starts with: docker compose --profile e2e up
+  e2e:
+    profiles:
+      - e2e
+    build:
+      context: ./e2e
+      dockerfile: docker/Dockerfile.e2e
+    environment:
+      - BASE_URL=http://frontend:3000
+      - API_URL=http://api:8000
+      - CI=true
+    depends_on:
+      frontend:
+        condition: service_healthy
 volumes:
   db-data:
     name: todo-app_db-data
