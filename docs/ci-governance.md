@@ -47,6 +47,16 @@ This policy defines CI artifact retention, failure triage ownership, SLO targets
 - Dependabot security updates from GitHub advisories may arrive outside the regular monthly cadence; handle these immediately.
 - For blocked PRs caused by dependency CVEs, first apply the smallest safe version bump that clears the finding, then run the same frozen lockfile audit flow used in CI.
 
+### Security Exception Workflow
+- Trigger this workflow when a dependency finding is `HIGH`/`CRITICAL` or blocks a required check.
+- Open an out-of-band hotfix PR immediately (do not wait for monthly cadence).
+- Keep scope narrow: affected dependency + lockfile + minimal validation evidence.
+- Required validation for backend dependency exceptions:
+  1. `uv sync --frozen --group dev`
+  2. `uv export --frozen --format requirements.txt --no-dev --no-editable --no-emit-project --output-file runtime-requirements.txt`
+  3. `uv run pip-audit -r runtime-requirements.txt`
+- After merge, evaluate whether a broader dependency refresh is needed as a separate follow-up PR.
+
 ## CodeQL Configuration Hygiene
 - Keep a single CodeQL workflow path and stable job identity in `.github/workflows/codeql.yml`.
 - Keep configuration parity between `pull_request` and `push` (`main`) triggers for the same CodeQL workflow intent (languages, path filters, and config inputs).
