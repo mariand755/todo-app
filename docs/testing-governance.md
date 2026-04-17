@@ -12,6 +12,7 @@ Use directory-level README files for local quick-start only.
 - Docker-first validation for merge readiness.
 - Keep test ID rules consistent and machine-checkable.
 - Keep local README files short to avoid policy drift.
+- Routine dependency update cadence and security hotfix handling are defined in docs/ci-governance.md.
 
 ## Test Layout
 

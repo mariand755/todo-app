@@ -9,14 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "outDir": "dist",
-    "rootDir": ".",
-    "baseUrl": ".",
-    "paths": {
-      "@fixtures/*": ["fixtures/*"],
-      "@pages/*": ["pages/*"],
-      "@utils/*": ["utils/*"],
-      "@data/*": ["data/*"]
-    }
+    "rootDir": "."
   },
   "include": [
     "**/*.ts"
