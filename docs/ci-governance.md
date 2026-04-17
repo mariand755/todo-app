@@ -37,6 +37,16 @@ This policy defines CI artifact retention, failure triage ownership, SLO targets
   3. Fix quick wins immediately; otherwise open/update a tracking issue.
   4. Link flaky issues to affected workflow job names.
 
+## Dependency Update Cadence
+- Routine dependency refresh cadence is **monthly** for backend and frontend package ecosystems (Dependabot schedule in `.github/dependabot.yml`).
+- Use small, focused PRs for urgent security fixes when a CVE or scanner finding blocks CI.
+- Keep security hotfix PR scope narrow (only affected packages and lockfile entries) unless broader updates are explicitly approved.
+
+## Security Update Handling
+- Treat dependency security findings as priority work when they block required checks.
+- Dependabot security updates from GitHub advisories may arrive outside the regular monthly cadence; handle these immediately.
+- For blocked PRs caused by dependency CVEs, first apply the smallest safe version bump that clears the finding, then run the same frozen lockfile audit flow used in CI.
+
 ## CodeQL Configuration Hygiene
 - Keep a single CodeQL workflow path and stable job identity in `.github/workflows/codeql.yml`.
 - Keep configuration parity between `pull_request` and `push` (`main`) triggers for the same CodeQL workflow intent (languages, path filters, and config inputs).
