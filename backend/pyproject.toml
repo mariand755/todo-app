@@ -10,7 +10,7 @@ dependencies = [
 
     # Explicit overrides to avoid known vulnerable transitive versions
     "starlette>=1.0.0",
-    "python-multipart>=0.0.22",
+    "python-multipart>=0.0.26",
     "urllib3>=2.6.3",
     "psycopg2-binary>=2.9.11",
     "sqlalchemy>=2.0.44",
