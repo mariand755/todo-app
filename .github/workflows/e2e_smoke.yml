@@ -1,0 +1,140 @@
+# PR smoke E2E tests using Playwright + Docker Compose.
+# Builds the full stack, runs Chromium-only E2E tests inside a container,
+# and uploads test reports and failure artifacts.
+#
+# Architecture decisions: Q5.1-01 (Docker-first), Q5.1-04 (Chromium PR smoke),
+# Q5.1-05 (hybrid trigger — PR required), Q5.1-06 (artifacts, 14-day retention),
+# Q5.1-09 (HTML + JUnit reporters)
+#
+# Jobs:
+#   detect-relevant-changes — skips if no e2e/backend/frontend/compose files changed
+#   e2e-smoke               — builds stack, runs Playwright Chromium tests
+#   e2e-smoke-gate           — blocks merge on failure
+
+name: E2E Smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-relevant-changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      should_run: ${{ steps.filter.outputs.should_run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect E2E-relevant changes
+        id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+
+          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only "$base" "$head" > changed_files.txt
+
+          if grep -E -q '^(e2e/|backend/|frontend/|docker-compose\.yaml|\.github/workflows/e2e_smoke\.yml)' changed_files.txt; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  e2e-smoke:
+    needs: detect-relevant-changes
+    if: needs.detect-relevant-changes.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Build and start full stack
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Build E2E runner image
+        run: docker compose --profile e2e build e2e
+
+      - name: Run Playwright Chromium smoke tests
+        run: |
+          mkdir -p e2e-artifacts
+          docker compose --profile e2e run --rm \
+            -v "$(pwd)/e2e-artifacts/test-results:/app/e2e/test-results" \
+            -v "$(pwd)/e2e-artifacts/playwright-report:/app/e2e/playwright-report" \
+            e2e npx playwright test --project=chromium
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e-artifacts/playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (JUnit + JSON)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: e2e-artifacts/test-results/
+          retention-days: 14
+
+      - name: Show compose status
+        if: always()
+        run: docker compose --profile e2e ps
+
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose --profile e2e logs --no-color api frontend db e2e
+
+      - name: Teardown
+        if: always()
+        run: docker compose --profile e2e down -v
+
+  e2e-smoke-gate:
+    needs: [detect-relevant-changes, e2e-smoke]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.e2e-smoke.result }}" == "failure" || "${{ needs.e2e-smoke.result }}" == "cancelled" ]]; then
+            echo "E2E smoke tests failed or were cancelled"
+            exit 1
+          fi
+          echo "E2E smoke gate passed (job succeeded or was skipped)"
