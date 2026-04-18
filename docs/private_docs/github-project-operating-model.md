@@ -177,6 +177,7 @@ pm-strategist (primary — single entry point, approval gates)
 6. **`git-commenter` never executes** — it only drafts text. Actual posting/execution is done by `git-executor` or the owner.
 7. **No agent infers "all remaining items"** for mutation scope — explicit approved ID lists are always required.
 8. **QA delegation** flows: `pm-strategist` → `qa-architect` → QA sub-agents (`ci-monitor`, `test-observer`, `quality-gate-agent`, `security-advisor`) when those sub-agents exist; otherwise `qa-architect` performs analysis directly.
+9. **Mandatory expert review gate** — Every recommendation, suggestion, draft, or analysis produced by `pm-strategist` must be routed through the relevant expert agent before presenting to the owner. Code/API changes route through `qa-architect`; board state claims route through `project-board-analyst`; doc structure routes through the appropriate doc-writer agent; Git/PR feasibility routes through `git-orchestrator`. This is not optional consultation — it is a required validation gate.
 
 ### Topology History
 - 2026-03-19: Initial agent system (orchestrator as primary, 8 agents total)

@@ -113,7 +113,7 @@ function App() {
     if (!folderId) return;
     if (String(folderId) === String(activeFolderId)) return;
 
-    const data = await makeAPICall("GET", `/folders/${folderId}/items/`);
+    const data = await makeAPICall("GET", `/folders/${folderId}/items`);
     if (!data) {
       return;
     }
@@ -257,7 +257,7 @@ function App() {
   const handleAddTodo = async (title) => {
     const rawApiResponse = await makeAPICall(
       "POST",
-      `/folders/${activeFolderId}/items/`,
+      `/folders/${activeFolderId}/items`,
       {
         title,
       },

@@ -25,9 +25,11 @@ export default defineConfig({
   // Fail the build on test.only left in source
   forbidOnly: !!process.env.CI,
 
-  // Reporter config per Q5.1-09: html + junit + json (+ github in CI)
+  // Reporter config per Q5.1-09
+  // list reporter added for real-time stdout in Docker — one line per test with ✓/✗
   reporter: process.env.CI
     ? [
+        ['list'],
         ['html', { open: 'never', outputFolder: 'playwright-report' }],
         ['junit', { outputFile: 'test-results/results.xml' }],
         ['json', { outputFile: 'test-results/results.json' }],

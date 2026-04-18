@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 import uuid
 from typing import Sequence, cast
@@ -11,9 +12,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from app.logging_config import configure_logging, request_id_context
+from library.models import Base, ensure_folder_positions, get_db, get_next_folder_position
 from library.models import Folder as FolderModel
 from library.models import TodoItem as TodoItemModel
-from library.models import ensure_folder_positions, get_db, get_next_folder_position
 
 configure_logging()
 logger = logging.getLogger("todo_app.api")
@@ -83,6 +84,19 @@ async def validation_exception_handler(request, exc):
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+
+# Hard-resets the test database by deleting all rows from every table.
+# Only registered when ALLOW_TEST_RESET=true — the route doesn't exist in production.
+# Never expose this on a public network.
+if os.environ.get("ALLOW_TEST_RESET", "").lower() == "true":
+
+    @app.post("/test/reset")
+    async def test_reset(db_session: Session = Depends(get_db)):
+        for table in reversed(Base.metadata.sorted_tables):
+            db_session.execute(table.delete())
+        db_session.commit()
+        return {"status": "reset"}
 
 
 # Returns all non-deleted folders, pinned ones first, then sorted by position.

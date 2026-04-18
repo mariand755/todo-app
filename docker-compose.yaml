@@ -16,6 +16,7 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_HOST=db
       - UV_LINK_MODE=copy
+      - ALLOW_TEST_RESET=true
     depends_on:
       db:
         condition: service_healthy
@@ -28,6 +29,7 @@ services:
       - node_modules:/usr/src/app/node_modules
     environment:
       NODE_ENV: development
+      VITE_API_TARGET: http://api:8000
     ports:
       - "3000:3000"
     command: npx vite --host --port 3000
@@ -80,4 +82,3 @@ volumes:
   db-data:
     name: todo-app_db-data
   node_modules:
-    #   - FLASK_ENV=development

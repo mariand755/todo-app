@@ -114,7 +114,7 @@ describe("App", () => {
     fireEvent.click(screen.getByText("Select Folder 1"));
 
     await waitFor(() => {
-      expect(makeAPICall).toHaveBeenCalledWith("GET", "/folders/1/items/");
+      expect(makeAPICall).toHaveBeenCalledWith("GET", "/folders/1/items");
     });
 
     expect(await screen.findByText("Main: Work")).toBeInTheDocument();
@@ -132,7 +132,7 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(makeAPICall).toHaveBeenCalledWith("GET", "/folders/2/items/");
+      expect(makeAPICall).toHaveBeenCalledWith("GET", "/folders/2/items");
     });
 
     expect(await screen.findByText("Main: Deep Linked")).toBeInTheDocument();
@@ -228,7 +228,7 @@ describe("App", () => {
 
     fireEvent.click(screen.getByText("Add Todo"));
     await waitFor(() => {
-      expect(makeAPICall).toHaveBeenCalledWith("POST", "/folders/1/items/", {
+      expect(makeAPICall).toHaveBeenCalledWith("POST", "/folders/1/items", {
         title: "Added Task",
       });
     });
@@ -393,7 +393,7 @@ describe("App", () => {
     fireEvent.click(screen.getByText("Add Todo"));
 
     await waitFor(() => {
-      expect(makeAPICall).toHaveBeenCalledWith("POST", "/folders/1/items/", {
+      expect(makeAPICall).toHaveBeenCalledWith("POST", "/folders/1/items", {
         title: "Added Task",
       });
     });
