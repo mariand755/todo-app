@@ -146,6 +146,7 @@ describe("makeAPICall", () => {
   });
 });
 
+// FUT54 must remain last: afterAll resets the module registry via vi.resetModules()
 describe("makeAPICall — relative base (VITE_API_URL unset)", () => {
   let makeAPICallFresh;
   beforeAll(async () => {
@@ -163,6 +164,7 @@ describe("makeAPICall — relative base (VITE_API_URL unset)", () => {
     const errorSpy = vi
       .spyOn(freshLogger, "error")
       .mockImplementation(() => {});
+    // result is null because Node fetch rejects relative URLs with a TypeError — not a test misconfiguration
     const result = await makeAPICallFresh("GET", "/folders");
     expect(result).toBeNull();
     // url: "/api/folders" confirms line 39 (relative return) executed
