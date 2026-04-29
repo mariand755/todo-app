@@ -1,28 +1,43 @@
 import { logger } from "./logger";
 
-const apiURL = "http://localhost:8000";
-const apiOrigin = new URL(apiURL).origin;
+// API base URL — environment-aware via Vite env vars
+// Browser dev/Docker: falls back to "/api" (proxied by Vite to real backend)
+// Unit tests: VITE_API_URL set to absolute URL for Node.js fetch compat
+const apiURL = (import.meta.env.VITE_API_URL || "/api").replace(/\/+$/, "");
 
-/**
- * Security: origin-pinned URL builder.
- * Every fetch() in this module is routed through buildSafeApiUrl(), which
- * rejects any path that does not start with "/" or that would resolve to a
- * different origin than the configured API base (http://localhost:8000).
- * This makes the js/client-side-request-forgery CodeQL alerts on the fetch
- * calls below false positives — cross-origin and malformed paths throw
- * before fetch is ever reached.
- */
+// Security: path-validation URL builder
+// Ensures every fetch path starts with "/" and stays under the API base.
+// With relative base (/api), the browser's same-origin policy provides
+// cross-origin protection naturally. With absolute base (tests), we
+// validate the resolved URL stays at the configured origin.
 function buildSafeApiUrl(apiPath) {
   if (typeof apiPath !== "string" || !apiPath.startsWith("/")) {
     throw new Error("API path must start with '/'.");
   }
 
-  const resolvedUrl = new URL(apiPath, apiURL);
-  if (resolvedUrl.origin !== apiOrigin) {
-    throw new Error("API path must resolve to the configured API origin.");
+  if (apiPath.startsWith("//")) {
+    throw new Error("API path must not start with '//'.");
   }
 
-  return resolvedUrl.toString();
+  if (apiPath.includes("..")) {
+    throw new Error("API path must not contain path traversal.");
+  }
+
+  const fullPath = apiURL + apiPath;
+
+  // Absolute base — validate origin stays pinned
+  if (apiURL.startsWith("http")) {
+    const resolvedUrl = new URL(fullPath);
+    const configuredOrigin = new URL(apiURL).origin;
+    /* v8 ignore next 3 -- defence-in-depth guard; prior // and .. checks make this unreachable */
+    if (resolvedUrl.origin !== configuredOrigin) {
+      throw new Error("API path must resolve to the configured API origin.");
+    }
+    return resolvedUrl.toString();
+  }
+
+  // Relative base — return path directly (same-origin by definition)
+  return fullPath;
 }
 
 // Central fetch wrapper — all API calls go through here.

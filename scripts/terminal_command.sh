@@ -65,5 +65,8 @@ curl -X PUT http://localhost:8000/folders/1/item_order \
 curl -i -X DELETE http://localhost:8000/folders/1/items/1
 
 
-# Stop stack
+#  Normal app cleanup
 docker compose down
+
+#  Profiled services like e2e
+docker compose --profile e2e down

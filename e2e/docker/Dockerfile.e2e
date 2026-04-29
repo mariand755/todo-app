@@ -13,6 +13,9 @@ RUN apt-get update && \
       fonts-liberation libappindicator3-1 xdg-utils wget ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
+# Disable TTY tricks so Docker logs are clean and scrollable
+ENV PLAYWRIGHT_FORCE_TTY=0
+
 # Copy package files and install deps
 COPY package.json package-lock.json ./
 RUN npm ci

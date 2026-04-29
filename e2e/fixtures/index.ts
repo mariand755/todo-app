@@ -9,8 +9,14 @@ type TodoAppFixtures = {
 };
 
 // Extended test with todoApp fixture per Q5.1-20
+// cleanDb runs automatically before each test — resets all tables via the API
 export const test = base.extend<TodoAppFixtures>({
-  todoApp: async ({ page, baseURL }, use) => {
+  todoApp: async ({ page, baseURL, request }, use) => {
+    const apiURL = process.env.API_URL ?? 'http://localhost:8000';
+
+    // Hard-reset the database before each test so every test starts clean
+    await request.post(`${apiURL}/test/reset`);
+
     // Navigate to the app and wait for initial load
     await page.goto(baseURL ?? 'http://localhost:3000');
     await page.waitForLoadState('domcontentloaded');

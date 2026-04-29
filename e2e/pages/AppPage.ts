@@ -16,8 +16,10 @@ export class AppPage {
   }
 
   // Verify the backend health endpoint is reachable
-  async checkHealthEndpoint(apiURL?: string) {
-    const url = apiURL ?? process.env.API_URL ?? 'http://localhost:8000';
+  // API_URL must be set via .env or Docker Compose — no hardcoded fallback
+  async checkHealthEndpoint() {
+    const url = process.env.API_URL;
+    if (!url) throw new Error('API_URL environment variable is not set');
     const response = await this.page.request.get(`${url}/health`);
     expect(response.ok()).toBeTruthy();
   }
