@@ -29,6 +29,7 @@ function buildSafeApiUrl(apiPath) {
   if (apiURL.startsWith("http")) {
     const resolvedUrl = new URL(fullPath);
     const configuredOrigin = new URL(apiURL).origin;
+    /* v8 ignore next 3 -- defence-in-depth guard; prior // and .. checks make this unreachable */
     if (resolvedUrl.origin !== configuredOrigin) {
       throw new Error("API path must resolve to the configured API origin.");
     }

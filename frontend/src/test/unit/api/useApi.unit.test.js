@@ -134,4 +134,41 @@ describe("makeAPICall", () => {
     const body = await result.json();
     expect(body).toEqual([{ id: 1, title: "Test Folder" }]);
   });
+
+  it("@FUT53 | rejects API paths containing path traversal sequences", async () => {
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
+    const result = await makeAPICall("GET", "/folders/../etc/passwd");
+    expect(result).toBeNull();
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Invalid API path",
+      expect.objectContaining({ api_path: "/folders/../etc/passwd" }),
+    );
+  });
+});
+
+describe("makeAPICall — relative base (VITE_API_URL unset)", () => {
+  let makeAPICallFresh;
+  beforeAll(async () => {
+    vi.stubEnv("VITE_API_URL", ""); // MUST come before resetModules
+    vi.resetModules();
+    const mod = await import("@/useApi");
+    makeAPICallFresh = mod.makeAPICall;
+  });
+  afterAll(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+  it("@FUT54 | uses relative /api base when VITE_API_URL is unset", async () => {
+    const { logger: freshLogger } = await import("@/logger");
+    const errorSpy = vi
+      .spyOn(freshLogger, "error")
+      .mockImplementation(() => {});
+    const result = await makeAPICallFresh("GET", "/folders");
+    expect(result).toBeNull();
+    // url: "/api/folders" confirms line 39 (relative return) executed
+    expect(errorSpy).toHaveBeenCalledWith(
+      "GET request failed",
+      expect.objectContaining({ url: "/api/folders" }),
+    );
+  });
 });
