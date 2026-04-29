@@ -66,7 +66,8 @@
           "project-board-executor": "allow",
           "board-doc-writer": "allow",
           "code-doc-writer": "allow",
-          "git-orchestrator": "allow"
+          "git-orchestrator": "allow",
+          "qa-architect": "allow"
         }
       }
     },
@@ -85,6 +86,16 @@
     "code-doc-writer": {
       "description": "Writes explicitly approved code, CI, and workflow files. Drafts first, never writes without owner approval. Routed from git-orchestrator or pm-strategist.",
       "mode": "subagent"
+    },
+    "qa-architect": {
+      "description": "Holistic QA intelligence agent for test gap analysis, CI health assessment, failure triage, and repository quality recommendations.",
+      "mode": "subagent",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "deny",
+        "task": "allow"
+      }
     }
   },
   "watcher": {

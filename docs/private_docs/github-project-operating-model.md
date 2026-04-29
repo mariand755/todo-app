@@ -13,6 +13,11 @@ This file is procedural (how-to), not normative policy.
 - Ownership matrix: `docs/private_docs/project-board-automation-responsibility-matrix.md`
 - Automation runbook: `docs/private_docs/github-issues-project-board-automation.md`
 
+## Owner-Only Control Plane Files
+- `opencode.json` and `.opencode/agent/*.md` are owner-only control-plane files.
+- No agent should create, edit, overwrite, or delete them.
+- Agents should only read them for governance/routing context and should draft proposed text for owner manual application only.
+
 ## Backlog Model Clarification
 - `docs/private_docs/TO Do List` is the canonical backlog list.
 - Project board column `Todo` is an execution lane, not the full backlog source.
@@ -102,6 +107,7 @@ When an iteration ends, the pm-strategist MUST execute these steps in order. No 
 11. **Document carry-over items**: non-Done items from the completed iteration are logged in the retro with root cause, then either re-assigned to the next iteration or returned to Backlog.
 12. **Re-assign multi-sprint Epics**: Epics with incomplete children carry forward to the next iteration (never returned to Backlog from In Progress per Epic Status rule). Mark as `🔄 Multi-sprint` in retro.
 13. **Pack next iteration**: select items for the new sprint based on velocity baseline, capacity, and priority. Set Iteration field, promote Status as needed.
+   > **Iteration creation:** If the next iteration does not yet exist on the board, route an analysis pass through `project-board-analyst` to inspect the current Iteration field configuration, compute the full replacement payload, and recommend the exact new iteration entry. After owner approval, `project-board-executor` performs the `updateProjectV2Field` mutation and any approved iteration assignments. `pm-strategist` and `project-board-analyst` remain analysis/recommendation-only for this step. Never create iterations manually in the UI.
 
 **Trigger**: Agent-driven at the start of each new iteration session. The pm-strategist detects the iteration boundary crossing and proposes the full checklist for owner approval.
 **Future scalability**: When contributors are added or hands-off hygiene is needed, replace the agent trigger with a scheduled GitHub Actions workflow that runs at iteration boundaries (tracked as TD-030).
@@ -151,7 +157,7 @@ pm-strategist (primary — single entry point, approval gates)
   └── (future: solution-architect, etc.)
 ```
 
-**Note:** `pm-strategist` is the sole `mode: primary` agent. All others are subagents (10 total). For simple single-step board reads, pm-strategist invokes `project-board-analyst` directly (skips orchestrator). For simple approved mutations, pm-strategist invokes `project-board-executor` directly. For complex multi-step board workflows, pm-strategist routes through `project-board-orchestrator`. QA-related analysis and recommendations route through `qa-architect`, which may delegate to QA sub-agents (`ci-monitor`, `test-observer`, `quality-gate-agent`, `security-advisor`) when they exist.
+**Note:** `pm-strategist` is the sole `mode: primary` agent. All others are subagents (10 total). For simple single-step board reads, pm-strategist invokes `project-board-analyst` directly (skips orchestrator). For simple approved mutations, pm-strategist invokes `project-board-executor` directly. For complex multi-step board workflows, pm-strategist routes through `project-board-orchestrator`. `pm-strategist` must always collaborate with `project-board-analyst` on board-state, sprint/iteration, cadence, close-out, and SDLC/process matters in the analyst's read-only evidence role. `pm-strategist` must always collaborate with `qa-architect` on all code, test, CI, workflow, and repository quality work before presenting recommendations to the owner. QA-related analysis and recommendations route through `qa-architect`, which may delegate to QA sub-agents (`ci-monitor`, `test-observer`, `quality-gate-agent`, `security-advisor`) when they exist.
 
 ### Agent Boundary Table
 
@@ -178,6 +184,8 @@ pm-strategist (primary — single entry point, approval gates)
 7. **No agent infers "all remaining items"** for mutation scope — explicit approved ID lists are always required.
 8. **QA delegation** flows: `pm-strategist` → `qa-architect` → QA sub-agents (`ci-monitor`, `test-observer`, `quality-gate-agent`, `security-advisor`) when those sub-agents exist; otherwise `qa-architect` performs analysis directly.
 9. **Mandatory expert review gate** — Every recommendation, suggestion, draft, or analysis produced by `pm-strategist` must be routed through the relevant expert agent before presenting to the owner. Code/API changes route through `qa-architect`; board state claims route through `project-board-analyst`; doc structure routes through the appropriate doc-writer agent; Git/PR feasibility routes through `git-orchestrator`. This is not optional consultation — it is a required validation gate.
+10. **Board / SDLC-process collaboration requirement** — `pm-strategist` must involve `project-board-analyst` for board-state claims, sprint packing, iteration close/open recommendations, cadence/process drift review, and any SDLC/process recommendation that depends on board evidence or read-only diagnostics.
+11. **Repo / quality collaboration requirement** — `pm-strategist` must involve `qa-architect` for all code, test, CI, workflow, and repository quality work before presenting recommendations or plans to the owner.
 
 ### Topology History
 - 2026-03-19: Initial agent system (orchestrator as primary, 8 agents total)
@@ -333,6 +341,31 @@ Use this only when running direct GraphQL field mutation workflows.
   - `Iteration 1`: `5513af3a` (starts 2026-03-16, 14 days)
   - `Iteration 2`: `4731df10` (starts 2026-03-30, 14 days)
   - `Iteration 3`: `ff767d1b` (starts 2026-04-13, 14 days)
+  - `Iteration 4`: `17838530` (starts 2026-04-27, 14 days)
+- **Iteration creation command** (payload prepared by `project-board-analyst`; executed by `project-board-executor` after owner approval):
+  ```bash
+  gh api graphql -f query='
+  mutation {
+    updateProjectV2Field(input: {
+      fieldId: "PVTIF_lAHOATOaf84BRQRGzg_yIfY"
+      iterationConfiguration: {
+        startDate: "YYYY-MM-DD"
+        duration: 14
+        iterations: [
+          { title: "Iteration N", startDate: "YYYY-MM-DD", duration: 14 }
+        ]
+      }
+    }) {
+      projectV2Field {
+        ... on ProjectV2IterationField {
+          id name
+          configuration { iterations { id title startDate duration } }
+        }
+      }
+    }
+  }'
+  ```
+  ⚠️ `iterations` is a full replacement — include all active iterations you want to keep. Completed iterations (past end date) are recomputed by GitHub automatically.
 
 ### GraphQL mutation pattern
 ```
@@ -374,7 +407,7 @@ When a child is promoted to a real issue, update its row:
 | A-1 | Subtask title here | Subtask | backend | S | P1 | ✅ Created | #XX |
 ```
 ### Rules
-- The breakdown table in the Epic body does NOT replace the `TD-*` entry in `docs/private_docs/TO Do List`. The To Do List remains the canonical backlog source of truth.
+- The breakdown table in the Epic body does NOT replace the `TD-*` entry in `docs/private_docs/TO Do List`. `docs/private_docs/TO Do List` remains the canonical backlog source of truth.
 - The breakdown table is the pre-board staging area — it is not a project board view, not a GitHub Projects table, and not a separate tracking system.
 - Items in the breakdown table are not GitHub issues yet. They become issues only when the owner decides they are ready to be worked on.
 - When promoting a child from the table to a real issue: create the issue using the appropriate template (story.yml / subtask.yml), link it to the parent Epic, set all required fields (`Type`, `Priority`, `Area`, `Effort`, `Phase`, `Status=Backlog`), then update the table row with the issue number.
