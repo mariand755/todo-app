@@ -99,7 +99,7 @@ When an iteration ends, the pm-strategist MUST execute these steps in order. No 
 
 **Phase 3 — Board Cleanup** 🔒 (requires owner approval for each mutation)
 7. **Close drifted GitHub issues**: any issue that is Done on the board but OPEN on GitHub must be closed via `gh issue close` with a completion comment referencing the delivery PR. Executed by `project-board-executor` with explicit owner-approved target IDs.
-8. **Archive Done items**: archive (NOT remove) all Done items assigned to the completed iteration from the project board. Archive preserves all field data — items remain queryable via `includeArchived: true`. **Never remove items from the project — removal permanently loses board-level field data.**
+8. **Archive Done items**: archive (NOT remove) all Done items assigned to the completed iteration from the project board. Archive preserves all field data — items remain queryable via `includeArchived: true`, but archived items cannot be updated after archival. **Complete Iteration/history/field repairs before the archive pass. Never remove items from the project — removal permanently loses board-level field data.**
 9. **Archive unattributed noise**: archive Done items with no iteration assignment that were completed during the sprint period.
 10. **Archive scope guardrail**: NEVER archive In Progress, Todo, Ready, Blocked, or Backlog items. Only Done items are archived.
 
@@ -262,7 +262,7 @@ pm-strategist (primary — single entry point, approval gates)
 
 ## Project Board Quick Reference (Human)
 
-This section is for quick human triage/reference and mirrors the `Table Metrix` view on the board.
+This section is intentionally **live-reference only**. Do not use this file as a static board snapshot.
 
 ### Matrix Columns To Display In Board View
 - `Type`
@@ -272,34 +272,17 @@ This section is for quick human triage/reference and mirrors the `Table Metrix` 
 - `Phase`
 - `Status`
 
-### Board Snapshot (human-readable)
-Last updated: 2026-03-24
-
-| Issue # | TD | Title (short) | Type | Priority | Area | Effort | Phase | Status |
-|---|---|---|---|---|---|---|---|---|
-| #23 | TD-003 | Mobile sidebar behavior redesign [EPIC] | Epic | P2 | frontend | XL | Now | Ready |
-| #24 | TD-006 | Pin folders to top | Story/Case | P2 | frontend | M | Now | Done |
-| #25 | TD-006 | Implement pinned ordering in sidebar list | Subtask | P2 | frontend | S | Now | Done |
-| #26 | TD-019 | CodeQL workflow parity and baseline | Task | P2 | ci-cd | S | Next | Done |
-| #34 | TD-020 | Public/Private documentation split | Task | P2 | docs | M | Next | Done |
-| #46 | TD-023 | CodeQL code-scanning alert remediation | Task | P1 | security | M | Now | In Progress |
-| #47 | TD-025 | Frontend CodeQL request-forgery residual | Story/Case | P1 | security | M | Now | In Progress |
-| #48 | TD-022 | Vitest v4 coverage delta/parity investigation | Task | P1 | frontend | M | Now | Backlog |
-| #49 | TD-021 | Frontend branch coverage uplift after Vitest 4 | Task | P1 | frontend | M | Now | Backlog |
-| #50 | TD-004 | User authentication/authorization [EPIC] | Epic | P1 | security | XL | Later | Backlog |
-| #51 | TD-007 | Remaining accessibility improvements [EPIC] | Epic | P2 | frontend | XL | Now | Backlog |
-| #52 | TD-008 | Optimize large folder/item datasets [EPIC] | Epic | P2 | full-stack | XL | Now | Backlog |
-| #53 | TD-009 | Add E2E tests and CI pipeline automation [EPIC] | Epic | P2 | qa | XL | Now | Backlog |
-| #54 | TD-005 | Dark mode toggle | Story/Case | P2 | frontend | M | Now | Backlog |
+### Current-State Sources
+- **Live board state:** GitHub Project `Todo App Task Board` (`#2`)
+- **Latest recovery / archive / handoff context:** `docs/private_docs/opencode-sessionhandoff-notes.md`
+- **Current iteration pack and active Epic focus:** `docs/private_docs/pm-roadmap.md`
 
 ### Notes
 - `Add status update` posts project updates; it does not control matrix columns.
 - The matrix layout comes from the saved project view configuration (`Table Metrix`).
-- ✅ `Ready` and `Review` Status options added to board on 2026-03-20. Board snapshot Status column updated to reflect final states: #23 → Ready, #48 → Backlog, #49 → Backlog, #51 → Backlog, #52 → Backlog, #53 → Backlog, #54 → Backlog.
-- ✅ Area field `full-stack` option added 2026-03-20. All 13 Area values re-patched. #52 Area corrected from `frontend` to `full-stack`. New Area option IDs recorded in Operator Appendix.
-- ✅ `Blocked` Status option added 2026-03-24. All 31 items re-patched via subagent pipeline (first automated wipe cycle). New Status option IDs recorded in Operator Appendix.
-- Board has grown to 31 items (6 new PRs auto-added: #56-#61). Snapshot table above shows only the 14 original tracked issues; noise/Dependabot PRs (#36-#45, #55-#61) are on the board but not in the snapshot table.
-- Iteration field discovered on live board 2026-03-24 — IDs recorded in Operator Appendix.
+- The old embedded board snapshot is retired because it drifts faster than this runbook can be kept current.
+- For daily execution, trust the live board. For narrative current-state context, trust the latest handoff notes.
+- Field IDs, option IDs, and mutation patterns still live in the Operator Appendix below.
 
 ## Operator Appendix (Executor/Automation)
 
