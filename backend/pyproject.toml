@@ -12,19 +12,19 @@ dependencies = [
     "starlette>=1.0.0",
     "python-multipart>=0.0.27",
     "urllib3>=2.6.3",
-    "psycopg2-binary>=2.9.11",
+    "psycopg2-binary>=2.9.12",
     "sqlalchemy>=2.0.49",
-    "uvicorn>=0.44.0",
+    "uvicorn>=0.46.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
-    "ruff>=0.15.11",
+    "ruff>=0.15.12",
     "pytest-cov>=7.1.0",
-    "mypy>=1.20.1",
+    "mypy>=2.0.0",
     "httpx>=0.28.1",
-    "pre-commit>=4.5.1",
+    "pre-commit>=4.6.0",
     "pip-audit>=2.10.0",
 ]
 
