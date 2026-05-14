@@ -1,0 +1,19 @@
+# Dev environment — never copy into Docker image
+.venv/
+
+# Python cache artefacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Coverage / test outputs
+.coverage
+coverage.xml
+htmlcov/
+
+# Local tooling
+runtime-requirements.txt
