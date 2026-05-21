@@ -59,6 +59,7 @@
     "pm-strategist": {
       "description": "Central PM router and strategic planner. Single primary entry point. Routes board work through project-board-orchestrator, Git work through git-orchestrator, and docs through board-doc-writer.",
       "mode": "primary",
+      "model": "github-copilot/claude-sonnet-4.6",
       "permission": {
         "edit": "deny",
         "bash": "deny",
@@ -98,6 +99,7 @@
     "qa-architect": {
       "description": "Holistic QA intelligence agent for test gap analysis, CI health assessment, failure triage, and repository quality recommendations.",
       "mode": "subagent",
+      "model": "github-copilot/claude-sonnet-4.6",
       "permission": {
         "edit": "deny",
         "bash": "deny",
