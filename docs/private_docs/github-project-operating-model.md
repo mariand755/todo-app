@@ -84,7 +84,7 @@ When picking up a ticket for active work:
    When moving a Subtask to `Review`, check all siblings under the same Story — if every sibling is at `Review` or `Done`, move the parent Story to `Review`. If any sibling is still `Todo` or `In Progress`, the Story stays at `In Progress`.
 7. **Epic child completion protocol:** When any child moves to `Review` or `Done`, update the parent Epic breakdown table, linked children checklist, and AC status; flag newly-unblocked deferred children. Never move an Epic to `Done` unless every breakdown table row maps to a `Done` board issue. Reference: `docs/private_docs/issue-project-governance.md` → Epic Child Completion Protocol.
 
-### Iteration Close Checklist (Approved 2026-04-07, replaces Housekeeping Protocol 2026-03-29)
+### Iteration Close Checklist (Approved 2026-04-07, replaces Housekeeping Protocol 2026-03-29) (amended 2026-05-09: added Phase 2 step 4 sprint-close Epic body sweep)
 When an iteration ends, the pm-strategist MUST execute these steps in order. No step may be skipped. Owner approval is required before mutation steps (marked with 🔒).
 
 **Phase 1 — Assessment**
@@ -92,22 +92,30 @@ When an iteration ends, the pm-strategist MUST execute these steps in order. No 
 2. **Identify GitHub state drift**: check for items that are Done on the board but OPEN on GitHub — these need closure.
 
 **Phase 2 — Documentation**
-3. **Write iteration retrospective**: populate the retro template in `iteration-retrospectives.md` with completed TDs, carry-overs (with root cause per item), multi-sprint Epics, velocity (count + points), blocked ratio, scope creep assessment, what worked, what didn't, and next-iteration adjustments.
-4. **Update pm-roadmap.md**: add a row to the retro summary table (Section 8) with velocity count, velocity points, carry-over count, blocked %, and scope creep flag.
-5. **Fix TO Do List drift**: update `docs/private_docs/TO Do List` TD statuses for all items completed this iteration (e.g., `outstanding` → `done`).
-6. **Update session handoff notes**: record iteration close actions in `opencode-sessionhandoff-notes.md`.
+3. **Write iteration retrospective**: populate the retro template in `iteration-retrospectives.md` with completed TDs, carry-overs (with root cause per item), multi-sprint Epics, velocity (count + points), blocked ratio, scope creep assessment, what worked, what didn't, and next-iteration adjustments. Note: Epic-level inputs are finalized in step 4 (sprint-close Epic body sweep); if step 4 surfaces drift, return to update this step.
+4. **Sprint-close Epic body sweep**: for every active Epic that had at least one child complete during the iteration, execute a batched reconciliation of the Epic body (complements the per-event Epic Child Completion Protocol):
+   - Read each active Epic's body — the breakdown table, linked children checklist, and Epic-level ACs are the source of truth for Epic scope.
+   - Update breakdown table rows (Status, Board Issue, Ready?) for every Done child.
+   - Tick `## Linked children` checkbox `- [x] #XX` for every Done child (drives GitHub Epic-card progress bar).
+   - Freeze any Epic-level ACs satisfied by completed children using the `✅ AC text — verified YYYY-MM-DD` format per the AC Completion Rule.
+   - Review `Deferred children` / dependency column and flag newly-unblocked candidates for next-iteration packing consideration.
+   - Record per-Epic sweep result (rows touched, drift found) as evidence in the iteration retro.
+   - Cross-reference: `docs/private_docs/issue-project-governance.md` → Epic Child Completion Protocol.
+5. **Update pm-roadmap.md**: add a row to the retro summary table (Section 8) with velocity count, velocity points, carry-over count, blocked %, and scope creep flag.
+6. **Fix TO Do List drift**: update `docs/private_docs/TO Do List` TD statuses for all items completed this iteration (e.g., `outstanding` → `done`).
+7. **Update session handoff notes**: record iteration close actions in `opencode-sessionhandoff-notes.md`.
 
 **Phase 3 — Board Cleanup** 🔒 (requires owner approval for each mutation)
-7. **Close drifted GitHub issues**: any issue that is Done on the board but OPEN on GitHub must be closed via `gh issue close` with a completion comment referencing the delivery PR. Executed by `project-board-executor` with explicit owner-approved target IDs.
-8. **Archive Done items**: archive (NOT remove) all Done items assigned to the completed iteration from the project board. Archive preserves all field data — items remain queryable via `includeArchived: true`, but archived items cannot be updated after archival. **Complete Iteration/history/field repairs before the archive pass. Never remove items from the project — removal permanently loses board-level field data.**
-9. **Archive unattributed noise**: archive Done items with no iteration assignment that were completed during the sprint period.
-10. **Archive scope guardrail**: NEVER archive In Progress, Todo, Ready, Blocked, or Backlog items. Only Done items are archived.
+8. **Close drifted GitHub issues**: any issue that is Done on the board but OPEN on GitHub must be closed via `gh issue close` with a completion comment referencing the delivery PR. Executed by `project-board-executor` with explicit owner-approved target IDs.
+9. **Archive Done items**: archive (NOT remove) all Done items assigned to the completed iteration from the project board. Archive preserves all field data — items remain queryable via `includeArchived: true`, but archived items cannot be updated after archival. **Complete Iteration/history/field repairs before the archive pass. Never remove items from the project — removal permanently loses board-level field data.**
+10. **Archive unattributed noise**: archive Done items with no iteration assignment that were completed during the sprint period.
+11. **Archive scope guardrail**: NEVER archive In Progress, Todo, Ready, Blocked, or Backlog items. Only Done items are archived.
 
 **Phase 4 — Next Iteration Setup** 🔒 (requires owner approval)
-11. **Document carry-over items**: non-Done items from the completed iteration are logged in the retro with root cause, then either re-assigned to the next iteration or returned to Backlog.
-12. **Re-assign multi-sprint Epics**: Epics with incomplete children carry forward to the next iteration (never returned to Backlog from In Progress per Epic Status rule). Mark as `🔄 Multi-sprint` in retro.
-13. **Pack next iteration**: select items for the new sprint based on velocity baseline, capacity, and priority. Set Iteration field, promote Status as needed.
-   > **Iteration creation:** If the next iteration does not yet exist on the board, route an analysis pass through `project-board-analyst` to inspect the current Iteration field configuration, compute the full replacement payload, and recommend the exact new iteration entry. After owner approval, `project-board-executor` performs the `updateProjectV2Field` mutation and any approved iteration assignments. `pm-strategist` and `project-board-analyst` remain analysis/recommendation-only for this step. Never create iterations manually in the UI.
+12. **Document carry-over items**: non-Done items from the completed iteration are logged in the retro with root cause, then either re-assigned to the next iteration or returned to Backlog.
+13. **Re-assign multi-sprint Epics**: Epics with incomplete children carry forward to the next iteration (never returned to Backlog from In Progress per Epic Status rule). Mark as `🔄 Multi-sprint` in retro.
+14. **Pack next iteration**: select items for the new sprint based on velocity baseline, capacity, and priority. Set Iteration field, promote Status as needed.
+   > **Iteration creation:** UI is the canonical method (per `docs/private_docs/issue-project-governance.md` → Iteration Management Method, Approved 2026-05-09). Owner creates the next iteration directly in the GitHub project Iteration field settings. `pm-strategist` and `project-board-analyst` may recommend the start date and capacity targets but do not perform the field-config mutation. After UI creation, `project-board-executor` may apply approved per-item Iteration assignments. The `updateProjectV2Field` mutation block below is retained for audit/emergency reference only and is **deprecated** for routine iteration creation.
 
 **Trigger**: Agent-driven at the start of each new iteration session. The pm-strategist detects the iteration boundary crossing and proposes the full checklist for owner approval.
 **Future scalability**: When contributors are added or hands-off hygiene is needed, replace the agent trigger with a scheduled GitHub Actions workflow that runs at iteration boundaries (tracked as TD-030).
@@ -325,6 +333,8 @@ Use this only when running direct GraphQL field mutation workflows.
   - `Iteration 2`: `4731df10` (starts 2026-03-30, 14 days)
   - `Iteration 3`: `ff767d1b` (starts 2026-04-13, 14 days)
   - `Iteration 4`: `17838530` (starts 2026-04-27, 14 days)
+> **Note (2026-05-10):** The IDs above are pre-2026-05-09 anomaly state and retained for audit/emergency reference only. Current iteration IDs (Iter 4-16 rotated, Iter 17-21 owner-added via UI) live in handoff L860 and the GitHub project UI as the canonical source. Do NOT use these old IDs for any executor mutation.
+- ⛔ **DEPRECATED 2026-05-09** — the mutation block below is retained for audit/emergency reference only. Do NOT use for routine iteration creation. The `iterationConfiguration` payload is a full replacement: it rotates all iteration option IDs and wipes `completedIterations`. Confirmed anomaly 2026-05-09 (Iter 1-3 history wiped + all post-mutation IDs rotated). Use the UI per `docs/private_docs/issue-project-governance.md` → Iteration Management Method (Approved 2026-05-09).
 - **Iteration creation command** (payload prepared by `project-board-analyst`; executed by `project-board-executor` after owner approval):
   ```bash
   gh api graphql -f query='
@@ -394,6 +404,7 @@ When a child is promoted to a real issue, update its row:
 - The breakdown table is the pre-board staging area — it is not a project board view, not a GitHub Projects table, and not a separate tracking system.
 - Items in the breakdown table are not GitHub issues yet. They become issues only when the owner decides they are ready to be worked on.
 - When promoting a child from the table to a real issue: create the issue using the appropriate template (story.yml / subtask.yml), link it to the parent Epic, set all required fields (`Type`, `Priority`, `Area`, `Effort`, `Phase`, `Status=Backlog`), then update the table row with the issue number.
+- **Reconciliation-Before-Promotion Gate (Approved 2026-05-09)**: Before promoting ANY new child from the holding table to a real GitHub issue, the parent Epic body MUST first be fully reconciled for every prior `Done` child of that Epic — breakdown table rows updated (Status / Board Issue / `Ready?` using the `✅ Created` format per the Standard Epic Body Template Rule in `docs/private_docs/github-project-operating-model.md`), `## Linked children` checklist boxes ticked (`- [x] #XX`), Epic-level ACs satisfied by the Done child frozen via the `✅ AC text — verified YYYY-MM-DD` format per the AC Completion Rule in `docs/private_docs/github-project-operating-model.md`, and the `Deferred children` / dependency column reviewed for newly-unblocked candidates. **Do NOT mix**: never create or flash out a new child issue while a prior Done child of the same Epic remains un-reconciled in the Epic body — sweep first, promote second. This gate is governed per-event by `docs/private_docs/issue-project-governance.md` → Epic Child Completion Protocol (Reconciliation-Before-Promotion Gate) and at sprint boundary by `docs/private_docs/github-project-operating-model.md` → Iteration Close Checklist Phase 2 step 4 (sprint-close Epic body sweep — the batched form of this gate).
 - Deferred design decisions should be noted inline in the breakdown table row or in a `## 🔖 Deferred Decisions` section below the table.
 - The Epic body breakdown table is the right place to record the full child inventory from a planning/analysis session even if only 2–3 children are immediately ready for the board.
 ### Progress Bar Visibility Exception
