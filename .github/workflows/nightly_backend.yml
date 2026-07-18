@@ -81,7 +81,16 @@ jobs:
         run: uv export --frozen --format requirements.txt --no-dev --no-editable --no-emit-project --output-file runtime-requirements.txt
 
       - name: Dependency audit (pip-audit)
-        run: uv run pip-audit -r runtime-requirements.txt
+        run: uv run pip-audit -r runtime-requirements.txt | tee pip-audit-backend-nightly.txt
+
+      - name: Upload pip-audit artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pip-audit-backend-nightly
+          path: backend/pip-audit-backend-nightly.txt
+          retention-days: 30
+          if-no-files-found: warn
 
   docker-build-and-trivy:
     name: Docker build + Trivy scan
