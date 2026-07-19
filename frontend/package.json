@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@emnapi/core": "1.9.2",
+    "@emnapi/core": "1.11.2",
     "@emnapi/runtime": "1.10.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -45,7 +45,7 @@
     "vitest": "^4.1.9"
   },
   "overrides": {
-    "@emnapi/core": "1.9.2",
+    "@emnapi/core": "1.11.2",
     "@emnapi/runtime": "1.10.0",
     "@emnapi/wasi-threads": "1.2.1",
     "brace-expansion": "^1.1.13",
