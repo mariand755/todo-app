@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "colorist==1.8.13",
-    "fastapi>=0.118.0",
+    "fastapi>=0.139.2",
 
     # Explicit overrides to avoid known vulnerable transitive versions
     "click>=8.3.3",
