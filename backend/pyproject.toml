@@ -16,7 +16,7 @@ dependencies = [
     "idna>=3.17",
     "psycopg2-binary>=2.9.12",
     "sqlalchemy>=2.0.51",
-    "uvicorn>=0.46.0",
+    "uvicorn>=0.51.0",
 ]
 
 [dependency-groups]
