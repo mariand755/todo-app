@@ -84,11 +84,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build frontend image
+      - name: Build frontend image (dev target)
         uses: docker/build-push-action@v7
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
+          target: dev
           push: false
           tags: frontend:test
           load: true
@@ -113,15 +114,26 @@ jobs:
       - name: Run frontend unit tests in container
         run: docker run --rm --init --pull=never frontend:test npm run test -- --run src/test/unit
 
-      - name: Trivy scan (fail on HIGH/CRITICAL)
+      - name: Build frontend runtime image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          target: runtime
+          push: false
+          tags: frontend:runtime
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trivy scan runtime (fail on HIGH/CRITICAL)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: frontend:test
+          image-ref: frontend:runtime
           format: table
           output: trivy-frontend-pr.txt
           ignore-unfixed: true
           vuln-type: library
-          skip-dirs: /usr/local/lib/node_modules/npm
           severity: HIGH,CRITICAL
           exit-code: "1"
 
