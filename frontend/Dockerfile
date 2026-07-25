@@ -1,33 +1,51 @@
 # syntax=docker/dockerfile:1
 
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
 ARG NODE_VERSION=24.11-bookworm-slim
 
-FROM node:${NODE_VERSION}
-
-# Use production node environment by default.
-ENV NODE_ENV=production
-
+# ----------------------------
+# Dev image: full toolchain (all devDependencies) for local development via
+# docker compose and for CI quality checks (lint, test, build).
+# ----------------------------
+FROM node:${NODE_VERSION} AS dev
 
 WORKDIR /usr/src/app
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.npm to speed up subsequent builds.
-# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
-# into this layer.
 COPY package.json package-lock.json ./
-RUN  npm i --include=dev
-
-# Run the application as a non-root user.
-# USER node
+RUN npm i --include=dev
 
 # Copy the rest of the source files into the image.
 COPY . .
 
-# Expose the port that the application listens on.
 EXPOSE 3000
 
-# Run the application.
-CMD ["npm", "start"]
+CMD ["npx", "vite", "--host", "--port", "3000"]
+
+# ----------------------------
+# Build stage: compiles the production static assets. Not shipped itself —
+# only its /dist output is copied into the runtime image below.
+# ----------------------------
+FROM node:${NODE_VERSION} AS build
+
+WORKDIR /usr/src/app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# ----------------------------
+# Runtime image: what you'd deploy — static assets served by nginx. No
+# Node.js runtime and no devDependencies, so it's what Trivy should scan.
+# ----------------------------
+FROM nginx:1.29-alpine AS runtime
+
+# Apply latest Alpine security patches to the base image layer.
+RUN apk upgrade --no-cache
+
+COPY --from=build /usr/src/app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

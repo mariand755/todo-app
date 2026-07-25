@@ -43,7 +43,7 @@ function buildSafeApiUrl(apiPath) {
 // Central fetch wrapper — all API calls go through here.
 // Returns the raw Response on success, or null if the request fails.
 export async function makeAPICall(http_method, api_path, payload = null) {
-  let url = "";
+  let url;
   try {
     url = buildSafeApiUrl(api_path);
   } catch (ex) {
