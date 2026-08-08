@@ -17,21 +17,21 @@
   "dependencies": {
     "@shoelace-style/shoelace": "^2.20.1",
     "immutability-helper": "^3.1.1",
-    "react": "^19.2.7",
+    "react": "^19.2.8",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@emnapi/core": "1.11.2",
-    "@emnapi/runtime": "1.10.0",
+    "@emnapi/runtime": "1.11.3",
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.2",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@vitejs/plugin-react": "^6.0.4",
     "@vitest/coverage-v8": "^4.1.1",
     "baseline-browser-mapping": "^2.10.37",
     "eslint": "^10.8.0",
@@ -40,17 +40,19 @@
     "globals": "^17.4.0",
     "jsdom": "^29.0.1",
     "msw": "^2.14.6",
-    "prettier": "^3.9.5",
+    "prettier": "^3.9.6",
     "vite": "^8.1.5",
     "vitest": "^4.1.10"
   },
   "overrides": {
     "@emnapi/core": "1.11.2",
-    "@emnapi/runtime": "1.10.0",
+    "@emnapi/runtime": "1.11.3",
     "@emnapi/wasi-threads": "1.2.1",
-    "brace-expansion": "^5.0.8",
+    "brace-expansion": "^5.0.9",
     "js-yaml": "^4.3.0",
+    "nanoid": "^3.3.17",
     "picomatch": "^4.0.4",
-    "undici": "^7.28.0"
+    "postcss": "^8.5.23",
+    "undici": "^7.29.0"
   }
 }
