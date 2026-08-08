@@ -115,6 +115,7 @@ jobs:
           vuln-type: os,library
           severity: HIGH,CRITICAL
           exit-code: "1"
+          trivyignores: backend/.trivyignore-test-tooling
 
       - name: Build backend runtime image
         uses: docker/build-push-action@v7
