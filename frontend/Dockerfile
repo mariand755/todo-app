@@ -39,7 +39,7 @@ RUN npm run build
 # Runtime image: what you'd deploy — static assets served by nginx. No
 # Node.js runtime and no devDependencies, so it's what Trivy should scan.
 # ----------------------------
-FROM nginx:1.29-alpine AS runtime
+FROM nginx:1.31-alpine AS runtime
 
 # Apply latest Alpine security patches to the base image layer.
 RUN apk upgrade --no-cache
