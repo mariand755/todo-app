@@ -30,14 +30,19 @@ repos:
       - id: frontend-eslint
         name: frontend-eslint
         language: system
-        entry: bash -c 'docker image inspect todo-app-frontend-test >/dev/null 2>&1 || docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend; docker run --rm -v "$PWD/frontend:/usr/src/app" -w /usr/src/app todo-app-frontend-test npm run lint'
+        # Always rebuild the `dev` stage (has npm + devDependencies; the
+        # default/last stage is the nginx runtime image, which has no npm).
+        # Docker layer-caches the `npm i` layer, so this is fast unless
+        # package.json/package-lock.json changed. No bind mount, so a
+        # stale image can never linger and node_modules is never shadowed.
+        entry: bash -c 'docker build -q -f frontend/Dockerfile --target dev -t todo-app-frontend-dev ./frontend && docker run --rm todo-app-frontend-dev npm run lint'
         pass_filenames: false
         files: ^frontend/.*\.(js|jsx)$
 
       - id: frontend-format-check
         name: frontend-format-check
         language: system
-        entry: bash -c 'docker image inspect todo-app-frontend-test >/dev/null 2>&1 || docker build -f frontend/Dockerfile -t todo-app-frontend-test ./frontend; docker run --rm -v "$PWD/frontend:/usr/src/app" -w /usr/src/app todo-app-frontend-test npm run format:check'
+        entry: bash -c 'docker build -q -f frontend/Dockerfile --target dev -t todo-app-frontend-dev ./frontend && docker run --rm todo-app-frontend-dev npm run format:check'
         pass_filenames: false
         files: ^frontend/
 
