@@ -53,6 +53,29 @@ jobs:
           GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
         run: |
           set -euo pipefail
+
+          # Retry gh only on GitHub rate limiting (primary or secondary). The PAT
+          # shares its API budget with the owner's other gh usage, and bursts of
+          # PR events (e.g. several Dependabot rebases) trip the secondary limit.
+          gh() {
+            local attempt=1 delay=20 rc out err
+            err="$(mktemp)"
+            while true; do
+              rc=0
+              out="$(command gh "$@" 2>"$err")" || rc=$?
+              if [[ $rc -eq 0 ]] || [[ $attempt -ge 5 ]] || ! grep -qiE 'rate limit|abuse detection' "$err"; then
+                if [[ -n "$out" ]]; then printf '%s\n' "$out"; fi
+                cat "$err" >&2
+                rm -f "$err"
+                return "$rc"
+              fi
+              echo "::warning::gh rate limited (attempt ${attempt}/5), retrying in ${delay}s" >&2
+              sleep $(( delay + RANDOM % 10 ))
+              attempt=$(( attempt + 1 ))
+              delay=$(( delay * 2 ))
+            done
+          }
+
           ITEM_URL="${{ github.event.issue.html_url || github.event.pull_request.html_url }}"
           gh project item-add 2 --owner mariand755 --url "$ITEM_URL"
 
@@ -66,6 +89,29 @@ jobs:
           ITEM_LABELS: ${{ join(github.event.issue.labels.*.name || github.event.pull_request.labels.*.name, ',') }}
         run: |
           set -euo pipefail
+
+          # Retry gh only on GitHub rate limiting (primary or secondary). The PAT
+          # shares its API budget with the owner's other gh usage, and bursts of
+          # PR events (e.g. several Dependabot rebases) trip the secondary limit.
+          gh() {
+            local attempt=1 delay=20 rc out err
+            err="$(mktemp)"
+            while true; do
+              rc=0
+              out="$(command gh "$@" 2>"$err")" || rc=$?
+              if [[ $rc -eq 0 ]] || [[ $attempt -ge 5 ]] || ! grep -qiE 'rate limit|abuse detection' "$err"; then
+                if [[ -n "$out" ]]; then printf '%s\n' "$out"; fi
+                cat "$err" >&2
+                rm -f "$err"
+                return "$rc"
+              fi
+              echo "::warning::gh rate limited (attempt ${attempt}/5), retrying in ${delay}s" >&2
+              sleep $(( delay + RANDOM % 10 ))
+              attempt=$(( attempt + 1 ))
+              delay=$(( delay * 2 ))
+            done
+          }
+
 
           PROJECT_OWNER="mariand755"
           PROJECT_NUMBER="2"
@@ -289,6 +335,29 @@ jobs:
           GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
         run: |
           set -euo pipefail
+
+          # Retry gh only on GitHub rate limiting (primary or secondary). The PAT
+          # shares its API budget with the owner's other gh usage, and bursts of
+          # PR events (e.g. several Dependabot rebases) trip the secondary limit.
+          gh() {
+            local attempt=1 delay=20 rc out err
+            err="$(mktemp)"
+            while true; do
+              rc=0
+              out="$(command gh "$@" 2>"$err")" || rc=$?
+              if [[ $rc -eq 0 ]] || [[ $attempt -ge 5 ]] || ! grep -qiE 'rate limit|abuse detection' "$err"; then
+                if [[ -n "$out" ]]; then printf '%s\n' "$out"; fi
+                cat "$err" >&2
+                rm -f "$err"
+                return "$rc"
+              fi
+              echo "::warning::gh rate limited (attempt ${attempt}/5), retrying in ${delay}s" >&2
+              sleep $(( delay + RANDOM % 10 ))
+              attempt=$(( attempt + 1 ))
+              delay=$(( delay * 2 ))
+            done
+          }
+
 
           PROJECT_OWNER="mariand755"
           REPO="mariand755/todo-app"
