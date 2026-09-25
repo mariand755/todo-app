@@ -45,9 +45,15 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      # vitest and @vitest/* peer-depend on the exact same version, so they must
+      # always move together, majors included (a lone vitest 5 bump in #193
+      # broke `npm ci` everywhere). Listed before test-and-lint-minor so it wins.
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
       test-and-lint-minor:
         patterns:
-          - "vitest*"
           - "@testing-library/*"
           - "eslint*"
           - "prettier"
