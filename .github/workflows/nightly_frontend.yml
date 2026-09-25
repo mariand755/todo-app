@@ -91,7 +91,13 @@ jobs:
           push: false
           tags: frontend:nightly
           load: true
-          cache-from: type=gha
+          # Always build from scratch on a freshly pulled base image. The
+          # Dockerfile's `apk upgrade` layer is otherwise served from the
+          # GHA cache indefinitely, so OS security patches silently stop
+          # reaching the image. cache-to still refreshes the shared cache, so
+          # PR builds on top of main pick up the patched layers.
+          pull: true
+          no-cache: true
           cache-to: type=gha,mode=max
 
       - name: Trivy scan (fail on HIGH/CRITICAL)
