@@ -15,7 +15,7 @@ dependencies = [
     "urllib3>=2.7.0",
     "idna>=3.19",
     "anyio>=4.14.2",
-    "psycopg2-binary>=2.9.12",
+    "psycopg2-binary>=2.9.13",
     "sqlalchemy>=2.0.51",
     "uvicorn>=0.51.0",
 ]
