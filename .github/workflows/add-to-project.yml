@@ -229,8 +229,13 @@ jobs:
           ITEM_JSON=""
           ITEM_ID=""
           for attempt in {1..10}; do
-            ITEM_JSON=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
-              | jq -c --argjson num "$ITEM_NUMBER" '.items[] | select(.content.number == $num)' | head -n1)
+            # Targeted lookup (1 GraphQL point) returning the same {id, area, priority,
+            # effort, type} shape as `gh project item-list` (~100 points per call).
+            ITEM_JSON=$(gh api graphql \
+              -f query='query($owner: String!, $repo: String!, $num: Int!) { repository(owner: $owner, name: $repo) { issueOrPullRequest(number: $num) { ... on Issue { projectItems(first: 20) { nodes { ...F } } } ... on PullRequest { projectItems(first: 20) { nodes { ...F } } } } } } fragment F on ProjectV2Item { id project { number } area: fieldValueByName(name: "Area") { ... on ProjectV2ItemFieldSingleSelectValue { name } } priority: fieldValueByName(name: "Priority") { ... on ProjectV2ItemFieldSingleSelectValue { name } } effort: fieldValueByName(name: "Effort") { ... on ProjectV2ItemFieldSingleSelectValue { name } } type: fieldValueByName(name: "Type") { ... on ProjectV2ItemFieldSingleSelectValue { name } } }' \
+              -F owner="$PROJECT_OWNER" -F repo="${GITHUB_REPOSITORY#*/}" -F num="$ITEM_NUMBER" \
+              --jq "[.data.repository.issueOrPullRequest.projectItems.nodes[] | select(.project.number == ${PROJECT_NUMBER}) | {id, area: .area.name, priority: .priority.name, effort: .effort.name, type: .type.name}][0] // empty" \
+              | jq -c '.')
             ITEM_ID=$(jq -r '.id // empty' <<<"${ITEM_JSON:-}")
             if [[ -n "$ITEM_ID" ]]; then
               break

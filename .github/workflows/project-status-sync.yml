@@ -14,7 +14,9 @@ name: Project Status Sync
 
 on:
   pull_request_target:
-    types: [opened, reopened, synchronize, edited, ready_for_review, closed]
+    # No `synchronize`: pushes/rebases never change board status, and each run
+    # spends GraphQL budget on the shared PAT (Dependabot rebases fired ~60/hr).
+    types: [opened, reopened, edited, ready_for_review, closed]
   issues:
     types: [opened, reopened, closed]
   workflow_dispatch:
@@ -105,13 +107,16 @@ jobs:
             target_option_id="$STATUS_DONE_OPTION_ID"
           fi
 
-          list_items() {
-            gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json
-          }
-
+          # Look up the item for issue/PR #num on this board directly (1 GraphQL
+          # point). `gh project item-list` downloads the whole board (~100 points).
           get_item_id() {
-            local num="$1"
-            list_items | jq -r --argjson issue "$num" '.items[] | select(.content.number==$issue) | .id' | head -n1
+            local num="$1" out
+            # On error gh prints the error JSON to stdout; never return it as an id.
+            out="$(gh api graphql \
+              -f query='query($owner: String!, $repo: String!, $num: Int!) { repository(owner: $owner, name: $repo) { issueOrPullRequest(number: $num) { ... on Issue { projectItems(first: 20) { nodes { id project { number } } } } ... on PullRequest { projectItems(first: 20) { nodes { id project { number } } } } } } }' \
+              -F owner="$PROJECT_OWNER" -F repo="${GITHUB_REPOSITORY#*/}" -F num="$num" \
+              --jq "[.data.repository.issueOrPullRequest.projectItems.nodes[] | select(.project.number == ${PROJECT_NUMBER}) | .id][0] // empty")" || return 1
+            printf '%s\n' "$out"
           }
 
           ensure_item_id() {
@@ -256,13 +261,16 @@ jobs:
             exit 0
           fi
 
-          list_items() {
-            gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json
-          }
-
+          # Look up the item for issue/PR #num on this board directly (1 GraphQL
+          # point). `gh project item-list` downloads the whole board (~100 points).
           get_item_id() {
-            local num="$1"
-            list_items | jq -r --argjson issue "$num" '.items[] | select(.content.number==$issue) | .id' | head -n1
+            local num="$1" out
+            # On error gh prints the error JSON to stdout; never return it as an id.
+            out="$(gh api graphql \
+              -f query='query($owner: String!, $repo: String!, $num: Int!) { repository(owner: $owner, name: $repo) { issueOrPullRequest(number: $num) { ... on Issue { projectItems(first: 20) { nodes { id project { number } } } } ... on PullRequest { projectItems(first: 20) { nodes { id project { number } } } } } } }' \
+              -F owner="$PROJECT_OWNER" -F repo="${GITHUB_REPOSITORY#*/}" -F num="$num" \
+              --jq "[.data.repository.issueOrPullRequest.projectItems.nodes[] | select(.project.number == ${PROJECT_NUMBER}) | .id][0] // empty")" || return 1
+            printf '%s\n' "$out"
           }
 
           ensure_item_id() {
@@ -319,7 +327,7 @@ jobs:
           done <<< "$issue_numbers"
 
   sync-pr-status:
-    if: ${{ github.event_name == 'pull_request_target' }}
+    if: ${{ github.event_name == 'pull_request_target' && github.event.action != 'edited' }}
     runs-on: ubuntu-latest
     steps:
       - name: Validate project automation secret
@@ -408,14 +416,16 @@ jobs:
             echo "Human/agent PR #${pr_number} — setting Status=Review."
           fi
 
-          # Find the PR's board item
-          list_items() {
-            gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json
-          }
-
+          # Look up the item for issue/PR #num on this board directly (1 GraphQL
+          # point). `gh project item-list` downloads the whole board (~100 points).
           get_item_id() {
-            local num="$1"
-            list_items | jq -r --argjson pr "$num" '.items[] | select(.content.number==$pr) | .id' | head -n1
+            local num="$1" out
+            # On error gh prints the error JSON to stdout; never return it as an id.
+            out="$(gh api graphql \
+              -f query='query($owner: String!, $repo: String!, $num: Int!) { repository(owner: $owner, name: $repo) { issueOrPullRequest(number: $num) { ... on Issue { projectItems(first: 20) { nodes { id project { number } } } } ... on PullRequest { projectItems(first: 20) { nodes { id project { number } } } } } } }' \
+              -F owner="$PROJECT_OWNER" -F repo="${GITHUB_REPOSITORY#*/}" -F num="$num" \
+              --jq "[.data.repository.issueOrPullRequest.projectItems.nodes[] | select(.project.number == ${PROJECT_NUMBER}) | .id][0] // empty")" || return 1
+            printf '%s\n' "$out"
           }
 
           item_id=""
