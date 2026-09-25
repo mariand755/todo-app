@@ -1,0 +1,4 @@
+# .gitignore is excluded from the Docker build context (.dockerignore), so
+# Prettier inside the container cannot use it. Ignore generated output here.
+coverage
+dist
