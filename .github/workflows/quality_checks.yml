@@ -102,6 +102,12 @@ jobs:
         restore-keys: |
           uv-${{ runner.os }}-
 
+    # Fails if pyproject.toml changed without regenerating uv.lock. Docker
+    # builds use `uv sync --frozen`, so a stale lock silently ships old
+    # (possibly vulnerable) versions.
+    - name: Verify uv.lock is in sync with pyproject.toml
+      run: uv lock --check
+
     - name: Install dependencies (including dev tools)
       run: uv sync --frozen --group dev
 
