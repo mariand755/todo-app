@@ -16,6 +16,12 @@ updates:
           - "ruff"
           - "mypy"
           - "pre-commit"
+      # One PR for all security fixes. Separate lock-only PRs each re-resolve
+      # uv.lock and conflict with each other (see #181/#182/#184/#186).
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -26,6 +32,10 @@ updates:
       timezone: "UTC"
     open-pull-requests-limit: 3
     groups:
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
       react-stack-minor:
         patterns:
           - "react"

@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version-file: backend/.python-version
 
       - name: Install uv
         run: pip install uv
@@ -125,6 +125,22 @@ jobs:
           vuln-type: os,library
           severity: HIGH,CRITICAL
           exit-code: "1"
+
+      # Trivy writes its table to a file, so findings are otherwise only visible
+      # by downloading the artifact. Surface them on the run's summary page.
+      - name: Publish Trivy report to job summary
+        if: always()
+        shell: bash
+        run: |
+          for f in trivy-backend-nightly.txt; do
+            [[ -f "$f" ]] || continue
+            findings="$(sed -n '/^[A-Za-z].*(.*)$/,$p' "$f")"
+            if [[ -z "$findings" ]]; then
+              echo "### $f: no HIGH/CRITICAL findings :white_check_mark:" >> "$GITHUB_STEP_SUMMARY"
+            else
+              { echo "### $f"; echo '```text'; echo "$findings"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
 
       - name: Upload Trivy backend artifact
         if: always()
