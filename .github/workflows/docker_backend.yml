@@ -140,6 +140,22 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "1"
 
+      # Trivy writes its table to a file, so findings are otherwise only visible
+      # by downloading the artifact. Surface them on the run's summary page.
+      - name: Publish Trivy report to job summary
+        if: always()
+        shell: bash
+        run: |
+          for f in trivy-backend-test-pr.txt trivy-backend-runtime-pr.txt; do
+            [[ -f "$f" ]] || continue
+            findings="$(sed -n '/^[A-Za-z].*(.*)$/,$p' "$f")"
+            if [[ -z "$findings" ]]; then
+              echo "### $f: no HIGH/CRITICAL findings :white_check_mark:" >> "$GITHUB_STEP_SUMMARY"
+            else
+              { echo "### $f"; echo '```text'; echo "$findings"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
       - name: Upload Trivy backend artifacts
         if: always()
         uses: actions/upload-artifact@v7

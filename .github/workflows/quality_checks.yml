@@ -89,7 +89,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v7
       with:
-        python-version: '3.12'
+        python-version-file: backend/.python-version
 
     - name: Install uv
       run: pip install uv
@@ -101,6 +101,18 @@ jobs:
         key: uv-${{ runner.os }}-${{ hashFiles('backend/uv.lock') }}
         restore-keys: |
           uv-${{ runner.os }}-
+
+    # .python-version is the single source of truth for the Python version.
+    # Fails if a Dockerfile base image (e.g. bumped by Dependabot) drifts from it.
+    - name: Verify Dockerfile Python matches .python-version
+      run: |
+        want="$(cat .python-version)"
+        bad="$(grep -E '^FROM python:' Dockerfile | grep -v "python:${want}-" || true)"
+        if [[ -n "$bad" ]]; then
+          echo "::error file=backend/Dockerfile::Base image does not match .python-version (${want}):"
+          echo "$bad"
+          exit 1
+        fi
 
     # Fails if pyproject.toml changed without regenerating uv.lock. Docker
     # builds use `uv sync --frozen`, so a stale lock silently ships old

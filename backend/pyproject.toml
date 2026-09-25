@@ -3,7 +3,7 @@ name = "app"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "colorist==1.8.13",
     "fastapi>=0.141.1",
@@ -44,13 +44,13 @@ markers = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py312"
+target-version = "py314"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B"]
 ignore = ["B008"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 strict = false
 ignore_missing_imports = true
 plugins = ["sqlalchemy.ext.mypy.plugin"]
