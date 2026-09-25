@@ -121,8 +121,8 @@ todo-app/
 ## Getting Started
 
 ### Prerequisites
-- Python `3.11` or higher (recommended)
-- Node.js `16+` and npm (for the frontend)
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose (required; all builds, tests and scans run in containers)
+- Optional, for running outside Docker only: Python `3.14` (see `backend/.python-version`) with [uv](https://docs.astral.sh/uv/), and Node.js `24` (see `NODE_VERSION` in `frontend/Dockerfile`)
 
 ### Installation
 Clone the repository:
