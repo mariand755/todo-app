@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG NODE_VERSION=24.11-bookworm-slim
+# Keep the version in sync with frontend/.nvmrc (enforced in CI).
+ARG NODE_VERSION=24.21-bookworm-slim
 
 # ----------------------------
 # Dev image: full toolchain (all devDependencies) for local development via
